@@ -25,6 +25,11 @@ async function main() {
       effectif: 25,
       anneeFondation: 2019,
       plan: SubscriptionPlan.PRO,
+      aiConfig: {
+        provider: 'gemini',
+        modelHeavy: 'gemini-2.0-flash',
+        modelLight: 'gemini-2.0-flash-lite',
+      },
     },
   })
 

@@ -48,11 +48,6 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
 
   # ── Qdrant (base vectorielle) ────────────────────────────────────────────────
   qdrant:
@@ -79,46 +74,6 @@ services:
       CLICKHOUSE_DB: guineatender_analytics
       CLICKHOUSE_USER: guineatender
       CLICKHOUSE_PASSWORD: password
-
-  # ── Backend API (NestJS) ─────────────────────────────────────────────────────
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: gt_api
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://guineatender:password@postgres:5432/guineatender_db
-      REDIS_URL: redis://redis:6379
-      NODE_ENV: production
-    ports:
-      - "4000:4000"
-    env_file:
-      - .env
-
-  # ── Frontend Web (Next.js) ───────────────────────────────────────────────────
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-      args:
-        # NEXT_PUBLIC_* sont baked au build — doit pointer vers localhost pour le navigateur
-        NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
-    container_name: gt_web
-    restart: unless-stopped
-    depends_on:
-      - api
-    environment:
-      NODE_ENV: production
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
 
 volumes:
   postgres_data:

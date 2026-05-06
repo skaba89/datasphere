@@ -15,6 +15,8 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { ScrapingModule } from './modules/scraping/scraping.module'
 import { PaymentsModule } from './modules/payments/payments.module'
 import { DocumentsModule } from './modules/documents/documents.module'
+import { NotificationsModule } from './modules/notifications/notifications.module'
+import { HealthModule } from './modules/health/health.module'
 import { PrismaModule } from './common/prisma/prisma.module'
 
 @Module({
@@ -57,6 +59,8 @@ import { PrismaModule } from './common/prisma/prisma.module'
     ScrapingModule,
     PaymentsModule,
     DocumentsModule,
+    NotificationsModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

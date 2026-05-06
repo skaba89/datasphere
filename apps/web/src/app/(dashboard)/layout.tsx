@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Brain, LayoutDashboard, FileSearch, Users, FileText,
-  Lightbulb, Settings, LogOut, Bell, ChevronDown, User
+  Lightbulb, Settings, LogOut, Bell, User, BarChart3
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { authApi } from '@/lib/api'
@@ -19,6 +19,7 @@ const navigation = [
   { name: 'Contacts', href: '/contacts', icon: Users },
   { name: 'Dossiers', href: '/dossiers', icon: FileText },
   { name: 'Solutions', href: '/solutions', icon: Lightbulb },
+  { name: 'Analytiques', href: '/analytics', icon: BarChart3 },
   { name: 'Paramètres', href: '/parametres', icon: Settings },
 ]
 
@@ -117,7 +118,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Topbar */}
         <header className="bg-white border-b px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div className="text-sm text-gray-500">
-            {navigation.find((n) => pathname.startsWith(n.href))?.name || 'GuineaTender AI'}
+            {[...navigation].reverse().find((n) => pathname.startsWith(n.href))?.name || 'GuineaTender AI'}
           </div>
           <div className="flex items-center gap-3">
             <button className="relative text-gray-500 hover:text-gray-700">

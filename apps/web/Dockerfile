@@ -27,12 +27,13 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
-COPY --from=builder /monorepo/apps/web/.next/standalone ./
-COPY --from=builder /monorepo/apps/web/.next/static ./.next/static
+COPY --from=builder /monorepo/apps/web/package.json ./
+COPY --from=builder /monorepo/apps/web/.next ./.next
 COPY --from=builder /monorepo/apps/web/public ./public
+COPY --from=builder /monorepo/node_modules ./node_modules
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node_modules/.bin/next", "start", "-p", "3000"]

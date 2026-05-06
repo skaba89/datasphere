@@ -16,7 +16,7 @@ class GenererOffreFinanciereDto {
 }
 
 class UpdateAiConfigDto {
-  @IsIn(['anthropic', 'openrouter', 'groq', 'glm', 'qwen'])
+  @IsIn(['anthropic', 'openrouter', 'groq', 'glm', 'qwen', 'gemini'])
   provider: AiProviderName
 
   @IsOptional() @IsString() modelHeavy?: string
@@ -73,6 +73,16 @@ const PROVIDERS_CATALOG = {
       { id: 'qwen-plus',  label: 'Qwen Plus',  tier: 'heavy' },
       { id: 'qwen-turbo', label: 'Qwen Turbo', tier: 'light' },
       { id: 'qwen-long',  label: 'Qwen Long',  tier: 'heavy' },
+    ],
+  },
+  gemini: {
+    label: 'Google Gemini',
+    description: 'Gemini Flash — rapide, multimodal, contexte 1M tokens',
+    models: [
+      { id: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash',      tier: 'heavy' },
+      { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite', tier: 'light' },
+      { id: 'gemini-1.5-pro',        label: 'Gemini 1.5 Pro',        tier: 'heavy' },
+      { id: 'gemini-1.5-flash',      label: 'Gemini 1.5 Flash',      tier: 'light' },
     ],
   },
 }

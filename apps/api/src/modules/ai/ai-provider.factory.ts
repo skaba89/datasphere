@@ -75,6 +75,13 @@ export class AiProviderFactory {
           'https://dashscope.aliyuncs.com/compatible-mode/v1',
         )
 
+      case 'gemini':
+        return new OpenAICompatibleProvider(
+          'gemini',
+          this.config.getOrThrow('GEMINI_API_KEY'),
+          'https://generativelanguage.googleapis.com/v1beta/openai',
+        )
+
       default:
         this.logger.warn(`Provider inconnu "${name}", fallback sur Anthropic`)
         return new AnthropicProvider(

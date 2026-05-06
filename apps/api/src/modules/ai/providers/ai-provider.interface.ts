@@ -9,7 +9,7 @@ export interface AiProvider {
   generate(prompt: string, options?: AiGenerateOptions): Promise<string>
 }
 
-export type AiProviderName = 'anthropic' | 'openrouter' | 'groq' | 'glm' | 'qwen'
+export type AiProviderName = 'anthropic' | 'openrouter' | 'groq' | 'glm' | 'qwen' | 'gemini'
 
 export interface AiConfig {
   provider: AiProviderName
@@ -23,4 +23,5 @@ export const DEFAULT_MODELS: Record<AiProviderName, { heavy: string; light: stri
   groq:        { heavy: 'llama-3.3-70b-versatile',    light: 'llama-3.1-8b-instant' },
   glm:         { heavy: 'glm-4-plus',                 light: 'glm-4-flash' },
   qwen:        { heavy: 'qwen-max',                   light: 'qwen-turbo' },
+  gemini:      { heavy: 'gemini-2.0-flash',           light: 'gemini-2.0-flash-lite' },
 }

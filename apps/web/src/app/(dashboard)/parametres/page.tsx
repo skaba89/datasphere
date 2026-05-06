@@ -23,6 +23,7 @@ const PROVIDER_ICONS: Record<string, string> = {
   groq:       '⚡',
   glm:        '🌐',
   qwen:       '🧠',
+  gemini:     '🔵',
 }
 
 export default function ParametresPage() {
@@ -207,6 +208,7 @@ export default function ParametresPage() {
               ['Groq', 'GROQ_API_KEY'],
               ['GLM / Zhipu', 'GLM_API_KEY'],
               ['Qwen / DashScope', 'QWEN_API_KEY'],
+            ['Google Gemini', 'GEMINI_API_KEY'],
             ].map(([label, key]) => (
               <div key={key} className="flex items-center gap-1.5">
                 <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${

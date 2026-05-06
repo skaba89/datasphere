@@ -1,0 +1,707 @@
+// =============================================================================
+// GuineaTender AI — Schéma Prisma
+// Base de données principale PostgreSQL
+// =============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  WRITER
+  READER
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+}
+
+enum AOSource {
+  TELEMO
+  ARMP
+  JAO_GUINEE
+  ANDE
+  MINISTERE_BUDGET
+  MINISTERE_NUMERIQUE
+  BANQUE_MONDIALE
+  BAD
+  PNUD
+  UNICEF
+  OMS
+  FAO
+  CEDEAO
+  DCMP_SENEGAL
+  DMP_COTE_IVOIRE
+  AUTRE
+}
+
+enum AOSector {
+  NUMERIQUE
+  SANTE
+  EDUCATION
+  TRANSPORT
+  AGRICULTURE
+  FINANCE
+  SECURITE
+  ENVIRONNEMENT
+  GOUVERNANCE
+  INFRASTRUCTURE
+  ENERGIE
+  EAU
+  AUTRE
+}
+
+enum AOType {
+  FOURNITURE
+  SERVICE
+  TRAVAUX
+  CONSULTANT
+  MIXTE
+}
+
+enum AOStatus {
+  NOUVEAU
+  QUALIFIE
+  EN_COURS
+  SOUMIS
+  REMPORTE
+  PERDU
+  ARCHIVE
+}
+
+enum InteractionType {
+  REUNION
+  EMAIL
+  APPEL_TELEPHONIQUE
+  EVENEMENT
+  NOTE
+  VISITE
+  WEBINAIRE
+}
+
+enum DossierStatus {
+  BROUILLON
+  EN_COURS
+  REVUE
+  SOUMIS
+  ARCHIVE
+}
+
+enum SolutionCategory {
+  E_SERVICES_CITOYENS
+  DIGITALISATION_ARCHIVES
+  PLATEFORME_PAIEMENT
+  SYSTEME_SANTE
+  GESTION_SCOLAIRE
+  ENTREPRENEURIAT_NUMERIQUE
+  GESTION_SUBVENTIONS
+  EMPLOI_PUBLIC
+  IDENTITE_NUMERIQUE
+  PLATEFORME_SERA
+  GESTION_IMPOTS
+  SUIVI_PROJETS
+  AUTRE
+}
+
+enum PaymentMethod {
+  ORANGE_MONEY
+  MTN_MOMO
+  CELLCOM
+  VIREMENT_BANCAIRE
+  STRIPE
+  ESPECES
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum DocumentType {
+  RCCM
+  IFU
+  ATTESTATION_FISCALE
+  ATTESTATION_CNSS
+  STATUTS
+  BILAN
+  REFERENCE_TECHNIQUE
+  CV_EXPERT
+  AUTRE
+}
+
+// =============================================================================
+// ORGANISATION (tenant principal)
+// =============================================================================
+
+model Organisation {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  nom              String
+  slug             String    @unique
+  rccm             String?
+  ifu              String?
+  adresse          String?
+  ville            String?
+  pays             String    @default("GN")
+  telephone        String?
+  email            String?
+  siteWeb          String?
+  logoUrl          String?
+  description      String?
+  secteurs         String[]
+  caAnnuelGNF      BigInt?
+  effectif         Int?
+  anneeFondation   Int?
+  certifications   String[]
+
+  // Abonnement
+  plan             SubscriptionPlan   @default(STARTER)
+  planStatus       SubscriptionStatus @default(TRIALING)
+  planExpiresAt    DateTime?
+  trialEndsAt      DateTime?
+
+  // Configuration scoring
+  scoringConfig    Json @default("{}")
+  alertConfig      Json @default("{}")
+  settings         Json @default("{}")
+
+  // Relations
+  users            User[]
+  appelsOffres     AppelOffre[]
+  contacts         Contact[]
+  dossiers         Dossier[]
+  solutions        Solution[]
+  documents        OrgDocument[]
+  payments         Payment[]
+  references       Reference[]
+  experts          Expert[]
+
+  @@index([slug])
+  @@map("organisations")
+}
+
+// =============================================================================
+// UTILISATEUR
+// =============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  email        String   @unique
+  passwordHash String?
+  prenom       String
+  nom          String
+  telephone    String?
+  avatarUrl    String?
+  role         UserRole @default(WRITER)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+
+  // 2FA
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+
+  // OAuth
+  googleId     String?
+  microsoftId  String?
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  // Relations
+  appelsOffresAssignes AppelOffre[]    @relation("AssigneA")
+  dossiersCreated      Dossier[]       @relation("DossierCreator")
+  dossiersCollab       DossierCollab[]
+  interactions         Interaction[]
+  refreshTokens        RefreshToken[]
+  auditLogs            AuditLog[]
+
+  @@index([email])
+  @@index([organisationId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// =============================================================================
+// APPEL D'OFFRE
+// =============================================================================
+
+model AppelOffre {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Source & identifiant
+  source         AOSource
+  sourceId       String?
+  sourceUrl      String?
+
+  // Informations principales
+  titre          String
+  objet          String        @db.Text
+  entiteAdj      String
+  entiteAdjPays  String        @default("GN")
+  secteur        AOSector      @default(AUTRE)
+  typeMarche     AOType        @default(SERVICE)
+
+  // Financier
+  budgetEstimeGNF BigInt?
+  budgetDevise    String?
+  budgetMontant   Float?
+  financeur       String?
+
+  // Dates
+  datePublication DateTime
+  dateLimite      DateTime
+  dureeMarche     Int?
+
+  // Contenu extrait
+  criteresEligibilite Json @default("{}")
+  criteresEvaluation  Json @default("{}")
+  documentUrls        String[]
+  documentParsed      Json @default("{}")
+  resumeIA            String? @db.Text
+
+  // Scoring
+  score              Int?
+  scoreDetails       Json @default("{}")
+  scoreUpdatedAt     DateTime?
+
+  // Statut & workflow
+  status             AOStatus @default(NOUVEAU)
+  decisionGoNoGo     Boolean?
+  decisionMotif      String?
+  decisionDate       DateTime?
+
+  // Attribution (si perdu/remplis)
+  attributaireNom    String?
+  attributaireMontant BigInt?
+  retourExperience   String? @db.Text
+
+  // Organisation
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  // Relations
+  assignes   User[]       @relation("AssigneA")
+  dossiers   Dossier[]
+  alertes    Alerte[]
+
+  @@unique([source, sourceId, organisationId])
+  @@index([organisationId])
+  @@index([dateLimite])
+  @@index([status])
+  @@index([secteur])
+  @@index([score])
+  @@map("appels_offres")
+}
+
+// =============================================================================
+// CONTACT & CRM
+// =============================================================================
+
+model Contact {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prenom          String
+  nom             String
+  titre           String?
+  poste           String?
+  email           String[]
+  telephone       String[]
+  linkedin        String?
+  photoUrl        String?
+  notes           String? @db.Text
+  tags            String[]
+
+  // Score de relation
+  scoreProximite  Int      @default(0)
+  derniereInteraction DateTime?
+
+  // Enrichissement
+  enrichiAuto     Boolean  @default(false)
+  enrichiAt       DateTime?
+
+  organisationId  String
+  organisation    Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  entiteId        String?
+  entite          Entite?      @relation(fields: [entiteId], references: [id])
+
+  interactions    Interaction[]
+
+  @@index([organisationId])
+  @@index([entiteId])
+  @@map("contacts")
+}
+
+model Entite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nom         String
+  type        String
+  siteWeb     String?
+  adresse     String?
+  pays        String  @default("GN")
+  secteur     String?
+  description String? @db.Text
+  logoUrl     String?
+
+  contacts    Contact[]
+
+  @@map("entites")
+}
+
+model Interaction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  type      InteractionType
+  date      DateTime
+  objet     String
+  resume    String? @db.Text
+  lieu      String?
+  suivi     String? @db.Text
+  rappelAt  DateTime?
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  aoId      String?
+  ao        AppelOffre? @relation(fields: [aoId], references: [id])
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@index([contactId])
+  @@index([aoId])
+  @@map("interactions")
+}
+
+// =============================================================================
+// DOSSIER DE RÉPONSE
+// =============================================================================
+
+model Dossier {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  titre           String
+  version         Int          @default(1)
+  status          DossierStatus @default(BROUILLON)
+  generatedByAI   Boolean      @default(false)
+
+  // Contenu structuré (TipTap JSON)
+  memTechnique    Json @default("{}")
+  offreFinanciere Json @default("{}")
+  planning        Json @default("{}")
+  piecesAdmin     Json @default("{}")
+  risques         Json @default("{}")
+  team            Json @default("{}")
+
+  // Exports
+  exportPdfUrl    String?
+  exportDocxUrl   String?
+  exportZipUrl    String?
+  exportedAt      DateTime?
+
+  // Soumission
+  soumisAt        DateTime?
+  referenceSoumission String?
+
+  aoId            String
+  ao              AppelOffre @relation(fields: [aoId], references: [id], onDelete: Cascade)
+
+  organisationId  String
+  organisation    Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  solutionId      String?
+  solution        Solution? @relation(fields: [solutionId], references: [id])
+
+  createdById     String
+  createdBy       User @relation("DossierCreator", fields: [createdById], references: [id])
+
+  collaborateurs  DossierCollab[]
+  versions        DossierVersion[]
+
+  @@index([aoId])
+  @@index([organisationId])
+  @@index([status])
+  @@map("dossiers")
+}
+
+model DossierCollab {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  dossierId String
+  dossier   Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([dossierId, userId])
+  @@map("dossier_collabs")
+}
+
+model DossierVersion {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  numero         Int
+  snapshot       Json
+  commentaire    String?
+
+  dossierId      String
+  dossier        Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  @@index([dossierId])
+  @@map("dossier_versions")
+}
+
+// =============================================================================
+// SOLUTION / TEMPLATE
+// =============================================================================
+
+model Solution {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nom             String
+  slug            String
+  categorie       SolutionCategory
+  description     String  @db.Text
+  configSchema    Json    @default("{}")
+  archDescription String? @db.Text
+  techStack       String[]
+  estimCoutMin    BigInt?
+  estimCoutMax    BigInt?
+  estimDelaiMois  Int?
+  tags            String[]
+  version         String  @default("1.0.0")
+  isPublic        Boolean @default(false)
+  isActive        Boolean @default(true)
+  coverImageUrl   String?
+
+  organisationId  String?
+  organisation    Organisation? @relation(fields: [organisationId], references: [id])
+
+  dossiers        Dossier[]
+
+  @@unique([slug])
+  @@index([categorie])
+  @@map("solutions")
+}
+
+// =============================================================================
+// DOCUMENTS ADMINISTRATIFS
+// =============================================================================
+
+model OrgDocument {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type        DocumentType
+  nom         String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  dateEmission DateTime?
+  dateExpiration DateTime?
+  isValid     Boolean   @default(true)
+  notes       String?
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([type])
+  @@map("org_documents")
+}
+
+// =============================================================================
+// RÉFÉRENCES TECHNIQUES
+// =============================================================================
+
+model Reference {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  titre          String
+  client         String
+  description    String @db.Text
+  secteur        AOSector
+  dateDebut      DateTime
+  dateFin        DateTime?
+  montantGNF     BigInt?
+  technologies   String[]
+  documentUrl    String?
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@map("references")
+}
+
+// =============================================================================
+// EXPERTS / CV
+// =============================================================================
+
+model Expert {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prenom        String
+  nom           String
+  titre         String
+  specialites   String[]
+  anneesExp     Int      @default(0)
+  cvUrl         String?
+  photoUrl      String?
+  email         String?
+  disponible    Boolean  @default(true)
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@map("experts")
+}
+
+// =============================================================================
+// ALERTES
+// =============================================================================
+
+model Alerte {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  titre    String
+  message  String @db.Text
+  type     String
+  lue      Boolean @default(false)
+  lueAt    DateTime?
+
+  aoId     String?
+  ao       AppelOffre? @relation(fields: [aoId], references: [id])
+
+  @@index([lue])
+  @@map("alertes")
+}
+
+// =============================================================================
+// PAIEMENTS & ABONNEMENTS
+// =============================================================================
+
+model Payment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  montantGNF      BigInt
+  methode         PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  reference       String?
+  transactionId   String?
+  description     String?
+  metadata        Json @default("{}")
+
+  organisationId  String
+  organisation    Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([status])
+  @@map("payments")
+}
+
+// =============================================================================
+// AUDIT LOG
+// =============================================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  action     String
+  entity     String
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+// =============================================================================
+// WEBHOOKS
+// =============================================================================
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  source    String
+  eventType String
+  payload   Json
+  status    String
+  errorMsg  String?
+
+  @@index([source])
+  @@map("webhook_logs")
+}

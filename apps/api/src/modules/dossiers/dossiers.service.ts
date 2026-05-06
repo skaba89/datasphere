@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { AiService } from '../ai/ai.service'
+import { NotificationsService } from '../notifications/notifications.service'
 import { DossierStatus } from '@guineatender/database'
 
 @Injectable()
@@ -8,6 +9,7 @@ export class DossiersService {
   constructor(
     private prisma: PrismaService,
     private aiService: AiService,
+    private notifications: NotificationsService,
   ) {}
 
   async findAll(organisationId: string, query: { aoId?: string; status?: string; page?: number; limit?: number }) {
@@ -123,9 +125,190 @@ export class DossiersService {
     })
   }
 
-  async soumettre(id: string, organisationId: string, reference?: string) {
+  // ── Soumettre pour validation (WRITER ou MANAGER) ──────────────────────────
+  async soumettreValidation(id: string, organisationId: string, userId: string) {
+    const dossier = await this.findOne(id, organisationId)
+
+    const statusesAutorisés: DossierStatus[] = ['BROUILLON', 'EN_COURS', 'REJETE']
+    if (!statusesAutorisés.includes(dossier.status as DossierStatus)) {
+      throw new BadRequestException(
+        `Le dossier est en statut "${dossier.status}" et ne peut pas être envoyé en validation.`,
+      )
+    }
+
+    // Vérifier que le dossier a un contenu minimal
+    const mem = dossier.memTechnique as any
+    if (!mem || Object.keys(mem).length === 0) {
+      throw new BadRequestException(
+        'Le dossier doit contenir une mémoire technique avant validation.',
+      )
+    }
+
+    const updated = await this.prisma.dossier.update({
+      where: { id },
+      data: { status: 'EN_VALIDATION', validatedById: null, validatedAt: null, validationNote: null },
+      include: {
+        ao: { select: { titre: true } },
+        createdBy: { select: { email: true, prenom: true } },
+        organisation: {
+          select: {
+            users: {
+              where: { role: { in: ['ADMIN', 'MANAGER'] }, isActive: true },
+              select: { email: true, prenom: true },
+            },
+          },
+        },
+      },
+    })
+
+    // Notifier tous les managers/admins
+    const notifTargets = updated.organisation.users
+    await Promise.all(
+      notifTargets.map(u =>
+        this.notifications.envoyerAlerteValidation(
+          u.email,
+          u.prenom,
+          updated.ao.titre,
+          id,
+          updated.createdBy.prenom,
+        ),
+      ),
+    )
+
+    return updated
+  }
+
+  // ── Valider (MANAGER ou ADMIN seulement) ───────────────────────────────────
+  async valider(
+    id: string,
+    organisationId: string,
+    valideurId: string,
+    valideurRole: string,
+    data: { commentaire: string; checklistOk?: string[] },
+  ) {
+    if (!['ADMIN', 'MANAGER'].includes(valideurRole)) {
+      throw new ForbiddenException('Seuls les MANAGER et ADMIN peuvent valider un dossier.')
+    }
+
+    const dossier = await this.findOne(id, organisationId)
+    if (dossier.status !== 'EN_VALIDATION') {
+      throw new BadRequestException('Le dossier n\'est pas en attente de validation.')
+    }
+
+    await this.prisma.dossierValidation.create({
+      data: {
+        dossierId: id,
+        valideurId,
+        decision: 'APPROUVE',
+        commentaire: data.commentaire,
+        checklistOk: data.checklistOk ?? [],
+      },
+    })
+
+    const updated = await this.prisma.dossier.update({
+      where: { id },
+      data: {
+        status: 'VALIDE',
+        validatedById: valideurId,
+        validatedAt: new Date(),
+        validationNote: data.commentaire,
+      },
+      include: {
+        ao: { select: { titre: true } },
+        createdBy: { select: { email: true, prenom: true } },
+      },
+    })
+
+    // Notifier le créateur
+    await this.notifications.envoyerResultatValidation(
+      updated.createdBy.email,
+      updated.createdBy.prenom,
+      updated.ao.titre,
+      'APPROUVE',
+      data.commentaire,
+      id,
+    )
+
+    return updated
+  }
+
+  // ── Rejeter (MANAGER ou ADMIN seulement) ───────────────────────────────────
+  async rejeter(
+    id: string,
+    organisationId: string,
+    valideurId: string,
+    valideurRole: string,
+    data: { commentaire: string },
+  ) {
+    if (!['ADMIN', 'MANAGER'].includes(valideurRole)) {
+      throw new ForbiddenException('Seuls les MANAGER et ADMIN peuvent rejeter un dossier.')
+    }
+
+    const dossier = await this.findOne(id, organisationId)
+    if (dossier.status !== 'EN_VALIDATION') {
+      throw new BadRequestException('Le dossier n\'est pas en attente de validation.')
+    }
+
+    if (!data.commentaire?.trim()) {
+      throw new BadRequestException('Un commentaire est obligatoire pour rejeter un dossier.')
+    }
+
+    await this.prisma.dossierValidation.create({
+      data: {
+        dossierId: id,
+        valideurId,
+        decision: 'REJETE',
+        commentaire: data.commentaire,
+      },
+    })
+
+    const updated = await this.prisma.dossier.update({
+      where: { id },
+      data: {
+        status: 'REJETE',
+        validationNote: data.commentaire,
+      },
+      include: {
+        ao: { select: { titre: true } },
+        createdBy: { select: { email: true, prenom: true } },
+      },
+    })
+
+    // Notifier le créateur avec les corrections à apporter
+    await this.notifications.envoyerResultatValidation(
+      updated.createdBy.email,
+      updated.createdBy.prenom,
+      updated.ao.titre,
+      'REJETE',
+      data.commentaire,
+      id,
+    )
+
+    return updated
+  }
+
+  async getHistoriqueValidations(id: string, organisationId: string) {
     await this.findOne(id, organisationId)
-    const dossier = await this.prisma.dossier.update({
+    return this.prisma.dossierValidation.findMany({
+      where: { dossierId: id },
+      include: {
+        valideur: { select: { prenom: true, nom: true, role: true, avatarUrl: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  // ── Soumettre officiellement (après validation) ────────────────────────────
+  async soumettre(id: string, organisationId: string, reference?: string) {
+    const dossier = await this.findOne(id, organisationId)
+
+    if (dossier.status !== 'VALIDE') {
+      throw new BadRequestException(
+        'Le dossier doit être validé par un manager avant soumission officielle.',
+      )
+    }
+
+    const updated = await this.prisma.dossier.update({
       where: { id },
       data: {
         status: 'SOUMIS',
@@ -136,11 +319,11 @@ export class DossiersService {
     })
 
     await this.prisma.appelOffre.update({
-      where: { id: dossier.aoId },
+      where: { id: updated.aoId },
       data: { status: 'SOUMIS' },
     })
 
-    return dossier
+    return updated
   }
 
   async addCollaborateur(id: string, organisationId: string, userId: string) {

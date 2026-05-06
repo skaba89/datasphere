@@ -104,9 +104,16 @@ enum InteractionType {
 enum DossierStatus {
   BROUILLON
   EN_COURS
-  REVUE
+  EN_VALIDATION
+  VALIDE
+  REJETE
   SOUMIS
   ARCHIVE
+}
+
+enum ValidationDecision {
+  APPROUVE
+  REJETE
 }
 
 enum SolutionCategory {
@@ -237,9 +244,11 @@ model User {
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
 
   // Relations
-  appelsOffresAssignes AppelOffre[]    @relation("AssigneA")
-  dossiersCreated      Dossier[]       @relation("DossierCreator")
+  appelsOffresAssignes AppelOffre[]       @relation("AssigneA")
+  dossiersCreated      Dossier[]          @relation("DossierCreator")
+  dossiersValides      Dossier[]          @relation("DossierValidator")
   dossiersCollab       DossierCollab[]
+  validationsEmises    DossierValidation[] @relation("ValidationValideur")
   interactions         Interaction[]
   refreshTokens        RefreshToken[]
   auditLogs            AuditLog[]
@@ -468,11 +477,36 @@ model Dossier {
 
   collaborateurs  DossierCollab[]
   versions        DossierVersion[]
+  validations     DossierValidation[]
+
+  // Validation
+  validatedById   String?
+  validatedBy     User?    @relation("DossierValidator", fields: [validatedById], references: [id])
+  validatedAt     DateTime?
+  validationNote  String?  @db.Text
 
   @@index([aoId])
   @@index([organisationId])
   @@index([status])
   @@map("dossiers")
+}
+
+model DossierValidation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  decision     ValidationDecision
+  commentaire  String   @db.Text
+  checklistOk  Json     @default("[]")
+
+  dossierId    String
+  dossier      Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+
+  valideurId   String
+  valideur     User    @relation("ValidationValideur", fields: [valideurId], references: [id])
+
+  @@index([dossierId])
+  @@map("dossier_validations")
 }
 
 model DossierCollab {

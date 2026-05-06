@@ -104,8 +104,8 @@ services:
   # ── Frontend Web (Next.js) ───────────────────────────────────────────────────
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
       args:
         # NEXT_PUBLIC_* sont baked au build — doit pointer vers localhost pour le navigateur
         NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1

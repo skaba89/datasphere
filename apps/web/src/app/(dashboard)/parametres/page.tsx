@@ -78,7 +78,7 @@ export default function ParametresPage() {
   })
 
   const providers = aiProviders?.providers ?? {}
-  const currentProvider = selectedProvider ?? aiConfig?.provider ?? 'anthropic'
+  const currentProvider = selectedProvider ?? (aiConfig as any)?.provider ?? 'anthropic'
   const currentModels = providers[currentProvider]?.models ?? []
 
   const STATUT_DOC: Record<string, { label: string; icon: any; color: string }> = {

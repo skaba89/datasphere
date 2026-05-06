@@ -40,12 +40,12 @@ export default function AODetailPage() {
 
   const { data: scoring } = useQuery({
     queryKey: ['scoring', id],
-    queryFn: () => scoringApi.get(`/${id}`).then(r => r.data),
+    queryFn: () => scoringApi.get(id).then(r => r.data),
     enabled: !!ao,
   })
 
   const scoreMutation = useMutation({
-    mutationFn: () => scoringApi.post(`/${id}/calculer`).then(r => r.data),
+    mutationFn: () => scoringApi.calculer(id).then(r => r.data),
     onSuccess: () => {
       toast.success('Score calculé avec succès')
       qc.invalidateQueries({ queryKey: ['scoring', id] })
@@ -55,13 +55,13 @@ export default function AODetailPage() {
   })
 
   const resumeMutation = useMutation({
-    mutationFn: () => aiApi.post(`/resumer/${id}`).then(r => r.data),
+    mutationFn: () => aiApi.resumer(id).then(r => r.data),
     onSuccess: () => toast.success('Résumé IA généré'),
   })
 
   const dossierMutation = useMutation({
-    mutationFn: () => dossiersApi.post('/', { appelOffreId: id, titre: `Dossier — ${ao?.titre}` }).then(r => r.data),
-    onSuccess: (data) => {
+    mutationFn: () => dossiersApi.create({ appelOffreId: id, titre: `Dossier — ${ao?.titre}` }).then(r => r.data),
+    onSuccess: () => {
       toast.success('Dossier créé — génération IA en cours')
       router.push(`/dossiers`)
     },

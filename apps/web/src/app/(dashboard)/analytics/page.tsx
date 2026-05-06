@@ -19,12 +19,12 @@ const COULEURS_SCORE = {
 export default function AnalyticsPage() {
   const { data: stats } = useQuery({
     queryKey: ['ao-stats'],
-    queryFn: () => aoApi.get('/stats').then(r => r.data),
+    queryFn: () => aoApi.stats().then(r => r.data),
   })
 
   const { data: dashboard } = useQuery({
     queryKey: ['dashboard'],
-    queryFn: () => orgApi.get('/dashboard').then(r => r.data),
+    queryFn: () => orgApi.dashboard().then(r => r.data),
   })
 
   const pipelineData = dashboard?.pipeline?.map((p: any) => ({

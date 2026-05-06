@@ -75,7 +75,12 @@ export const dossiersApi = {
   update: (id: string, data: any) => api.put(`/dossiers/${id}`, data),
   genererIA: (id: string) => api.post(`/dossiers/${id}/generer-ia`),
   soumettre: (id: string, reference?: string) => api.post(`/dossiers/${id}/soumettre`, { reference }),
+  soumettrePourValidation: (id: string) => api.post(`/dossiers/${id}/soumettre-validation`),
+  valider: (id: string, data: any) => api.post(`/dossiers/${id}/valider`, data),
+  rejeter: (id: string, data: any) => api.post(`/dossiers/${id}/rejeter`, data),
+  historiqueValidations: (id: string) => api.get(`/dossiers/${id}/validations`),
   checklist: (id: string) => api.get(`/dossiers/${id}/checklist`),
+  post: (path: string, data?: any) => api.post(`/dossiers${path}`, data),
 }
 
 // ── Solutions ─────────────────────────────────────────────────────────────────
@@ -88,6 +93,8 @@ export const solutionsApi = {
 // ── Scoring ───────────────────────────────────────────────────────────────────
 export const scoringApi = {
   calculer: (aoId: string) => api.post(`/scoring/${aoId}/calculer`),
+  get: (aoId: string) => api.get(`/scoring/${aoId}`),
+  post: (path: string, data?: any) => api.post(`/scoring${path}`, data),
 }
 
 // ── AI ─────────────────────────────────────────────────────────────────────────

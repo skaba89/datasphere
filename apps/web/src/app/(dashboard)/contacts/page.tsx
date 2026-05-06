@@ -7,9 +7,9 @@ import { Search, UserPlus, Flame, Thermometer, Snowflake, Phone, Mail } from 'lu
 import { clsx } from 'clsx'
 
 function ProximiteIcon({ score }: { score: number }) {
-  if (score >= 70) return <Flame className="w-4 h-4 text-red-500" title="Chaud" />
-  if (score >= 30) return <Thermometer className="w-4 h-4 text-orange-400" title="Tiède" />
-  return <Snowflake className="w-4 h-4 text-blue-400" title="Froid" />
+  if (score >= 70) return <Flame className="w-4 h-4 text-red-500" aria-label="Chaud" />
+  if (score >= 30) return <Thermometer className="w-4 h-4 text-orange-400" aria-label="Tiède" />
+  return <Snowflake className="w-4 h-4 text-blue-400" aria-label="Froid" />
 }
 
 export default function ContactsPage() {

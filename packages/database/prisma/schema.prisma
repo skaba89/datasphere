@@ -332,9 +332,10 @@ model AppelOffre {
   organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
 
   // Relations
-  assignes   User[]       @relation("AssigneA")
-  dossiers   Dossier[]
-  alertes    Alerte[]
+  assignes      User[]        @relation("AssigneA")
+  dossiers      Dossier[]
+  alertes       Alerte[]
+  interactions  Interaction[]
 
   @@unique([source, sourceId, organisationId])
   @@index([organisationId])

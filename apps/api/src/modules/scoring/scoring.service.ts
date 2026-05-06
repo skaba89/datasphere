@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 
-interface ScoringDimension {
+export interface ScoringDimension {
   nom: string
   score: number
   poids: number
@@ -9,7 +9,7 @@ interface ScoringDimension {
   raison: string
 }
 
-interface ScoringResult {
+export interface ScoringResult {
   scoreFinal: number
   dimensions: ScoringDimension[]
   recommandation: 'GO' | 'MAYBE' | 'NO_GO'

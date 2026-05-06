@@ -95,6 +95,12 @@ export const aiApi = {
   resumer: (aoId: string) => api.post(`/ai/ao/${aoId}/resumer`),
   genererMemTechnique: (aoId: string, data?: any) => api.post(`/ai/ao/${aoId}/mem-technique`, data),
   genererOffreFinanciere: (aoId: string, data?: any) => api.post(`/ai/ao/${aoId}/offre-financiere`, data),
+  getProviders: () => api.get('/ai/providers'),
+  getConfig: () => api.get('/ai/config'),
+  saveConfig: (data: any) => api.post('/ai/config', data),
+  // Helpers pour les composants qui utilisent api.get/post directement
+  get: (path: string) => api.get(`/ai${path}`),
+  post: (path: string, data?: any) => api.post(`/ai${path}`, data),
 }
 
 // ── Organisation ──────────────────────────────────────────────────────────────

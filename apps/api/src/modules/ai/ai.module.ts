@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common'
 import { AiController } from './ai.controller'
 import { AiService } from './ai.service'
+import { AiProviderFactory } from './ai-provider.factory'
 
 @Module({
   controllers: [AiController],
-  providers: [AiService],
-  exports: [AiService],
+  providers: [AiService, AiProviderFactory],
+  exports: [AiService, AiProviderFactory],
 })
 export class AiModule {}

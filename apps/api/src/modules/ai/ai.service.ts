@@ -1,29 +1,37 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import Anthropic from '@anthropic-ai/sdk'
 import { PrismaService } from '../../common/prisma/prisma.service'
+import { AiProviderFactory } from './ai-provider.factory'
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name)
-  private anthropic: Anthropic
 
   constructor(
-    private config: ConfigService,
     private prisma: PrismaService,
-  ) {
-    this.anthropic = new Anthropic({
-      apiKey: this.config.get<string>('ANTHROPIC_API_KEY'),
+    private providerFactory: AiProviderFactory,
+  ) {}
+
+  private async getProviders(organisationId: string) {
+    const org = await this.prisma.organisation.findUnique({
+      where: { id: organisationId },
+      select: { aiConfig: true },
     })
+    const config = this.providerFactory.resolveConfig((org?.aiConfig as any) ?? {})
+    return {
+      heavy: this.providerFactory.getProvider(config, 'heavy'),
+      light: this.providerFactory.getProvider(config, 'light'),
+      config,
+    }
   }
 
   async genererMemTechnique(aoId: string, organisationId: string, options?: { solutionId?: string }): Promise<string> {
-    const [ao, org] = await Promise.all([
+    const [ao, org, providers] = await Promise.all([
       this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
       this.prisma.organisation.findUnique({
         where: { id: organisationId },
         include: { references: { take: 5 }, experts: { take: 10 } },
       }),
+      this.getProviders(organisationId),
     ])
 
     if (!ao || !org) throw new Error('AO ou organisation introuvable')
@@ -36,11 +44,11 @@ export class AiService {
       }
     }
 
-    const referencesContext = org.references.map((r) =>
+    const referencesContext = org.references.map(r =>
       `- ${r.titre} (${r.client}, ${r.secteur}, ${new Date(r.dateDebut).getFullYear()})`
     ).join('\n')
 
-    const expertsContext = org.experts.map((e) =>
+    const expertsContext = org.experts.map(e =>
       `- ${e.prenom} ${e.nom} — ${e.titre} — ${e.specialites.join(', ')} (${e.anneesExp} ans d'exp.)`
     ).join('\n')
 
@@ -67,62 +75,15 @@ ${referencesContext || 'Aucune référence disponible'}
 EXPERTS DISPONIBLES:
 ${expertsContext || 'Aucun expert renseigné'}
 
-MISSION: Rédige un mémoire technique professionnel et structuré en français pour répondre à cet appel d'offres. Le document doit:
+MISSION: Rédige un mémoire technique professionnel et structuré en français pour répondre à cet appel d'offres. Le document doit couvrir: compréhension du besoin, méthodologie, solution technique (offline-first, Mobile Money, contexte guinéen), équipe projet, références pertinentes, plan de formation, gestion des risques, garanties et maintenance. Environ 3000-4000 mots.`
 
-1. COMPRÉHENSION DU BESOIN
-   - Reformuler l'objet du marché dans vos propres mots
-   - Identifier les enjeux clés pour l'entité adjudicatrice
-   - Montrer que vous avez bien compris les attentes
+    const result = await providers.heavy.generate(prompt, {
+      maxTokens: 8000,
+      model: providers.heavy.model,
+    } as any)
 
-2. MÉTHODOLOGIE PROPOSÉE
-   - Approche générale et principes directeurs
-   - Phases détaillées (avec objectifs, livrables, durée)
-   - Jalons clés et points de contrôle
-   - Gestion du projet et outils
-
-3. SOLUTION TECHNIQUE
-   - Description de la solution proposée
-   - Architecture technique (adaptée au contexte guinéen: offline-first, Mobile Money, etc.)
-   - Technologies utilisées et justification
-   - Sécurité et conformité réglementaire
-   - Scalabilité et maintenance
-
-4. ÉQUIPE PROJET
-   - Organisation de l'équipe (organigramme textuel)
-   - Profils clés et responsabilités
-   - Expérience des experts sur des projets similaires
-
-5. RÉFÉRENCES PERTINENTES
-   - Projets réalisés similaires
-   - Résultats obtenus et valeur créée
-
-6. PLAN DE FORMATION & TRANSFERT DE COMPÉTENCES
-   - Programme de formation des utilisateurs finaux
-   - Documentation technique et utilisateur
-   - Accompagnement post-déploiement
-
-7. GESTION DES RISQUES
-   - Risques identifiés (technique, opérationnel, calendaire)
-   - Mesures d'atténuation pour chaque risque
-
-8. GARANTIES & MAINTENANCE
-   - Engagement sur la qualité et les délais
-   - Plan de maintenance préventive et corrective
-   - Support technique (SLA, niveaux d'intervention)
-
-Utilise un style professionnel, convainquant et adapté aux administrations publiques guinéennes. Intègre les réalités locales (connectivité variable, Mobile Money, formation des utilisateurs, etc.). Le mémoire doit faire environ 3000 à 4000 mots.`
-
-    const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const content = response.content[0]
-    if (content.type !== 'text') throw new Error('Réponse IA invalide')
-
-    this.logger.log(`Mémoire technique généré pour AO ${aoId} — ${content.text.length} caractères`)
-    return content.text
+    this.logger.log(`Mémoire technique générée — provider: ${providers.config.provider}, modèle: ${providers.heavy.model}, ${result.length} chars`)
+    return result
   }
 
   async genererOffreFinanciere(
@@ -130,10 +91,13 @@ Utilise un style professionnel, convainquant et adapté aux administrations publ
     organisationId: string,
     params: { margePercent?: number; dureeM?: number },
   ) {
-    const ao = await this.prisma.appelOffre.findFirst({
-      where: { id: aoId, organisationId },
-      include: { dossiers: { include: { solution: true }, take: 1 } },
-    })
+    const [ao, providers] = await Promise.all([
+      this.prisma.appelOffre.findFirst({
+        where: { id: aoId, organisationId },
+        include: { dossiers: { include: { solution: true }, take: 1 } },
+      }),
+      this.getProviders(organisationId),
+    ])
 
     if (!ao) throw new Error('AO introuvable')
 
@@ -149,15 +113,7 @@ CONTEXTE:
 CONSIGNE: Génère un tableau de décomposition du prix en JSON avec la structure suivante:
 {
   "postes": [
-    {
-      "numero": "1",
-      "designation": "...",
-      "unite": "forfait|mois|jour",
-      "quantite": number,
-      "prixUnitaireGNF": number,
-      "montantGNF": number,
-      "detail": "..."
-    }
+    { "numero": "1", "designation": "...", "unite": "forfait|mois|jour", "quantite": number, "prixUnitaireGNF": number, "montantGNF": number, "detail": "..." }
   ],
   "sousTotal": number,
   "tvaPercent": 18,
@@ -166,42 +122,29 @@ CONSIGNE: Génère un tableau de décomposition du prix en JSON avec la structur
   "notes": "..."
 }
 
-Inclure les postes standards: développement logiciel, infrastructure/hébergement, formation, maintenance (12 mois), management de projet, documentation. Utilise des prix réalistes du marché guinéen.`
+Inclure: développement logiciel, infrastructure/hébergement, formation, maintenance (12 mois), management de projet, documentation. Prix réalistes du marché guinéen. Réponds UNIQUEMENT en JSON valide.`
 
-    const response = await this.anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: prompt }],
-    })
+    const raw = await providers.light.generate(prompt, {
+      maxTokens: 3000,
+      model: providers.light.model,
+    } as any)
 
-    const content = response.content[0]
-    if (content.type !== 'text') throw new Error('Réponse IA invalide')
-
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/)
+    const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0])
-      } catch {
-        return { raw: content.text }
-      }
+      try { return JSON.parse(jsonMatch[0]) } catch {}
     }
-
-    return { raw: content.text }
+    return { raw }
   }
 
   async resumerAO(aoId: string, organisationId: string): Promise<string> {
-    const ao = await this.prisma.appelOffre.findFirst({
-      where: { id: aoId, organisationId },
-    })
+    const [ao, providers] = await Promise.all([
+      this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
+      this.getProviders(organisationId),
+    ])
     if (!ao) throw new Error('AO introuvable')
 
-    const response = await this.anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 500,
-      messages: [
-        {
-          role: 'user',
-          content: `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
+    return providers.light.generate(
+      `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
 
 Titre: ${ao.titre}
 Entité: ${ao.entiteAdj}
@@ -210,39 +153,39 @@ Budget: ${ao.budgetEstimeGNF ? Number(ao.budgetEstimeGNF).toLocaleString('fr-FR'
 Date limite: ${ao.dateLimite.toLocaleDateString('fr-FR')}
 
 Focus: enjeux principaux, opportunités, risques évidents.`,
-        },
-      ],
-    })
-
-    const content = response.content[0]
-    return content.type === 'text' ? content.text : ''
+      { maxTokens: 500, model: providers.light.model } as any,
+    )
   }
 
   async analyserDocument(texte: string, typeDocument: string): Promise<Record<string, any>> {
-    const response = await this.anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'user',
-          content: `Analyse ce document de type "${typeDocument}" et extrais les informations clés en JSON:
+    // Utiliser le provider par défaut (Anthropic) pour l'analyse de documents
+    const defaultConfig = this.providerFactory.resolveConfig({})
+    const provider = this.providerFactory.getProvider(defaultConfig, 'light')
+
+    const raw = await provider.generate(
+      `Analyse ce document de type "${typeDocument}" et extrais les informations clés en JSON:
 
 ${texte.substring(0, 8000)}
 
 Extrais: titre, entite_adj, objet, budget_estime, date_publication, date_limite, duree_marche, criteres_eligibilite (liste), criteres_evaluation (liste), secteur, type_marche.
 Réponds UNIQUEMENT en JSON valide.`,
-        },
-      ],
-    })
-
-    const content = response.content[0]
-    if (content.type !== 'text') return {}
+      { maxTokens: 2000, model: provider.model } as any,
+    )
 
     try {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/)
+      const jsonMatch = raw.match(/\{[\s\S]*\}/)
       return jsonMatch ? JSON.parse(jsonMatch[0]) : {}
     } catch {
       return {}
     }
+  }
+
+  /** Retourne les providers disponibles et configurés pour une organisation */
+  async getConfiguredProviders(organisationId: string) {
+    const org = await this.prisma.organisation.findUnique({
+      where: { id: organisationId },
+      select: { aiConfig: true },
+    })
+    return this.providerFactory.resolveConfig((org?.aiConfig as any) ?? {})
   }
 }

@@ -6,6 +6,7 @@ import { orgApi, documentsApi, aiApi } from '@/lib/api'
 import {
   Building2, FileCheck, CreditCard, AlertTriangle,
   CheckCircle2, Clock, Brain, ChevronDown, Zap,
+  Users, Award, Plus, X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -31,6 +32,10 @@ export default function ParametresPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null)
   const [selectedHeavy, setSelectedHeavy] = useState('')
   const [selectedLight, setSelectedLight] = useState('')
+  const [showExpertForm, setShowExpertForm] = useState(false)
+  const [showRefForm, setShowRefForm] = useState(false)
+  const [expertForm, setExpertForm] = useState({ nom: '', prenom: '', specialite: '', anneesExp: 5 })
+  const [refForm, setRefForm] = useState({ client: '', projet: '', montantGNF: '', annee: new Date().getFullYear() })
 
   const { data: org } = useQuery({
     queryKey: ['organisation'],
@@ -63,6 +68,38 @@ export default function ParametresPage() {
       }
     },
   } as any)
+
+  const { data: experts } = useQuery({
+    queryKey: ['experts'],
+    queryFn: () => orgApi.experts().then(r => r.data),
+  })
+
+  const { data: references } = useQuery({
+    queryKey: ['references'],
+    queryFn: () => orgApi.references().then(r => r.data),
+  })
+
+  const createExpert = useMutation({
+    mutationFn: () => orgApi.createExpert(expertForm).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Expert ajouté')
+      qc.invalidateQueries({ queryKey: ['experts'] })
+      setExpertForm({ nom: '', prenom: '', specialite: '', anneesExp: 5 })
+      setShowExpertForm(false)
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
+  const createReference = useMutation({
+    mutationFn: () => orgApi.createReference({ ...refForm, montantGNF: Number(refForm.montantGNF), annee: Number(refForm.annee) }).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Référence ajoutée')
+      qc.invalidateQueries({ queryKey: ['references'] })
+      setRefForm({ client: '', projet: '', montantGNF: '', annee: new Date().getFullYear() })
+      setShowRefForm(false)
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
 
   const saveAiConfig = useMutation({
     mutationFn: () => aiApi.post('/config', {
@@ -304,6 +341,201 @@ export default function ParametresPage() {
           )}
         </div>
         <button className="mt-4 text-sm text-orange-600 hover:underline">+ Ajouter un document</button>
+      </section>
+
+      {/* Équipe d'experts */}
+      <section className="bg-white border rounded-xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-gray-500" />
+            <div>
+              <h2 className="font-semibold text-gray-900">Équipe d&apos;experts</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Valorise la capacité humaine dans le scoring des dossiers</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowExpertForm(v => !v)}
+            className="flex items-center gap-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium"
+          >
+            {showExpertForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showExpertForm ? 'Annuler' : 'Ajouter'}
+          </button>
+        </div>
+
+        {showExpertForm && (
+          <div className="mb-4 p-4 bg-gray-50 border rounded-lg">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Prénom</label>
+                <input
+                  value={expertForm.prenom}
+                  onChange={e => setExpertForm(f => ({ ...f, prenom: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Jean"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Nom</label>
+                <input
+                  value={expertForm.nom}
+                  onChange={e => setExpertForm(f => ({ ...f, nom: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Camara"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Spécialité</label>
+                <input
+                  value={expertForm.specialite}
+                  onChange={e => setExpertForm(f => ({ ...f, specialite: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Génie civil, Informatique..."
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Années d&apos;expérience</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  value={expertForm.anneesExp}
+                  onChange={e => setExpertForm(f => ({ ...f, anneesExp: Number(e.target.value) }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+            <button
+              onClick={() => createExpert.mutate()}
+              disabled={createExpert.isPending || !expertForm.nom || !expertForm.specialite}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+            >
+              {createExpert.isPending ? 'Ajout...' : 'Ajouter l\'expert'}
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {(experts ?? []).map((e: any) => (
+            <div key={e.id} className="flex items-center gap-3 py-2 border-b last:border-0">
+              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-orange-700">
+                  {(e.prenom?.[0] ?? e.nom?.[0] ?? '?').toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">{e.prenom} {e.nom}</p>
+                <p className="text-xs text-gray-500">{e.specialite}</p>
+              </div>
+              <span className="text-xs text-gray-400 flex-shrink-0">{e.anneesExp} ans</span>
+            </div>
+          ))}
+          {!(experts ?? []).length && !showExpertForm && (
+            <p className="text-sm text-gray-500 text-center py-4">
+              Aucun expert enregistré. Ajoutez les membres clés de votre équipe.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* Références clients */}
+      <section className="bg-white border rounded-xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <Award className="w-5 h-5 text-gray-500" />
+            <div>
+              <h2 className="font-semibold text-gray-900">Références clients</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Valorise l&apos;expérience passée dans le scoring de capacité</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowRefForm(v => !v)}
+            className="flex items-center gap-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium"
+          >
+            {showRefForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showRefForm ? 'Annuler' : 'Ajouter'}
+          </button>
+        </div>
+
+        {showRefForm && (
+          <div className="mb-4 p-4 bg-gray-50 border rounded-lg">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Client / Maître d&apos;ouvrage</label>
+                <input
+                  value={refForm.client}
+                  onChange={e => setRefForm(f => ({ ...f, client: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Ministère des Travaux Publics"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Projet</label>
+                <input
+                  value={refForm.projet}
+                  onChange={e => setRefForm(f => ({ ...f, projet: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Construction pont de Kaloum"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Montant (GNF)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={refForm.montantGNF}
+                  onChange={e => setRefForm(f => ({ ...f, montantGNF: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="500000000"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Année</label>
+                <input
+                  type="number"
+                  min={2000}
+                  max={2030}
+                  value={refForm.annee}
+                  onChange={e => setRefForm(f => ({ ...f, annee: Number(e.target.value) }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+            <button
+              onClick={() => createReference.mutate()}
+              disabled={createReference.isPending || !refForm.client || !refForm.projet}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+            >
+              {createReference.isPending ? 'Ajout...' : 'Ajouter la référence'}
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {(references ?? []).map((r: any) => (
+            <div key={r.id} className="flex items-center gap-3 py-2 border-b last:border-0">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <Award className="w-4 h-4 text-green-700" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">{r.projet}</p>
+                <p className="text-xs text-gray-500">{r.client}</p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                {r.montantGNF && (
+                  <p className="text-xs font-medium text-gray-700">
+                    {(Number(r.montantGNF) / 1_000_000).toFixed(0)}M GNF
+                  </p>
+                )}
+                <p className="text-xs text-gray-400">{r.annee}</p>
+              </div>
+            </div>
+          ))}
+          {!(references ?? []).length && !showRefForm && (
+            <p className="text-sm text-gray-500 text-center py-4">
+              Aucune référence enregistrée. Ajoutez vos projets passés pour renforcer votre scoring.
+            </p>
+          )}
+        </div>
       </section>
     </div>
   )

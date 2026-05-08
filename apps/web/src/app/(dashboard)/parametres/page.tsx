@@ -36,8 +36,10 @@ export default function ParametresPage() {
   const [selectedLight, setSelectedLight] = useState('')
   const [showExpertForm, setShowExpertForm] = useState(false)
   const [showRefForm, setShowRefForm] = useState(false)
+  const [showDocForm, setShowDocForm] = useState(false)
   const [expertForm, setExpertForm] = useState({ nom: '', prenom: '', titre: '', specialites: '', anneesExp: 5 })
   const [refForm, setRefForm] = useState({ client: '', projet: '', secteur: 'NUMERIQUE', montantGNF: '', annee: new Date().getFullYear() })
+  const [docForm, setDocForm] = useState({ type: 'RCCM', nom: '', fileUrl: '', dateExpiration: '' })
 
   const { data: org } = useQuery({
     queryKey: ['organisation'],
@@ -136,6 +138,33 @@ export default function ParametresPage() {
       qc.invalidateQueries({ queryKey: ['references'] })
       setRefForm({ client: '', projet: '', secteur: 'NUMERIQUE', montantGNF: '', annee: new Date().getFullYear() })
       setShowRefForm(false)
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
+  const createDoc = useMutation({
+    mutationFn: () => documentsApi.create({
+      type: docForm.type,
+      nom: docForm.nom,
+      fileUrl: docForm.fileUrl || undefined,
+      dateExpiration: docForm.dateExpiration ? new Date(docForm.dateExpiration).toISOString() : undefined,
+    }).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Document ajouté')
+      qc.invalidateQueries({ queryKey: ['documents'] })
+      qc.invalidateQueries({ queryKey: ['documents-alertes'] })
+      setDocForm({ type: 'RCCM', nom: '', fileUrl: '', dateExpiration: '' })
+      setShowDocForm(false)
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
+  const deleteDoc = useMutation({
+    mutationFn: (id: string) => documentsApi.delete(id),
+    onSuccess: () => {
+      toast.success('Document supprimé')
+      qc.invalidateQueries({ queryKey: ['documents'] })
+      qc.invalidateQueries({ queryKey: ['documents-alertes'] })
     },
     onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
   })
@@ -405,14 +434,90 @@ export default function ParametresPage() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <FileCheck className="w-5 h-5 text-gray-500" />
-            <h2 className="font-semibold text-gray-900">Documents administratifs</h2>
+            <div>
+              <h2 className="font-semibold text-gray-900">Documents administratifs</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Pièces légales requises pour les soumissions (RCCM, IFU, attestations…)</p>
+            </div>
           </div>
-          {alertesDocs?.length > 0 && (
-            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-              {alertesDocs.length} expir(ent) bientôt
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {alertesDocs?.length > 0 && (
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                {alertesDocs.length} expir(ent) bientôt
+              </span>
+            )}
+            <button
+              onClick={() => setShowDocForm(v => !v)}
+              className="flex items-center gap-1.5 text-sm text-orange-600 hover:text-orange-700 font-medium"
+            >
+              {showDocForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              {showDocForm ? 'Annuler' : 'Ajouter'}
+            </button>
+          </div>
         </div>
+
+        {showDocForm && (
+          <div className="mb-4 p-4 bg-gray-50 border rounded-lg">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Type de document</label>
+                <select
+                  value={docForm.type}
+                  onChange={e => setDocForm(f => ({ ...f, type: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                >
+                  {[
+                    ['RCCM', 'RCCM'],
+                    ['IFU', 'IFU'],
+                    ['ATTESTATION_FISCALE', 'Attestation fiscale'],
+                    ['ATTESTATION_CNSS', 'Attestation CNSS'],
+                    ['STATUTS', 'Statuts'],
+                    ['BILAN', 'Bilan financier'],
+                    ['REFERENCE_TECHNIQUE', 'Référence technique'],
+                    ['CV_EXPERT', 'CV Expert'],
+                    ['AUTRE', 'Autre'],
+                  ].map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Nom / description</label>
+                <input
+                  value={docForm.nom}
+                  onChange={e => setDocForm(f => ({ ...f, nom: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="RCCM N°GN-CON-2024-B5-0001"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">URL du fichier (optionnel)</label>
+                <input
+                  value={docForm.fileUrl}
+                  onChange={e => setDocForm(f => ({ ...f, fileUrl: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Date d&apos;expiration (optionnel)</label>
+                <input
+                  type="date"
+                  value={docForm.dateExpiration}
+                  onChange={e => setDocForm(f => ({ ...f, dateExpiration: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+            <button
+              onClick={() => createDoc.mutate()}
+              disabled={createDoc.isPending || !docForm.nom}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+            >
+              {createDoc.isPending ? 'Ajout...' : 'Ajouter le document'}
+            </button>
+          </div>
+        )}
+
         <div className="space-y-2">
           {docs?.map((doc: any) => {
             const conf = STATUT_DOC[doc.statut] || STATUT_DOC.VALIDE
@@ -422,24 +527,43 @@ export default function ParametresPage() {
                 <Icon className={`w-4 h-4 flex-shrink-0 ${conf.color}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900">{doc.nom}</p>
-                  <p className="text-xs text-gray-500">{doc.type}</p>
+                  <p className="text-xs text-gray-500">{doc.type?.replace(/_/g, ' ')}</p>
                 </div>
-                <div className="text-right">
-                  <span className={`text-xs font-medium ${conf.color}`}>{conf.label}</span>
-                  {doc.dateExpiration && (
-                    <p className="text-xs text-gray-400">{format(new Date(doc.dateExpiration), 'dd/MM/yyyy')}</p>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className={`text-xs font-medium ${conf.color}`}>{conf.label}</span>
+                    {doc.dateExpiration && (
+                      <p className="text-xs text-gray-400">{format(new Date(doc.dateExpiration), 'dd/MM/yyyy')}</p>
+                    )}
+                  </div>
+                  {doc.fileUrl && (
+                    <a
+                      href={doc.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-500 hover:underline flex-shrink-0"
+                    >
+                      Voir
+                    </a>
                   )}
+                  <button
+                    onClick={() => deleteDoc.mutate(doc.id)}
+                    disabled={deleteDoc.isPending}
+                    className="p-1 text-gray-300 hover:text-red-500 transition-colors flex-shrink-0"
+                    title="Supprimer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             )
           })}
-          {!docs?.length && (
+          {!docs?.length && !showDocForm && (
             <p className="text-sm text-gray-500 text-center py-4">
               Aucun document enregistré. Ajoutez vos pièces administratives.
             </p>
           )}
         </div>
-        <button className="mt-4 text-sm text-orange-600 hover:underline">+ Ajouter un document</button>
       </section>
 
       {/* Équipe d'experts */}

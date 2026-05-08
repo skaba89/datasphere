@@ -43,7 +43,7 @@ services:
       - gt_network
 
   api:
-    image: guineatender-api:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-skaba89}/guineatender-api:latest
     restart: always
     depends_on:
       - postgres
@@ -62,7 +62,7 @@ services:
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
 
   web:
-    image: guineatender-web:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-skaba89}/guineatender-web:latest
     restart: always
     depends_on:
       - api

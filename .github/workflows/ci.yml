@@ -86,7 +86,8 @@ jobs:
       - name: Build & Push API image
         uses: docker/build-push-action@v5
         with:
-          context: apps/api
+          context: .
+          file: apps/api/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_API }}:latest
@@ -95,7 +96,8 @@ jobs:
       - name: Build & Push Web image
         uses: docker/build-push-action@v5
         with:
-          context: apps/web
+          context: .
+          file: apps/web/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_WEB }}:latest

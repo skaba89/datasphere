@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import {
   Brain, LayoutDashboard, FileSearch, Users, FileText,
-  Lightbulb, Settings, LogOut, Bell, User, BarChart3
+  Lightbulb, Settings, LogOut, Bell, User, BarChart3,
+  AlertTriangle, Clock, Shield, X,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
-import { authApi } from '@/lib/api'
+import { authApi, aoApi, dossiersApi } from '@/lib/api'
 import { toast } from 'sonner'
 import { clsx } from 'clsx'
 
@@ -22,6 +24,119 @@ const navigation = [
   { name: 'Analytiques', href: '/analytics', icon: BarChart3 },
   { name: 'Paramètres', href: '/parametres', icon: Settings },
 ]
+
+function NotificationsBell() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const { data: aoData } = useQuery({
+    queryKey: ['ao-notifs'],
+    queryFn: () => aoApi.list({ limit: 50 }).then(r => r.data),
+    refetchInterval: 60_000,
+  })
+
+  const { data: dossierData } = useQuery({
+    queryKey: ['dossier-notifs'],
+    queryFn: () => dossiersApi.list({ limit: 50 }).then(r => r.data),
+    refetchInterval: 60_000,
+  })
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const now = Date.now()
+  const urgentAOs = (aoData?.data ?? []).filter((ao: any) => {
+    const jours = Math.floor((new Date(ao.dateLimite).getTime() - now) / 86400000)
+    return jours >= 0 && jours <= 7 && !['SOUMIS', 'REMPORTE', 'PERDU', 'ARCHIVE'].includes(ao.status)
+  })
+  const dossiersEnValidation = (dossierData?.data ?? []).filter((d: any) => d.status === 'EN_VALIDATION')
+  const dossiersRejetes = (dossierData?.data ?? []).filter((d: any) => d.status === 'REJETE')
+
+  const alertes = [
+    ...urgentAOs.map((ao: any) => ({
+      id: `ao-${ao.id}`,
+      type: 'deadline' as const,
+      message: ao.titre,
+      sous: `${Math.floor((new Date(ao.dateLimite).getTime() - now) / 86400000)}j restants`,
+      href: `/appels-offres/${ao.id}`,
+      icon: AlertTriangle,
+      color: 'text-red-500',
+    })),
+    ...dossiersEnValidation.map((d: any) => ({
+      id: `dossier-val-${d.id}`,
+      type: 'validation' as const,
+      message: d.titre,
+      sous: 'En attente de validation',
+      href: `/dossiers/${d.id}`,
+      icon: Shield,
+      color: 'text-orange-500',
+    })),
+    ...dossiersRejetes.map((d: any) => ({
+      id: `dossier-rej-${d.id}`,
+      type: 'rejet' as const,
+      message: d.titre,
+      sous: 'Rejeté — corrections requises',
+      href: `/dossiers/${d.id}`,
+      icon: Clock,
+      color: 'text-red-600',
+    })),
+  ]
+
+  const count = alertes.length
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="relative text-gray-500 hover:text-gray-700 p-1"
+      >
+        <Bell className="w-5 h-5" />
+        {count > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+            {count > 9 ? '9+' : count}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-9 w-80 bg-white rounded-xl border shadow-lg z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <span className="text-sm font-semibold text-gray-900">Alertes</span>
+            <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          {alertes.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 text-sm">
+              <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              Aucune alerte active
+            </div>
+          ) : (
+            <div className="divide-y max-h-96 overflow-y-auto">
+              {alertes.map((a) => (
+                <Link
+                  key={a.id}
+                  href={a.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <a.icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${a.color}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 truncate">{a.message}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{a.sous}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuthStore()
@@ -121,10 +236,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {[...navigation].reverse().find((n) => pathname.startsWith(n.href))?.name || 'GuineaTender AI'}
           </div>
           <div className="flex items-center gap-3">
-            <button className="relative text-gray-500 hover:text-gray-700">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
+            <NotificationsBell />
           </div>
         </header>
 

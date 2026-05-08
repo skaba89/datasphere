@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { orgApi, documentsApi, aiApi } from '@/lib/api'
+import { orgApi, documentsApi, aiApi, usersApi } from '@/lib/api'
+import { useAuthStore } from '@/store/auth.store'
 import {
   Building2, FileCheck, CreditCard, AlertTriangle,
   CheckCircle2, Clock, Brain, ChevronDown, Zap,
-  Users, Award, Plus, X,
+  Users, Award, Plus, X, UserCheck, UserX, Shield,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -29,6 +30,7 @@ const PROVIDER_ICONS: Record<string, string> = {
 
 export default function ParametresPage() {
   const qc = useQueryClient()
+  const { user: currentUser } = useAuthStore()
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null)
   const [selectedHeavy, setSelectedHeavy] = useState('')
   const [selectedLight, setSelectedLight] = useState('')
@@ -68,6 +70,29 @@ export default function ParametresPage() {
       }
     },
   } as any)
+
+  const { data: teamUsers } = useQuery({
+    queryKey: ['team-users'],
+    queryFn: () => usersApi.list().then(r => r.data),
+  })
+
+  const toggleUserMutation = useMutation({
+    mutationFn: (userId: string) => usersApi.toggleActive(userId).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Statut utilisateur mis à jour')
+      qc.invalidateQueries({ queryKey: ['team-users'] })
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: string }) => usersApi.update(id, { role }).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Rôle mis à jour')
+      qc.invalidateQueries({ queryKey: ['team-users'] })
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
 
   const { data: experts } = useQuery({
     queryKey: ['experts'],
@@ -314,6 +339,66 @@ export default function ParametresPage() {
           </button>
         </div>
       </section>
+
+      {/* Gestion de l'équipe */}
+      {['ADMIN', 'MANAGER'].includes(currentUser?.role ?? '') && (
+        <section className="bg-white border rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <Shield className="w-5 h-5 text-gray-500" />
+            <div>
+              <h2 className="font-semibold text-gray-900">Équipe & accès</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Gérez les rôles et accès des membres de votre organisation</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {(teamUsers ?? []).map((u: any) => (
+              <div key={u.id} className="flex items-center gap-3 py-2 border-b last:border-0">
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-bold text-primary-700">
+                    {(u.prenom?.[0] ?? u.nom?.[0] ?? '?').toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">{u.prenom} {u.nom}</p>
+                  <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {u.id !== currentUser?.id && currentUser?.role === 'ADMIN' ? (
+                    <select
+                      value={u.role}
+                      onChange={e => updateRoleMutation.mutate({ id: u.id, role: e.target.value })}
+                      className="text-xs border rounded px-2 py-1 bg-white focus:ring-1 focus:ring-orange-500"
+                    >
+                      <option value="ADMIN">Admin</option>
+                      <option value="MANAGER">Manager</option>
+                      <option value="WRITER">Rédacteur</option>
+                      <option value="VIEWER">Lecteur</option>
+                    </select>
+                  ) : (
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{u.role}</span>
+                  )}
+                  {u.id !== currentUser?.id && (
+                    <button
+                      onClick={() => toggleUserMutation.mutate(u.id)}
+                      disabled={toggleUserMutation.isPending}
+                      title={u.isActive ? 'Désactiver' : 'Réactiver'}
+                      className={`p-1 rounded transition-colors ${u.isActive ? 'text-green-600 hover:bg-red-50 hover:text-red-600' : 'text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
+                    >
+                      {u.isActive ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {!(teamUsers ?? []).length && (
+              <p className="text-sm text-gray-500 text-center py-4">Aucun membre trouvé</p>
+            )}
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            Pour inviter de nouveaux membres, ils doivent s&apos;enregistrer avec le même RCCM d&apos;organisation.
+          </p>
+        </section>
+      )}
 
       {/* Documents administratifs */}
       <section className="bg-white border rounded-xl p-6">

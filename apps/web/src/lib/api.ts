@@ -132,6 +132,13 @@ export const scrapingApi = {
   sources: () => api.get('/scraping/sources'),
 }
 
+// ── Utilisateurs ─────────────────────────────────────────────────────────────
+export const usersApi = {
+  list: () => api.get('/users'),
+  update: (id: string, data: any) => api.put(`/users/${id}`, data),
+  toggleActive: (id: string) => api.patch(`/users/${id}/toggle-active`),
+}
+
 // ── Documents ─────────────────────────────────────────────────────────────────
 export const documentsApi = {
   list: () => api.get('/documents'),

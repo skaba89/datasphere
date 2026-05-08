@@ -142,7 +142,7 @@ export class AppelsOffresService {
       this.prisma.appelOffre.count({ where: { organisationId, score: { gte: 65 } } }),
       this.prisma.appelOffre.count({ where: { organisationId, score: { gte: 50, lt: 65 } } }),
       this.prisma.appelOffre.count({ where: { organisationId, score: { lt: 50, not: null } } }),
-      this.prisma.dossier.count({ where: { organisationId, contenu: { not: Prisma.JsonNullValueFilter.DbNull } } }),
+      this.prisma.dossier.count({ where: { organisationId, generatedByAI: true } }),
       this.prisma.appelOffre.aggregate({
         where: { organisationId },
         _sum: { budgetEstimeGNF: true },

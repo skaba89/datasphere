@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { solutionsApi, dossiersApi } from '@/lib/api'
+import { solutionsApi } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -39,17 +39,10 @@ function EstimationModal({ solution, onClose }: { solution: any; onClose: () => 
     onError: () => toast.error('Erreur lors de l\'estimation'),
   })
 
-  const dossierMutation = useMutation({
-    mutationFn: () => dossiersApi.create({
-      titre: `Dossier — ${solution.nom}`,
-      solutionId: solution.id,
-    }),
-    onSuccess: (res) => {
-      toast.success('Dossier créé depuis ce template')
-      router.push('/dossiers')
-    },
-    onError: () => toast.error('Erreur lors de la création du dossier'),
-  })
+  const ouvrirAOs = () => {
+    toast.info('Sélectionnez un appel d\'offres pour y associer ce template', { duration: 4000 })
+    router.push('/appels-offres')
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
@@ -210,12 +203,11 @@ function EstimationModal({ solution, onClose }: { solution: any; onClose: () => 
             Fermer
           </button>
           <button
-            onClick={() => dossierMutation.mutate()}
-            disabled={dossierMutation.isPending}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            onClick={ouvrirAOs}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
           >
             <FileText className="w-4 h-4" />
-            {dossierMutation.isPending ? 'Création...' : 'Créer un dossier depuis ce template'}
+            Utiliser pour un appel d'offres
           </button>
         </div>
       </div>

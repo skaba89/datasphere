@@ -14,6 +14,7 @@ import {
   ChevronRight, Users, Calendar, Tag, History, Download,
   Edit3, Save,
 } from 'lucide-react'
+import { useAuthStore } from '@/store/auth.store'
 
 type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
 
@@ -287,6 +288,8 @@ export default function DossierDetailPage() {
   const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState<Tab>('mem')
   const [modal, setModal] = useState<'valider' | 'rejeter' | 'soumettre_validation' | 'soumettre_final' | null>(null)
+  const { user } = useAuthStore()
+  const userRole = user?.role ?? 'WRITER'
 
   const { data: dossier, isLoading } = useQuery({
     queryKey: ['dossier', id],
@@ -479,7 +482,7 @@ export default function DossierDetailPage() {
           </button>
         )}
 
-        {status === 'EN_VALIDATION' && (
+        {status === 'EN_VALIDATION' && ['ADMIN', 'MANAGER'].includes(userRole) && (
           <>
             <button
               onClick={() => setModal('valider')}

@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { dossiersApi } from '@/lib/api'
 import { joursRestants } from '@/lib/utils'
+import { useAuthStore } from '@/store/auth.store'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import {
   FileText, Brain, Send, CheckCircle2, XCircle, Clock,
   AlertTriangle, ChevronRight, X, MessageSquare, Shield,
-  Upload, Eye,
+  Upload, Eye, Search, Filter,
 } from 'lucide-react'
 
 type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
@@ -205,12 +206,13 @@ function ValidationModal({ dossierId, titre, mode, onClose }: ModalProps) {
 export default function DossiersPage() {
   const qc = useQueryClient()
   const [modal, setModal] = useState<{ dossierId: string; titre: string; mode: ModalMode } | null>(null)
-  // En production, récupérer depuis useAuthStore()
-  const userRole = 'MANAGER'
+  const [statusFilter, setStatusFilter] = useState('')
+  const { user } = useAuthStore()
+  const userRole = user?.role ?? 'WRITER'
 
   const { data, isLoading } = useQuery({
-    queryKey: ['dossiers'],
-    queryFn: () => dossiersApi.get('/').then(r => r.data),
+    queryKey: ['dossiers', { statusFilter }],
+    queryFn: () => dossiersApi.list(statusFilter ? { status: statusFilter } : undefined).then(r => r.data),
   })
 
   const genererMutation = useMutation({
@@ -259,6 +261,31 @@ export default function DossiersPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Filtre par statut */}
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { value: '', label: 'Tous' },
+          { value: 'BROUILLON', label: 'Brouillons' },
+          { value: 'EN_COURS', label: 'En cours' },
+          { value: 'EN_VALIDATION', label: 'En validation' },
+          { value: 'VALIDE', label: 'Validés' },
+          { value: 'REJETE', label: 'Rejetés' },
+          { value: 'SOUMIS', label: 'Soumis' },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setStatusFilter(opt.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              statusFilter === opt.value
+                ? 'bg-primary-500 text-white'
+                : 'bg-white border text-gray-600 hover:border-primary-300 hover:text-primary-600'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* Dossiers */}

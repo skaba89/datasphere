@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common'
-import { ContactsController } from './contacts.controller'
+import { ContactsController, EntitesController } from './contacts.controller'
 import { ContactsService } from './contacts.service'
+import { PrismaModule } from '../../common/prisma/prisma.module'
 
 @Module({
-  controllers: [ContactsController],
+  imports: [PrismaModule],
+  controllers: [ContactsController, EntitesController],
   providers: [ContactsService],
   exports: [ContactsService],
 })

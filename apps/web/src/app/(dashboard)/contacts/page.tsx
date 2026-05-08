@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { contactsApi } from '@/lib/api'
-import { Search, UserPlus, Flame, Thermometer, Snowflake, Phone, Mail, X, Tag } from 'lucide-react'
+import { contactsApi, entitesApi } from '@/lib/api'
+import { Search, UserPlus, Flame, Thermometer, Snowflake, Phone, Mail, X, Tag, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -17,7 +17,25 @@ function NouveauContactModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient()
   const [form, setForm] = useState({
     prenom: '', nom: '', titre: '', poste: '',
-    email: '', telephone: '', notes: '',
+    email: '', telephone: '', notes: '', entiteId: '',
+  })
+  const [entiteSearch, setEntiteSearch] = useState('')
+  const [showNewEntite, setShowNewEntite] = useState(false)
+  const [newEntite, setNewEntite] = useState({ nom: '', type: 'Ministère' })
+
+  const { data: entites } = useQuery({
+    queryKey: ['entites', entiteSearch],
+    queryFn: () => entitesApi.list(entiteSearch || undefined).then(r => r.data),
+  })
+
+  const createEntiteMutation = useMutation({
+    mutationFn: () => entitesApi.create(newEntite).then(r => r.data),
+    onSuccess: (e: any) => {
+      setForm(f => ({ ...f, entiteId: e.id }))
+      setEntiteSearch(e.nom)
+      setShowNewEntite(false)
+      qc.invalidateQueries({ queryKey: ['entites'] })
+    },
   })
 
   const mutation = useMutation({
@@ -25,6 +43,7 @@ function NouveauContactModal({ onClose }: { onClose: () => void }) {
       ...form,
       email: form.email ? [form.email] : [],
       telephone: form.telephone ? [form.telephone] : [],
+      entiteId: form.entiteId || undefined,
     }),
     onSuccess: () => {
       toast.success('Contact créé avec succès')
@@ -95,6 +114,80 @@ function NouveauContactModal({ onClose }: { onClose: () => void }) {
                 placeholder="Directeur Général"
               />
             </div>
+          </div>
+
+          {/* Entité institutionnelle */}
+          <div>
+            <label className="text-xs font-medium text-gray-700 mb-1 block flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5" /> Organisation / Entité
+            </label>
+            {!showNewEntite ? (
+              <div className="relative">
+                <input
+                  value={entiteSearch}
+                  onChange={e => { setEntiteSearch(e.target.value); setForm(f => ({ ...f, entiteId: '' })) }}
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  placeholder="Ministère, agence, entreprise publique..."
+                />
+                {entiteSearch && !form.entiteId && entites && entites.length > 0 && (
+                  <div className="absolute z-10 left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {entites.map((e: any) => (
+                      <button
+                        key={e.id}
+                        type="button"
+                        onClick={() => { setForm(f => ({ ...f, entiteId: e.id })); setEntiteSearch(e.nom) }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      >
+                        <span className="font-medium">{e.nom}</span>
+                        <span className="text-gray-400 ml-2 text-xs">{e.type}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {entiteSearch && !form.entiteId && (
+                  <button
+                    type="button"
+                    onClick={() => setShowNewEntite(true)}
+                    className="mt-1 text-xs text-primary-600 hover:underline"
+                  >
+                    + Créer &quot;{entiteSearch}&quot; comme nouvelle entité
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2 p-3 bg-gray-50 rounded-lg border">
+                <p className="text-xs font-medium text-gray-600">Nouvelle entité</p>
+                <input
+                  value={newEntite.nom}
+                  onChange={e => setNewEntite(f => ({ ...f, nom: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  placeholder="Nom de l'entité"
+                  defaultValue={entiteSearch}
+                />
+                <select
+                  value={newEntite.type}
+                  onChange={e => setNewEntite(f => ({ ...f, type: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                >
+                  {['Ministère','Agence','Banque','Entreprise publique','ONG','Organisation internationale','Mairie','Université','Autre'].map(t => (
+                    <option key={t}>{t}</option>
+                  ))}
+                </select>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => createEntiteMutation.mutate()}
+                    disabled={!newEntite.nom || createEntiteMutation.isPending}
+                    className="text-xs bg-primary-500 text-white px-3 py-1.5 rounded-lg hover:bg-primary-600 disabled:opacity-50"
+                  >
+                    {createEntiteMutation.isPending ? '...' : 'Créer'}
+                  </button>
+                  <button type="button" onClick={() => setShowNewEntite(false)} className="text-xs text-gray-500 hover:text-gray-700">
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

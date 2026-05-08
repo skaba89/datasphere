@@ -2,6 +2,33 @@ import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Requ
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { ContactsService } from './contacts.service'
+import { PrismaService } from '../../common/prisma/prisma.service'
+
+@ApiTags('Entités')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('entites')
+export class EntitesController {
+  constructor(private prisma: PrismaService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Lister les entités institutionnelles' })
+  async findAll(@Query() query: any) {
+    const where = query.search ? {
+      OR: [
+        { nom: { contains: query.search, mode: 'insensitive' as const } },
+        { type: { contains: query.search, mode: 'insensitive' as const } },
+      ],
+    } : {}
+    return this.prisma.entite.findMany({ where, orderBy: { nom: 'asc' }, take: 50 })
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Créer une entité' })
+  create(@Body() body: any) {
+    return this.prisma.entite.create({ data: body })
+  }
+}
 
 @ApiTags('Contacts')
 @ApiBearerAuth()

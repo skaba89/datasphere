@@ -67,6 +67,11 @@ export const contactsApi = {
   delete: (id: string) => api.delete(`/contacts/${id}`),
 }
 
+export const entitesApi = {
+  list: (search?: string) => api.get('/entites', { params: search ? { search } : undefined }),
+  create: (data: any) => api.post('/entites', data),
+}
+
 // ── Dossiers ──────────────────────────────────────────────────────────────────
 export const dossiersApi = {
   list: (params?: any) => api.get('/dossiers', { params }),

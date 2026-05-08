@@ -113,7 +113,7 @@ export class AppelsOffresService {
   }
 
   async getStats(organisationId: string) {
-    const [totalAOs, parStatus, budgetTotal, expirantBientot] = await Promise.all([
+    const [totalAOs, parStatus, budgetTotal, expirantBientot, scored, goCount, maybeCount, noGoCount, dossiersGeneres, budgetValeurTotale] = await Promise.all([
       this.prisma.appelOffre.count({ where: { organisationId } }),
       this.prisma.appelOffre.groupBy({
         by: ['status'],
@@ -134,15 +134,38 @@ export class AppelsOffresService {
           },
         },
       }),
+      this.prisma.appelOffre.aggregate({
+        where: { organisationId, score: { not: null } },
+        _avg: { score: true },
+        _count: { score: true },
+      }),
+      this.prisma.appelOffre.count({ where: { organisationId, score: { gte: 65 } } }),
+      this.prisma.appelOffre.count({ where: { organisationId, score: { gte: 50, lt: 65 } } }),
+      this.prisma.appelOffre.count({ where: { organisationId, score: { lt: 50, not: null } } }),
+      this.prisma.dossier.count({ where: { organisationId, contenu: { not: Prisma.JsonNullValueFilter.DbNull } } }),
+      this.prisma.appelOffre.aggregate({
+        where: { organisationId },
+        _sum: { budgetEstimeGNF: true },
+      }),
     ])
 
-    const statusMap = parStatus.reduce((acc, s) => ({ ...acc, [s.status]: s._count.status }), {})
+    const statusMap = parStatus.reduce((acc: Record<string, number>, s) => ({ ...acc, [s.status]: s._count.status }), {})
+    const remporte = statusMap['REMPORTE'] ?? 0
+    const soumis = statusMap['SOUMIS'] ?? 0
+    const tauxSucces = soumis + remporte > 0 ? Math.round((remporte / (soumis + remporte)) * 100) : 0
 
     return {
       total: totalAOs,
       parStatus: statusMap,
       budgetRemporte: budgetTotal._sum.budgetEstimeGNF?.toString() ?? '0',
       expirantBientot,
+      scoreMoyen: scored._avg.score ? Math.round(scored._avg.score) : null,
+      goCount,
+      maybeCount,
+      noGoCount,
+      tauxSucces,
+      dossiersGeneres,
+      valeurTotale: budgetValeurTotale._sum.budgetEstimeGNF?.toString() ?? '0',
     }
   }
 

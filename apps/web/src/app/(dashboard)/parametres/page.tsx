@@ -34,8 +34,8 @@ export default function ParametresPage() {
   const [selectedLight, setSelectedLight] = useState('')
   const [showExpertForm, setShowExpertForm] = useState(false)
   const [showRefForm, setShowRefForm] = useState(false)
-  const [expertForm, setExpertForm] = useState({ nom: '', prenom: '', specialite: '', anneesExp: 5 })
-  const [refForm, setRefForm] = useState({ client: '', projet: '', montantGNF: '', annee: new Date().getFullYear() })
+  const [expertForm, setExpertForm] = useState({ nom: '', prenom: '', titre: '', specialites: '', anneesExp: 5 })
+  const [refForm, setRefForm] = useState({ client: '', projet: '', secteur: 'NUMERIQUE', montantGNF: '', annee: new Date().getFullYear() })
 
   const { data: org } = useQuery({
     queryKey: ['organisation'],
@@ -80,22 +80,36 @@ export default function ParametresPage() {
   })
 
   const createExpert = useMutation({
-    mutationFn: () => orgApi.createExpert(expertForm).then(r => r.data),
+    mutationFn: () => orgApi.createExpert({
+      prenom: expertForm.prenom,
+      nom: expertForm.nom,
+      titre: expertForm.titre || expertForm.specialites.split(',')[0]?.trim() || 'Expert',
+      specialites: expertForm.specialites.split(',').map(s => s.trim()).filter(Boolean),
+      anneesExp: expertForm.anneesExp,
+    }).then(r => r.data),
     onSuccess: () => {
       toast.success('Expert ajouté')
       qc.invalidateQueries({ queryKey: ['experts'] })
-      setExpertForm({ nom: '', prenom: '', specialite: '', anneesExp: 5 })
+      setExpertForm({ nom: '', prenom: '', titre: '', specialites: '', anneesExp: 5 })
       setShowExpertForm(false)
     },
     onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
   })
 
   const createReference = useMutation({
-    mutationFn: () => orgApi.createReference({ ...refForm, montantGNF: Number(refForm.montantGNF), annee: Number(refForm.annee) }).then(r => r.data),
+    mutationFn: () => orgApi.createReference({
+      titre: refForm.projet,
+      client: refForm.client,
+      description: '',
+      secteur: refForm.secteur,
+      dateDebut: new Date(refForm.annee, 0, 1).toISOString(),
+      montantGNF: refForm.montantGNF ? String(refForm.montantGNF) : undefined,
+      technologies: [],
+    }).then(r => r.data),
     onSuccess: () => {
       toast.success('Référence ajoutée')
       qc.invalidateQueries({ queryKey: ['references'] })
-      setRefForm({ client: '', projet: '', montantGNF: '', annee: new Date().getFullYear() })
+      setRefForm({ client: '', projet: '', secteur: 'NUMERIQUE', montantGNF: '', annee: new Date().getFullYear() })
       setShowRefForm(false)
     },
     onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
@@ -384,12 +398,12 @@ export default function ParametresPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 block mb-1">Spécialité</label>
+                <label className="text-xs text-gray-500 block mb-1">Titre / Fonction</label>
                 <input
-                  value={expertForm.specialite}
-                  onChange={e => setExpertForm(f => ({ ...f, specialite: e.target.value }))}
+                  value={expertForm.titre}
+                  onChange={e => setExpertForm(f => ({ ...f, titre: e.target.value }))}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Génie civil, Informatique..."
+                  placeholder="Ingénieur Senior, Consultant..."
                 />
               </div>
               <div>
@@ -404,9 +418,18 @@ export default function ParametresPage() {
                 />
               </div>
             </div>
+            <div className="mb-3">
+              <label className="text-xs text-gray-500 block mb-1">Spécialités (séparées par virgule)</label>
+              <input
+                value={expertForm.specialites}
+                onChange={e => setExpertForm(f => ({ ...f, specialites: e.target.value }))}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Génie civil, Gestion de projet, BTP..."
+              />
+            </div>
             <button
               onClick={() => createExpert.mutate()}
-              disabled={createExpert.isPending || !expertForm.nom || !expertForm.specialite}
+              disabled={createExpert.isPending || !expertForm.nom || !expertForm.specialites}
               className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
             >
               {createExpert.isPending ? 'Ajout...' : 'Ajouter l\'expert'}
@@ -424,7 +447,7 @@ export default function ParametresPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900">{e.prenom} {e.nom}</p>
-                <p className="text-xs text-gray-500">{e.specialite}</p>
+                <p className="text-xs text-gray-500">{e.specialites?.join(', ') || e.titre}</p>
               </div>
               <span className="text-xs text-gray-400 flex-shrink-0">{e.anneesExp} ans</span>
             </div>
@@ -458,7 +481,7 @@ export default function ParametresPage() {
 
         {showRefForm && (
           <div className="mb-4 p-4 bg-gray-50 border rounded-lg">
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
               <div>
                 <label className="text-xs text-gray-500 block mb-1">Client / Maître d&apos;ouvrage</label>
                 <input
@@ -476,6 +499,18 @@ export default function ParametresPage() {
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Construction pont de Kaloum"
                 />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Secteur</label>
+                <select
+                  value={refForm.secteur}
+                  onChange={e => setRefForm(f => ({ ...f, secteur: e.target.value }))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                >
+                  {['NUMERIQUE','SANTE','EDUCATION','TRANSPORT','AGRICULTURE','FINANCE','SECURITE','ENVIRONNEMENT','GOUVERNANCE','INFRASTRUCTURE','ENERGIE','EAU','AUTRE'].map(s => (
+                    <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-xs text-gray-500 block mb-1">Montant (GNF)</label>
@@ -517,7 +552,7 @@ export default function ParametresPage() {
                 <Award className="w-4 h-4 text-green-700" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{r.projet}</p>
+                <p className="text-sm font-medium text-gray-900">{r.titre}</p>
                 <p className="text-xs text-gray-500">{r.client}</p>
               </div>
               <div className="text-right flex-shrink-0">
@@ -526,7 +561,7 @@ export default function ParametresPage() {
                     {(Number(r.montantGNF) / 1_000_000).toFixed(0)}M GNF
                   </p>
                 )}
-                <p className="text-xs text-gray-400">{r.annee}</p>
+                <p className="text-xs text-gray-400">{r.dateDebut ? new Date(r.dateDebut).getFullYear() : ''}</p>
               </div>
             </div>
           ))}

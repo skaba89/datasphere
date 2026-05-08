@@ -27,15 +27,18 @@ export default function AnalyticsPage() {
     queryFn: () => orgApi.dashboard().then(r => r.data),
   })
 
-  const pipelineData = dashboard?.pipeline?.map((p: any) => ({
-    name: p.statut.replace('_', ' '),
-    count: p._count,
-  })) ?? []
+  const STATUS_LABELS: Record<string, string> = {
+    NOUVEAU: 'Nouveau', QUALIFIE: 'Qualifié', EN_COURS: 'En cours',
+    SOUMIS: 'Soumis', REMPORTE: 'Remporté', PERDU: 'Perdu', ARCHIVE: 'Archivé',
+  }
+  const pipelineData = stats?.parStatus
+    ? Object.entries(stats.parStatus).map(([k, v]) => ({ name: STATUS_LABELS[k] ?? k, count: v }))
+    : []
 
   const scoreDistribution = [
-    { name: 'GO (≥65)', value: stats?.goCount ?? 12, color: '#22c55e' },
-    { name: 'MAYBE (50-64)', value: stats?.maybeCount ?? 8, color: '#f59e0b' },
-    { name: 'NO GO (<50)', value: stats?.noGoCount ?? 5, color: '#ef4444' },
+    { name: 'GO (≥65)', value: stats?.goCount ?? 0, color: '#22c55e' },
+    { name: 'MAYBE (50-64)', value: stats?.maybeCount ?? 0, color: '#f59e0b' },
+    { name: 'NO GO (<50)', value: stats?.noGoCount ?? 0, color: '#ef4444' },
   ]
 
   const tendanceMensuelle = [
@@ -66,10 +69,10 @@ export default function AnalyticsPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Valeur pipeline total', value: formatGNF(stats?.valeurTotale ?? 12500000000), sub: 'Montants estimés', color: 'text-orange-600' },
-          { label: 'Score moyen', value: `${stats?.scoreMoyen ?? 67}%`, sub: 'Sur AOs scorés', color: 'text-blue-600' },
-          { label: 'Taux de succès', value: `${stats?.tauxSucces ?? 38}%`, sub: 'AOs remportés', color: 'text-green-600' },
-          { label: 'Dossiers IA générés', value: stats?.dossiersGeneres ?? 47, sub: 'Ce trimestre', color: 'text-purple-600' },
+          { label: 'Valeur pipeline total', value: formatGNF(Number(stats?.valeurTotale ?? 0)), sub: 'Montants estimés', color: 'text-orange-600' },
+          { label: 'Score moyen', value: stats?.scoreMoyen != null ? `${stats.scoreMoyen}/100` : '—', sub: 'Sur AOs scorés', color: 'text-blue-600' },
+          { label: 'Taux de succès', value: `${stats?.tauxSucces ?? 0}%`, sub: 'AOs soumis remportés', color: 'text-green-600' },
+          { label: 'Dossiers IA générés', value: stats?.dossiersGeneres ?? 0, sub: 'Avec contenu généré', color: 'text-purple-600' },
         ].map(kpi => (
           <div key={kpi.label} className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-sm text-gray-500">{kpi.label}</p>
@@ -126,14 +129,7 @@ export default function AnalyticsPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Pipeline par statut</h2>
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={pipelineData.length ? pipelineData : [
-              { name: 'VEILLE', count: 14 },
-              { name: 'ANALYSE', count: 8 },
-              { name: 'QUALIFICATION', count: 6 },
-              { name: 'REDACTION', count: 5 },
-              { name: 'SOUMIS', count: 9 },
-              { name: 'GAGNE', count: 3 },
-            ]}>
+            <BarChart data={pipelineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 12 }} />

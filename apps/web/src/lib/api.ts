@@ -121,6 +121,12 @@ export const orgApi = {
   createExpert: (data: any) => api.post('/organisation/experts', data),
 }
 
+// ── Scraping / Veille ─────────────────────────────────────────────────────────
+export const scrapingApi = {
+  lancer: () => api.post('/scraping/lancer'),
+  sources: () => api.get('/scraping/sources'),
+}
+
 // ── Documents ─────────────────────────────────────────────────────────────────
 export const documentsApi = {
   list: () => api.get('/documents'),

@@ -2,16 +2,15 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { aoApi, scoringApi } from '@/lib/api'
+import { aoApi, scoringApi, scrapingApi } from '@/lib/api'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import {
-  Search, Filter, Plus, Star, Clock, Building2,
-  TrendingUp, RefreshCw, Eye, FileText, ChevronDown
+  Search, Plus, Clock, Building2,
+  TrendingUp, RefreshCw, Eye, FileText, Radio, CheckCircle2
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { clsx } from 'clsx'
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Tous les statuts' },
@@ -73,6 +72,21 @@ export default function AppelsOffresPage() {
     onError: () => toast.error('Erreur lors du calcul du score'),
   })
 
+  const veillerMutation = useMutation({
+    mutationFn: () => scrapingApi.lancer(),
+    onSuccess: (res) => {
+      const resultats: any[] = res.data
+      const total = resultats.reduce((acc, r) => acc + r.nouveaux, 0)
+      const contacts = resultats.reduce((acc, r) => acc + (r.contactsCreés || 0), 0)
+      toast.success(
+        `Veille terminée — ${total} nouveaux AOs${contacts > 0 ? `, ${contacts} contacts créés` : ''}`,
+        { duration: 5000 }
+      )
+      qc.invalidateQueries({ queryKey: ['appels-offres'] })
+    },
+    onError: () => toast.error('Erreur lors de la veille'),
+  })
+
   return (
     <div className="space-y-5">
       {/* En-tête */}
@@ -83,10 +97,24 @@ export default function AppelsOffresPage() {
             {data?.meta?.total ?? 0} opportunités collectées
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors">
-          <Plus className="w-4 h-4" />
-          Ajouter manuellement
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => veillerMutation.mutate()}
+            disabled={veillerMutation.isPending}
+            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-60"
+          >
+            {veillerMutation.isPending ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Radio className="w-4 h-4" />
+            )}
+            {veillerMutation.isPending ? 'Veille en cours...' : 'Lancer la veille'}
+          </button>
+          <button className="inline-flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors">
+            <Plus className="w-4 h-4" />
+            Ajouter
+          </button>
+        </div>
       </div>
 
       {/* Filtres */}

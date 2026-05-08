@@ -8,7 +8,17 @@ import { toast } from 'sonner'
 import {
   ArrowLeft, Zap, FileText, Brain, Calendar, Building2,
   TrendingUp, Users, Clock, CheckCircle2, XCircle, AlertCircle,
+  ChevronDown,
 } from 'lucide-react'
+
+const STATUS_PIPELINE = [
+  { value: 'NOUVEAU',  label: 'Nouveau',   color: 'text-blue-700',   bg: 'bg-blue-100' },
+  { value: 'QUALIFIE', label: 'Qualifié',  color: 'text-purple-700', bg: 'bg-purple-100' },
+  { value: 'EN_COURS', label: 'En cours',  color: 'text-yellow-700', bg: 'bg-yellow-100' },
+  { value: 'SOUMIS',   label: 'Soumis',   color: 'text-orange-700', bg: 'bg-orange-100' },
+  { value: 'REMPORTE', label: 'Remporté',  color: 'text-green-700',  bg: 'bg-green-100' },
+  { value: 'PERDU',    label: 'Perdu',    color: 'text-red-700',    bg: 'bg-red-100' },
+]
 
 const DIMENSIONS_LABELS: Record<string, string> = {
   alignementSectoriel: 'Alignement sectoriel',
@@ -35,7 +45,7 @@ export default function AODetailPage() {
 
   const { data: ao, isLoading } = useQuery({
     queryKey: ['ao', id],
-    queryFn: () => aoApi.get(`/${id}`).then(r => r.data),
+    queryFn: () => aoApi.get(id).then(r => r.data),
   })
 
   const { data: scoring } = useQuery({
@@ -60,12 +70,23 @@ export default function AODetailPage() {
   })
 
   const dossierMutation = useMutation({
-    mutationFn: () => dossiersApi.create({ appelOffreId: id, titre: `Dossier — ${ao?.titre}` }).then(r => r.data),
+    mutationFn: () => dossiersApi.create({ aoId: id, titre: `Dossier — ${ao?.titre}` }).then(r => r.data),
     onSuccess: () => {
-      toast.success('Dossier créé — génération IA en cours')
-      router.push(`/dossiers`)
+      toast.success('Dossier créé avec succès')
+      router.push('/dossiers')
     },
     onError: () => toast.error('Erreur lors de la création du dossier'),
+  })
+
+  const statusMutation = useMutation({
+    mutationFn: (newStatus: string) => aoApi.updateStatus(id, newStatus).then(r => r.data),
+    onSuccess: (_, newStatus) => {
+      const label = STATUS_PIPELINE.find(s => s.value === newStatus)?.label ?? newStatus
+      toast.success(`Statut mis à jour : ${label}`)
+      qc.invalidateQueries({ queryKey: ['ao', id] })
+      qc.invalidateQueries({ queryKey: ['appels-offres'] })
+    },
+    onError: () => toast.error('Erreur lors de la mise à jour du statut'),
   })
 
   if (isLoading) {
@@ -82,10 +103,11 @@ export default function AODetailPage() {
   const score = ao.scoreFinal ?? scoring?.scoreFinal
   const recommandation = score ? scoreRecommandation(score) : null
   const dimensions = scoring?.dimensions ?? []
+  const currentStatusCfg = STATUS_PIPELINE.find(s => s.value === ao.status) ?? STATUS_PIPELINE[0]
 
-  const StatusIcon = recommandation === 'GO' ? CheckCircle2 :
+  const ScoreIcon = recommandation === 'GO' ? CheckCircle2 :
     recommandation === 'MAYBE' ? AlertCircle : XCircle
-  const statusColor = recommandation === 'GO' ? 'text-green-600' :
+  const scoreIconColor = recommandation === 'GO' ? 'text-green-600' :
     recommandation === 'MAYBE' ? 'text-yellow-600' : 'text-red-600'
 
   return (
@@ -103,21 +125,36 @@ export default function AODetailPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
               <span className="text-xs font-medium bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
                 {ao.source}
               </span>
-              <span className="text-xs text-gray-400">{ao.reference}</span>
+              {ao.reference && <span className="text-xs text-gray-400">{ao.reference}</span>}
+
+              {/* Status selector */}
+              <div className="relative">
+                <select
+                  value={ao.status ?? 'NOUVEAU'}
+                  onChange={(e) => statusMutation.mutate(e.target.value)}
+                  disabled={statusMutation.isPending}
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full border-0 cursor-pointer appearance-none pr-6 ${currentStatusCfg.bg} ${currentStatusCfg.color} focus:ring-2 focus:ring-primary-500 outline-none`}
+                >
+                  {STATUS_PIPELINE.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1.5 top-1.5 w-3 h-3 pointer-events-none opacity-60" />
+              </div>
             </div>
             <h1 className="text-xl font-bold text-gray-900">{ao.titre}</h1>
-            <p className="text-gray-500 mt-1">{ao.entitePublique}</p>
+            <p className="text-gray-500 mt-1">{ao.entiteAdj ?? ao.entitePublique}</p>
           </div>
 
           {score && (
             <div className="flex-shrink-0 text-center">
               <div className={`text-4xl font-bold ${scoreColor(score).split(' ')[0]}`}>{score}%</div>
-              <div className={`flex items-center gap-1 justify-center mt-1 text-sm font-medium ${statusColor}`}>
-                <StatusIcon className="w-4 h-4" />
+              <div className={`flex items-center gap-1 justify-center mt-1 text-sm font-medium ${scoreIconColor}`}>
+                <ScoreIcon className="w-4 h-4" />
                 {recommandation}
               </div>
             </div>
@@ -128,7 +165,7 @@ export default function AODetailPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-100">
           <div>
             <p className="text-xs text-gray-400">Valeur estimée</p>
-            <p className="font-semibold text-gray-900 mt-0.5">{formatGNF(ao.montantEstime)}</p>
+            <p className="font-semibold text-gray-900 mt-0.5">{formatGNF(ao.budgetEstimeGNF)}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Secteur</p>
@@ -136,7 +173,7 @@ export default function AODetailPage() {
           </div>
           <div>
             <p className="text-xs text-gray-400">Statut</p>
-            <p className="font-semibold text-gray-900 mt-0.5">{ao.statut?.replace('_', ' ')}</p>
+            <p className="font-semibold text-gray-900 mt-0.5">{currentStatusCfg.label}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Échéance</p>

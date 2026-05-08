@@ -274,14 +274,14 @@ export default function ContactDetailPage() {
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="text-sm font-medium text-gray-900">{typeConfig?.label ?? interaction.type}</span>
                       <span className="text-xs text-gray-400 flex-shrink-0">
-                        {format(new Date(interaction.createdAt), 'dd MMM yyyy HH:mm', { locale: fr })}
+                        {format(new Date(interaction.date ?? interaction.createdAt), 'dd MMM yyyy', { locale: fr })}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">{interaction.description}</p>
-                    {interaction.resultat && (
+                    <p className="text-sm text-gray-600">{interaction.objet || interaction.description}</p>
+                    {(interaction.suivi || interaction.resultat) && (
                       <p className="text-xs text-green-700 mt-1.5 flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" />
-                        {interaction.resultat}
+                        {interaction.suivi || interaction.resultat}
                       </p>
                     )}
                   </div>

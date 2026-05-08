@@ -68,8 +68,17 @@ export class ContactsService {
   async addInteraction(contactId: string, organisationId: string, userId: string, data: any) {
     await this.findOne(contactId, organisationId)
 
+    // Normalise les champs frontend (description/resultat) vers le schéma Prisma
+    const { description, resultat, date, ...rest } = data
     const interaction = await this.prisma.interaction.create({
-      data: { ...data, contactId, userId, date: new Date(data.date) },
+      data: {
+        ...rest,
+        contactId,
+        userId,
+        date: date ? new Date(date) : new Date(),
+        objet: rest.objet ?? description ?? '',
+        suivi: rest.suivi ?? resultat,
+      },
     })
 
     // Recalculer le score de proximité

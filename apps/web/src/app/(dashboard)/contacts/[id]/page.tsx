@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import {
   ArrowLeft, Mail, Phone, Flame, Thermometer, Snowflake,
   MessageSquare, Video, FileText, Users, Send, Tag,
-  Plus, Clock, CheckCircle2, Pencil, X,
+  Plus, Clock, CheckCircle2, Pencil, X, Save,
 } from 'lucide-react'
 
 const INTERACTION_TYPES = [
@@ -45,11 +45,13 @@ export default function ContactDetailPage() {
   const router = useRouter()
   const qc = useQueryClient()
   const [showInteractionForm, setShowInteractionForm] = useState(false)
+  const [editing, setEditing] = useState(false)
   const [interactionForm, setInteractionForm] = useState({
     type: 'REUNION',
     description: '',
     resultat: '',
   })
+  const [editForm, setEditForm] = useState<Record<string, string>>({})
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ['contact', id],
@@ -66,6 +68,33 @@ export default function ContactDetailPage() {
     },
     onError: () => toast.error('Erreur lors de l\'enregistrement'),
   })
+
+  const updateMutation = useMutation({
+    mutationFn: () => contactsApi.update(id, {
+      ...editForm,
+      email: editForm.email ? [editForm.email] : contact?.email ?? [],
+      telephone: editForm.telephone ? [editForm.telephone] : contact?.telephone ?? [],
+    }),
+    onSuccess: () => {
+      toast.success('Contact mis à jour')
+      qc.invalidateQueries({ queryKey: ['contact', id] })
+      setEditing(false)
+    },
+    onError: () => toast.error('Erreur lors de la mise à jour'),
+  })
+
+  const startEdit = () => {
+    setEditForm({
+      prenom: contact?.prenom ?? '',
+      nom: contact?.nom ?? '',
+      titre: contact?.titre ?? '',
+      poste: contact?.poste ?? '',
+      email: contact?.email?.[0] ?? '',
+      telephone: contact?.telephone?.[0] ?? '',
+      notes: contact?.notes ?? '',
+    })
+    setEditing(true)
+  }
 
   if (isLoading) {
     return (
@@ -91,66 +120,127 @@ export default function ContactDetailPage() {
 
       {/* Header */}
       <div className="bg-white rounded-xl border p-6">
-        <div className="flex items-start gap-5">
-          <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700 flex-shrink-0">
-            {initiales}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  {[contact.titre, contact.prenom, contact.nom].filter(Boolean).join(' ')}
-                </h1>
-                {contact.poste && <p className="text-gray-500 mt-0.5">{contact.poste}</p>}
-                {contact.entite && (
-                  <p className="text-sm text-gray-400 mt-0.5">{contact.entite.nom}</p>
+        {!editing ? (
+          <>
+            <div className="flex items-start gap-5">
+              <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700 flex-shrink-0">
+                {initiales}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">
+                      {[contact.titre, contact.prenom, contact.nom].filter(Boolean).join(' ')}
+                    </h1>
+                    {contact.poste && <p className="text-gray-500 mt-0.5">{contact.poste}</p>}
+                    {contact.entite && (
+                      <p className="text-sm text-gray-400 mt-0.5">{contact.entite.nom}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ProximiteLabel score={contact.scoreProximite ?? 0} />
+                    <button
+                      onClick={startEdit}
+                      className="text-gray-400 hover:text-primary-600 p-1.5 rounded-lg hover:bg-primary-50"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 mt-4">
+                  {contact.email?.[0] && (
+                    <a href={`mailto:${contact.email[0]}`} className="flex items-center gap-1.5 text-sm text-primary-600 hover:underline">
+                      <Mail className="w-4 h-4" />{contact.email[0]}
+                    </a>
+                  )}
+                  {contact.telephone?.[0] && (
+                    <a href={`tel:${contact.telephone[0]}`} className="flex items-center gap-1.5 text-sm text-green-600 hover:underline">
+                      <Phone className="w-4 h-4" />{contact.telephone[0]}
+                    </a>
+                  )}
+                </div>
+
+                {contact.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {contact.tags.map((tag: string) => (
+                      <span key={tag} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                        <Tag className="w-2.5 h-2.5" />{tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
-              <ProximiteLabel score={contact.scoreProximite ?? 0} />
             </div>
-
-            {/* Coordonnées */}
-            <div className="flex flex-wrap gap-4 mt-4">
-              {contact.email?.[0] && (
-                <a
-                  href={`mailto:${contact.email[0]}`}
-                  className="flex items-center gap-1.5 text-sm text-primary-600 hover:underline"
-                >
-                  <Mail className="w-4 h-4" />
-                  {contact.email[0]}
-                </a>
-              )}
-              {contact.telephone?.[0] && (
-                <a
-                  href={`tel:${contact.telephone[0]}`}
-                  className="flex items-center gap-1.5 text-sm text-green-600 hover:underline"
-                >
-                  <Phone className="w-4 h-4" />
-                  {contact.telephone[0]}
-                </a>
-              )}
-            </div>
-
-            {/* Tags */}
-            {contact.tags?.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {contact.tags.map((tag: string) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                  >
-                    <Tag className="w-2.5 h-2.5" />
-                    {tag}
-                  </span>
-                ))}
+            {contact.notes && (
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-gray-600 whitespace-pre-line">{contact.notes}</p>
               </div>
             )}
-          </div>
-        </div>
+          </>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900">Modifier le contact</h2>
+              <button onClick={() => setEditing(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-        {contact.notes && (
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-sm text-gray-600 whitespace-pre-line">{contact.notes}</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { key: 'titre', label: 'Titre', type: 'select', options: ['', 'M.', 'Mme', 'Dr', 'Pr', 'DG', 'Ministre'] },
+                { key: 'prenom', label: 'Prénom *', type: 'text' },
+                { key: 'nom', label: 'Nom *', type: 'text' },
+                { key: 'poste', label: 'Poste', type: 'text' },
+                { key: 'email', label: 'Email', type: 'email' },
+                { key: 'telephone', label: 'Téléphone', type: 'tel' },
+              ].map((field) => (
+                <div key={field.key}>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">{field.label}</label>
+                  {field.type === 'select' ? (
+                    <select
+                      value={editForm[field.key] ?? ''}
+                      onChange={(e) => setEditForm(f => ({ ...f, [field.key]: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                    >
+                      {field.options!.map(o => <option key={o} value={o}>{o || '—'}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type}
+                      value={editForm[field.key] ?? ''}
+                      onChange={(e) => setEditForm(f => ({ ...f, [field.key]: e.target.value }))}
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-gray-700 mb-1 block">Notes</label>
+              <textarea
+                value={editForm.notes ?? ''}
+                onChange={(e) => setEditForm(f => ({ ...f, notes: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setEditing(false)} className="px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50">
+                Annuler
+              </button>
+              <button
+                onClick={() => updateMutation.mutate()}
+                disabled={updateMutation.isPending}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {updateMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              </button>
+            </div>
           </div>
         )}
       </div>

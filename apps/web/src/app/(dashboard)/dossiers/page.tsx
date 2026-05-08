@@ -5,10 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { dossiersApi } from '@/lib/api'
 import { joursRestants } from '@/lib/utils'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import {
   FileText, Brain, Send, CheckCircle2, XCircle, Clock,
   AlertTriangle, ChevronRight, X, MessageSquare, Shield,
-  Upload,
+  Upload, Eye,
 } from 'lucide-react'
 
 type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
@@ -337,6 +338,13 @@ export default function DossiersPage() {
 
                 {/* Actions selon statut */}
                 <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+                  <Link
+                    href={`/dossiers/${d.id}`}
+                    className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border hover:bg-gray-50 font-medium transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Ouvrir
+                  </Link>
                   {/* Générer IA */}
                   {['BROUILLON', 'EN_COURS', 'REJETE'].includes(status) && !d.generatedByAI && (
                     <button

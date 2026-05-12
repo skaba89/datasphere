@@ -141,6 +141,8 @@ export const usersApi = {
   list: () => api.get('/users'),
   update: (id: string, data: any) => api.put(`/users/${id}`, data),
   toggleActive: (id: string) => api.patch(`/users/${id}/toggle-active`),
+  inviter: (data: { email: string; prenom: string; nom: string; role: string }) => api.post('/users/inviter', data),
+  delete: (id: string) => api.delete(`/users/${id}`),
 }
 
 // ── Documents ─────────────────────────────────────────────────────────────────

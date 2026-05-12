@@ -37,6 +37,9 @@ export default function ParametresPage() {
   const [showExpertForm, setShowExpertForm] = useState(false)
   const [showRefForm, setShowRefForm] = useState(false)
   const [showDocForm, setShowDocForm] = useState(false)
+  const [showInviteForm, setShowInviteForm] = useState(false)
+  const [inviteForm, setInviteForm] = useState({ email: '', prenom: '', nom: '', role: 'WRITER' })
+  const [inviteResult, setInviteResult] = useState<{ tempPassword: string; email: string } | null>(null)
   const [expertForm, setExpertForm] = useState({ nom: '', prenom: '', titre: '', specialites: '', anneesExp: 5 })
   const [refForm, setRefForm] = useState({ client: '', projet: '', secteur: 'NUMERIQUE', montantGNF: '', annee: new Date().getFullYear() })
   const [docForm, setDocForm] = useState({ type: 'RCCM', nom: '', fileUrl: '', dateExpiration: '' })
@@ -76,6 +79,17 @@ export default function ParametresPage() {
   const { data: teamUsers } = useQuery({
     queryKey: ['team-users'],
     queryFn: () => usersApi.list().then(r => r.data),
+  })
+
+  const inviterMutation = useMutation({
+    mutationFn: () => usersApi.inviter(inviteForm).then(r => r.data),
+    onSuccess: (data: any) => {
+      toast.success(`${inviteForm.prenom} ${inviteForm.nom} invité avec succès`)
+      setInviteResult({ tempPassword: data.tempPassword, email: data.email })
+      qc.invalidateQueries({ queryKey: ['team-users'] })
+      setInviteForm({ email: '', prenom: '', nom: '', role: 'WRITER' })
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur lors de l\'invitation'),
   })
 
   const toggleUserMutation = useMutation({
@@ -372,13 +386,90 @@ export default function ParametresPage() {
       {/* Gestion de l'équipe */}
       {['ADMIN', 'MANAGER'].includes(currentUser?.role ?? '') && (
         <section className="bg-white border rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <Shield className="w-5 h-5 text-gray-500" />
-            <div>
-              <h2 className="font-semibold text-gray-900">Équipe & accès</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Gérez les rôles et accès des membres de votre organisation</p>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <Shield className="w-5 h-5 text-gray-500" />
+              <div>
+                <h2 className="font-semibold text-gray-900">Équipe & accès</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Gérez les rôles et accès des membres de votre organisation</p>
+              </div>
             </div>
+            {currentUser?.role === 'ADMIN' && (
+              <button
+                onClick={() => { setShowInviteForm(v => !v); setInviteResult(null) }}
+                className="flex items-center gap-2 text-sm bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                <Users className="w-3.5 h-3.5" />
+                Inviter
+              </button>
+            )}
           </div>
+
+          {/* Invite form */}
+          {showInviteForm && !inviteResult && (
+            <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+              <p className="text-sm font-medium text-gray-800 mb-3">Inviter un nouveau membre</p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <input
+                  placeholder="Prénom *"
+                  value={inviteForm.prenom}
+                  onChange={e => setInviteForm(f => ({ ...f, prenom: e.target.value }))}
+                  className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white"
+                />
+                <input
+                  placeholder="Nom *"
+                  value={inviteForm.nom}
+                  onChange={e => setInviteForm(f => ({ ...f, nom: e.target.value }))}
+                  className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white"
+                />
+                <input
+                  type="email"
+                  placeholder="Email *"
+                  value={inviteForm.email}
+                  onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))}
+                  className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white col-span-2"
+                />
+                <select
+                  value={inviteForm.role}
+                  onChange={e => setInviteForm(f => ({ ...f, role: e.target.value }))}
+                  className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white"
+                >
+                  <option value="WRITER">Rédacteur</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="VIEWER">Lecteur</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => inviterMutation.mutate()}
+                  disabled={inviterMutation.isPending || !inviteForm.email || !inviteForm.prenom || !inviteForm.nom}
+                  className="px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50 font-medium"
+                >
+                  {inviterMutation.isPending ? 'Invitation...' : 'Créer le compte'}
+                </button>
+                <button onClick={() => setShowInviteForm(false)} className="px-4 py-2 border text-sm rounded-lg hover:bg-gray-50">
+                  Annuler
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Invite success — show temp password */}
+          {inviteResult && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <p className="text-sm font-semibold text-green-800 mb-2">✅ Compte créé avec succès</p>
+              <p className="text-xs text-gray-600 mb-2">Communiquez ces identifiants à la personne invitée :</p>
+              <div className="bg-white rounded-lg p-3 border border-green-200 text-sm font-mono space-y-1">
+                <div><span className="text-gray-500">Email:</span> <strong>{inviteResult.email}</strong></div>
+                <div><span className="text-gray-500">Mot de passe temporaire:</span> <strong>{inviteResult.tempPassword}</strong></div>
+              </div>
+              <p className="text-xs text-orange-600 mt-2">⚠️ La personne doit changer son mot de passe à la première connexion.</p>
+              <button onClick={() => { setInviteResult(null); setShowInviteForm(false) }} className="mt-2 text-xs text-gray-500 underline">
+                Fermer
+              </button>
+            </div>
+          )}
           <div className="space-y-2">
             {(teamUsers ?? []).map((u: any) => (
               <div key={u.id} className="flex items-center gap-3 py-2 border-b last:border-0">
@@ -424,7 +515,7 @@ export default function ParametresPage() {
             )}
           </div>
           <p className="mt-4 text-xs text-gray-400">
-            Pour inviter de nouveaux membres, ils doivent s&apos;enregistrer avec le même RCCM d&apos;organisation.
+            {(teamUsers ?? []).length} membre{(teamUsers ?? []).length > 1 ? 's' : ''} dans l&apos;organisation
           </p>
         </section>
       )}

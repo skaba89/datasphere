@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { hash } from 'bcryptjs'
+import { randomBytes } from 'crypto'
 
 @Injectable()
 export class UsersService {
@@ -43,5 +44,34 @@ export class UsersService {
       where: { id },
       data: { isActive: !(user as any).isActive },
     })
+  }
+
+  async inviter(organisationId: string, inviteurId: string, data: { email: string; prenom: string; nom: string; role: string }) {
+    const existing = await this.prisma.user.findUnique({ where: { email: data.email } })
+    if (existing) throw new ConflictException('Un compte existe déjà avec cet email')
+
+    const tempPassword = randomBytes(8).toString('hex')
+    const passwordHash = await hash(tempPassword, 12)
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        prenom: data.prenom,
+        nom: data.nom,
+        role: data.role as any,
+        passwordHash,
+        organisationId,
+        isActive: true,
+      },
+      select: { id: true, email: true, prenom: true, nom: true, role: true },
+    })
+
+    return { ...user, tempPassword }
+  }
+
+  async deleteUser(id: string, organisationId: string, requesterId: string) {
+    if (id === requesterId) throw new ConflictException('Impossible de supprimer votre propre compte')
+    await this.findOne(id, organisationId)
+    return this.prisma.user.delete({ where: { id } })
   }
 }

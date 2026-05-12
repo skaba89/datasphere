@@ -319,6 +319,51 @@ export class AppelsOffresService {
       .slice(0, 10)
   }
 
+  async exportCsv(organisationId: string, query: QueryAODto): Promise<string> {
+    const where: Prisma.AppelOffreWhereInput = {
+      organisationId,
+      ...(query.status && { status: query.status as AOStatus }),
+      ...(query.secteur && { secteur: query.secteur as any }),
+      ...(query.search && {
+        OR: [
+          { titre: { contains: query.search, mode: 'insensitive' } },
+          { objet: { contains: query.search, mode: 'insensitive' } },
+        ],
+      }),
+    }
+
+    const items = await this.prisma.appelOffre.findMany({
+      where,
+      orderBy: { dateLimite: 'asc' },
+      take: 1000,
+    })
+
+    const escape = (val: any) => {
+      if (val == null) return ''
+      const str = String(val).replace(/"/g, '""')
+      return str.includes(',') || str.includes('"') || str.includes('\n') ? `"${str}"` : str
+    }
+
+    const header = ['Référence', 'Titre', 'Source', 'Entité adj.', 'Secteur', 'Budget estimé (GNF)', 'Score', 'Recommandation', 'Statut', 'Date limite', 'Date publication', 'Créé le'].join(',')
+
+    const rows = items.map(ao => [
+      escape(ao.reference),
+      escape(ao.titre),
+      escape(ao.source),
+      escape(ao.entiteAdj),
+      escape(ao.secteur),
+      ao.budgetEstimeGNF != null ? Number(ao.budgetEstimeGNF) : '',
+      ao.score ?? '',
+      ao.score != null ? (ao.score >= 65 ? 'GO' : ao.score >= 50 ? 'MAYBE' : 'NO GO') : '',
+      escape(ao.status),
+      ao.dateLimite ? ao.dateLimite.toISOString().split('T')[0] : '',
+      ao.datePublication ? ao.datePublication.toISOString().split('T')[0] : '',
+      ao.createdAt.toISOString().split('T')[0],
+    ].join(','))
+
+    return [header, ...rows].join('\r\n')
+  }
+
   async delete(id: string, organisationId: string) {
     await this.findOne(id, organisationId)
     return this.prisma.appelOffre.delete({ where: { id } })

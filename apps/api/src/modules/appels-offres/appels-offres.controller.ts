@@ -1,7 +1,8 @@
 import {
   Controller, Get, Post, Put, Patch, Delete,
-  Param, Body, Query, UseGuards, Request, HttpCode, HttpStatus
+  Param, Body, Query, UseGuards, Request, HttpCode, HttpStatus, Res,
 } from '@nestjs/common'
+import type { Response } from 'express'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { AppelsOffresService } from './appels-offres.service'
@@ -56,6 +57,15 @@ export class AppelsOffresController {
   @ApiOperation({ summary: 'Activité récente de l\'organisation' })
   getActivite(@Request() req: any) {
     return this.service.getActiviteRecente(req.user.organisationId)
+  }
+
+  @Get('export-csv')
+  @ApiOperation({ summary: 'Export CSV des appels d\'offres' })
+  async exportCsv(@Request() req: any, @Query() query: QueryAODto, @Res() res: Response) {
+    const csv = await this.service.exportCsv(req.user.organisationId, query)
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+    res.setHeader('Content-Disposition', `attachment; filename="appels-offres-${new Date().toISOString().split('T')[0]}.csv"`)
+    res.send('﻿' + csv)
   }
 
   @Get(':id')

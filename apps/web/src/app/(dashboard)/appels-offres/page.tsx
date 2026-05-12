@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import {
   Search, Plus, Clock, Building2,
-  TrendingUp, RefreshCw, Eye, FileText, Radio, CheckCircle2, X,
+  TrendingUp, RefreshCw, Eye, FileText, Radio, CheckCircle2, X, Download,
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -280,6 +280,34 @@ export default function AppelsOffresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const params = new URLSearchParams()
+              if (search) params.set('search', search)
+              if (status) params.set('status', status)
+              const token = localStorage.getItem('access_token')
+              const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/appels-offres/export-csv?${params}`
+              const a = document.createElement('a')
+              a.href = url
+              a.setAttribute('download', '')
+              document.body.appendChild(a)
+              // Use fetch to carry auth header
+              fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+                .then(r => r.blob())
+                .then(blob => {
+                  const objUrl = URL.createObjectURL(blob)
+                  a.href = objUrl
+                  a.click()
+                  URL.revokeObjectURL(objUrl)
+                  document.body.removeChild(a)
+                })
+            }}
+            className="inline-flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            title="Exporter en CSV"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
           <button
             onClick={() => veillerMutation.mutate()}
             disabled={veillerMutation.isPending}

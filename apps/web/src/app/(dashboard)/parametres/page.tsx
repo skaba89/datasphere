@@ -28,6 +28,52 @@ const PROVIDER_ICONS: Record<string, string> = {
   gemini:     '🔵',
 }
 
+function MonProfilForm({ currentUser, onSave, saving }: { currentUser: any; onSave: (d: any) => void; saving: boolean }) {
+  const [form, setForm] = useState({
+    prenom: currentUser?.prenom ?? '',
+    nom: currentUser?.nom ?? '',
+    telephone: currentUser?.telephone ?? '',
+  })
+  const hasChanges = form.prenom !== (currentUser?.prenom ?? '') ||
+    form.nom !== (currentUser?.nom ?? '') ||
+    form.telephone !== (currentUser?.telephone ?? '')
+
+  return (
+    <div className="space-y-3 max-w-sm">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-medium text-gray-600 block mb-1">Prénom</label>
+          <input value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-gray-600 block mb-1">Nom</label>
+          <input value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
+            className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none" />
+        </div>
+      </div>
+      <div>
+        <label className="text-xs font-medium text-gray-600 block mb-1">Téléphone</label>
+        <input value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))}
+          placeholder="+224 6XX XXX XXX"
+          className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none" />
+      </div>
+      <div>
+        <label className="text-xs font-medium text-gray-600 block mb-1">Email</label>
+        <input value={currentUser?.email ?? ''} disabled
+          className="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 text-gray-400" />
+      </div>
+      <button
+        onClick={() => onSave(form)}
+        disabled={!hasChanges || saving}
+        className="px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50 font-medium"
+      >
+        {saving ? 'Sauvegarde...' : 'Sauvegarder le profil'}
+      </button>
+    </div>
+  )
+}
+
 export default function ParametresPage() {
   const qc = useQueryClient()
   const { user: currentUser } = useAuthStore()
@@ -217,9 +263,24 @@ export default function ParametresPage() {
     EXPIRE: { label: 'Expiré', icon: AlertTriangle, color: 'text-red-600' },
   }
 
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: any) => usersApi.update(currentUser!.id, data).then(r => r.data),
+    onSuccess: () => toast.success('Profil mis à jour'),
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
   return (
     <div className="space-y-6 max-w-3xl">
       <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
+
+      {/* Mon profil */}
+      <section className="bg-white border rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <Lock className="w-5 h-5 text-gray-500" />
+          <h2 className="font-semibold text-gray-900">Mon profil</h2>
+        </div>
+        <MonProfilForm currentUser={currentUser} onSave={(data) => updateProfileMutation.mutate(data)} saving={updateProfileMutation.isPending} />
+      </section>
 
       {/* Profil entreprise */}
       <section className="bg-white border rounded-xl p-6">

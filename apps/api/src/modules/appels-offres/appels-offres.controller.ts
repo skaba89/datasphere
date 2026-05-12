@@ -34,6 +34,18 @@ export class AppelsOffresController {
     return this.service.getPipeline(req.user.organisationId)
   }
 
+  @Get('tendance')
+  @ApiOperation({ summary: 'Tendance mensuelle sur 6 mois' })
+  getTendance(@Request() req: any) {
+    return this.service.getTendanceMensuelle(req.user.organisationId)
+  }
+
+  @Get('par-secteur')
+  @ApiOperation({ summary: 'Répartition valeur par secteur' })
+  getParSecteur(@Request() req: any) {
+    return this.service.getParSecteur(req.user.organisationId)
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'un appel d\'offres' })
   findOne(@Request() req: any, @Param('id') id: string) {

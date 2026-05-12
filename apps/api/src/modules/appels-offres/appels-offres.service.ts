@@ -194,6 +194,46 @@ export class AppelsOffresService {
     return pipeline
   }
 
+  async getTendanceMensuelle(organisationId: string) {
+    const now = new Date()
+    const mois = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
+      return { year: d.getFullYear(), month: d.getMonth() + 1, label: d.toLocaleString('fr-FR', { month: 'short' }) }
+    })
+
+    const results = await Promise.all(
+      mois.map(async ({ year, month, label }) => {
+        const debut = new Date(year, month - 1, 1)
+        const fin = new Date(year, month, 0, 23, 59, 59)
+        const [aos, dossiers, gagnes] = await Promise.all([
+          this.prisma.appelOffre.count({ where: { organisationId, createdAt: { gte: debut, lte: fin } } }),
+          this.prisma.dossier.count({ where: { organisationId, createdAt: { gte: debut, lte: fin } } }),
+          this.prisma.appelOffre.count({ where: { organisationId, status: 'REMPORTE', decisionDate: { gte: debut, lte: fin } } }),
+        ])
+        return { mois: label, aos, dossiers, gagnes }
+      }),
+    )
+
+    return results
+  }
+
+  async getParSecteur(organisationId: string) {
+    const groups = await this.prisma.appelOffre.groupBy({
+      by: ['secteur'],
+      where: { organisationId, secteur: { not: null } },
+      _sum: { budgetEstimeGNF: true },
+      _count: { secteur: true },
+      orderBy: { _sum: { budgetEstimeGNF: 'desc' } },
+      take: 8,
+    })
+
+    return groups.map(g => ({
+      secteur: g.secteur ?? 'Autre',
+      valeur: Number(g._sum.budgetEstimeGNF ?? 0),
+      count: g._count.secteur,
+    }))
+  }
+
   async delete(id: string, organisationId: string) {
     await this.findOne(id, organisationId)
     return this.prisma.appelOffre.delete({ where: { id } })

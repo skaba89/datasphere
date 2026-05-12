@@ -5,16 +5,10 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
-import { aoApi, orgApi } from '@/lib/api'
+import { aoApi } from '@/lib/api'
 import { formatGNF } from '@/lib/utils'
 
-const COLORS_PIE = ['#f97316', '#3b82f6', '#22c55e', '#a855f7', '#14b8a6', '#f43f5e']
-
-const COULEURS_SCORE = {
-  GO: '#22c55e',
-  MAYBE: '#f59e0b',
-  NO_GO: '#ef4444',
-}
+const COLORS_PIE = ['#f97316', '#3b82f6', '#22c55e', '#a855f7', '#14b8a6', '#f43f5e', '#eab308', '#06b6d4']
 
 export default function AnalyticsPage() {
   const { data: stats } = useQuery({
@@ -22,9 +16,14 @@ export default function AnalyticsPage() {
     queryFn: () => aoApi.stats().then(r => r.data),
   })
 
-  const { data: dashboard } = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: () => orgApi.dashboard().then(r => r.data),
+  const { data: tendance = [] } = useQuery({
+    queryKey: ['ao-tendance'],
+    queryFn: () => aoApi.tendance().then(r => r.data),
+  })
+
+  const { data: secteurs = [] } = useQuery({
+    queryKey: ['ao-secteurs'],
+    queryFn: () => aoApi.parSecteur().then(r => r.data),
   })
 
   const STATUS_LABELS: Record<string, string> = {
@@ -39,24 +38,6 @@ export default function AnalyticsPage() {
     { name: 'GO (≥65)', value: stats?.goCount ?? 0, color: '#22c55e' },
     { name: 'MAYBE (50-64)', value: stats?.maybeCount ?? 0, color: '#f59e0b' },
     { name: 'NO GO (<50)', value: stats?.noGoCount ?? 0, color: '#ef4444' },
-  ]
-
-  const tendanceMensuelle = [
-    { mois: 'Jan', aos: 8, dossiers: 3, gagnes: 1 },
-    { mois: 'Fév', aos: 12, dossiers: 5, gagnes: 2 },
-    { mois: 'Mar', aos: 10, dossiers: 6, gagnes: 2 },
-    { mois: 'Avr', aos: 18, dossiers: 9, gagnes: 3 },
-    { mois: 'Mai', aos: 22, dossiers: 11, gagnes: 4 },
-    { mois: 'Juin', aos: 16, dossiers: 8, gagnes: 3 },
-  ]
-
-  const secteurData = [
-    { secteur: 'Télécoms', valeur: 4200000000 },
-    { secteur: 'Énergie', valeur: 2800000000 },
-    { secteur: 'Éducation', valeur: 1900000000 },
-    { secteur: 'Santé', valeur: 1500000000 },
-    { secteur: 'Finance', valeur: 1200000000 },
-    { secteur: 'Agriculture', valeur: 900000000 },
   ]
 
   return (
@@ -85,12 +66,12 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tendance mensuelle */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Tendance mensuelle</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Tendance mensuelle (6 mois)</h2>
           <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={tendanceMensuelle}>
+            <LineChart data={tendance}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="mois" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="aos" name="AOs détectés" stroke="#3b82f6" strokeWidth={2} dot={false} />
@@ -113,7 +94,7 @@ export default function AnalyticsPage() {
                 outerRadius={100}
                 paddingAngle={4}
                 dataKey="value"
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                label={({ name, percent }) => percent > 0 ? `${name} (${(percent * 100).toFixed(0)}%)` : ''}
                 labelLine={false}
               >
                 {scoreDistribution.map((entry, i) => (
@@ -132,7 +113,7 @@ export default function AnalyticsPage() {
             <BarChart data={pipelineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Tooltip />
               <Bar dataKey="count" name="AOs" radius={[4, 4, 0, 0]}>
                 {COLORS_PIE.map((c, i) => <Cell key={i} fill={c} />)}
@@ -144,15 +125,21 @@ export default function AnalyticsPage() {
         {/* Valeur par secteur */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Valeur des marchés par secteur</h2>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={secteurData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-              <XAxis type="number" tickFormatter={v => `${(v / 1_000_000_000).toFixed(1)} Mrd`} tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="secteur" tick={{ fontSize: 12 }} width={80} />
-              <Tooltip formatter={(v: number) => formatGNF(v)} />
-              <Bar dataKey="valeur" name="Valeur estimée" fill="#f97316" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {secteurs.length > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={secteurs} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis type="number" tickFormatter={v => `${(v / 1_000_000_000).toFixed(1)} Mrd`} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="secteur" tick={{ fontSize: 12 }} width={90} />
+                <Tooltip formatter={(v: number) => formatGNF(v)} />
+                <Bar dataKey="valeur" name="Valeur estimée" fill="#f97316" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+              Aucune donnée secteur disponible
+            </div>
+          )}
         </div>
       </div>
 

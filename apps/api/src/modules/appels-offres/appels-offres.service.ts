@@ -234,6 +234,91 @@ export class AppelsOffresService {
     }))
   }
 
+  async getParSource(organisationId: string) {
+    const sources = await this.prisma.appelOffre.groupBy({
+      by: ['source'],
+      where: { organisationId },
+      _count: { source: true },
+    })
+
+    const results = await Promise.all(
+      sources.map(async (s) => {
+        const [soumis, gagnes] = await Promise.all([
+          this.prisma.appelOffre.count({
+            where: { organisationId, source: s.source, status: { in: ['SOUMIS', 'REMPORTE'] } },
+          }),
+          this.prisma.appelOffre.count({
+            where: { organisationId, source: s.source, status: 'REMPORTE' },
+          }),
+        ])
+        const total = soumis + gagnes > 0 ? soumis : 0
+        return {
+          source: s.source,
+          detectes: s._count.source,
+          soumis: soumis - gagnes,
+          gagnes,
+          taux: soumis > 0 ? Math.round((gagnes / soumis) * 100) : 0,
+        }
+      }),
+    )
+
+    return results.sort((a, b) => b.detectes - a.detectes)
+  }
+
+  async getActiviteRecente(organisationId: string) {
+    const [recentAOs, recentDossiers, recentStatusChanges] = await Promise.all([
+      this.prisma.appelOffre.findMany({
+        where: { organisationId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { id: true, titre: true, source: true, createdAt: true, status: true },
+      }),
+      this.prisma.dossier.findMany({
+        where: { organisationId },
+        orderBy: { updatedAt: 'desc' },
+        take: 5,
+        select: { id: true, titre: true, status: true, updatedAt: true },
+      }),
+      this.prisma.appelOffre.findMany({
+        where: { organisationId, decisionDate: { not: null } },
+        orderBy: { decisionDate: 'desc' },
+        take: 5,
+        select: { id: true, titre: true, status: true, decisionDate: true },
+      }),
+    ])
+
+    const activites = [
+      ...recentAOs.map(ao => ({
+        id: `ao-new-${ao.id}`,
+        type: 'ao_nouveau' as const,
+        titre: ao.titre,
+        detail: `Détecté via ${ao.source}`,
+        date: ao.createdAt,
+        href: `/appels-offres/${ao.id}`,
+      })),
+      ...recentDossiers.map(d => ({
+        id: `dossier-${d.id}`,
+        type: 'dossier_update' as const,
+        titre: d.titre,
+        detail: `Statut : ${d.status}`,
+        date: d.updatedAt,
+        href: `/dossiers/${d.id}`,
+      })),
+      ...recentStatusChanges.map(ao => ({
+        id: `ao-status-${ao.id}`,
+        type: 'ao_status' as const,
+        titre: ao.titre,
+        detail: `Statut mis à jour : ${ao.status}`,
+        date: ao.decisionDate!,
+        href: `/appels-offres/${ao.id}`,
+      })),
+    ]
+
+    return activites
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10)
+  }
+
   async delete(id: string, organisationId: string) {
     await this.findOne(id, organisationId)
     return this.prisma.appelOffre.delete({ where: { id } })

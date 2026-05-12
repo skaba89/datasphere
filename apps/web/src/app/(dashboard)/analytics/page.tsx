@@ -26,6 +26,11 @@ export default function AnalyticsPage() {
     queryFn: () => aoApi.parSecteur().then(r => r.data),
   })
 
+  const { data: sourcesData = [] } = useQuery({
+    queryKey: ['ao-sources'],
+    queryFn: () => aoApi.parSource().then(r => r.data),
+  })
+
   const STATUS_LABELS: Record<string, string> = {
     NOUVEAU: 'Nouveau', QUALIFIE: 'Qualifié', EN_COURS: 'En cours',
     SOUMIS: 'Soumis', REMPORTE: 'Remporté', PERDU: 'Perdu', ARCHIVE: 'Archivé',
@@ -146,42 +151,40 @@ export default function AnalyticsPage() {
       {/* Table sources AOs */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-4">Performance par source de veille</h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-2 font-medium text-gray-500">Source</th>
-              <th className="text-right py-2 font-medium text-gray-500">AOs détectés</th>
-              <th className="text-right py-2 font-medium text-gray-500">Soumis</th>
-              <th className="text-right py-2 font-medium text-gray-500">Gagnés</th>
-              <th className="text-right py-2 font-medium text-gray-500">Taux succès</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { source: 'TELEMO', detectes: 28, soumis: 12, gagnes: 5, taux: 42 },
-              { source: 'ARMP', detectes: 19, soumis: 8, gagnes: 3, taux: 38 },
-              { source: 'Banque Mondiale', detectes: 14, soumis: 6, gagnes: 2, taux: 33 },
-              { source: 'JAO Guinée', detectes: 11, soumis: 4, gagnes: 2, taux: 50 },
-              { source: 'BAD', detectes: 8, soumis: 3, gagnes: 1, taux: 33 },
-            ].map(row => (
-              <tr key={row.source} className="border-b border-gray-50 hover:bg-gray-50">
-                <td className="py-3 font-medium text-gray-900">{row.source}</td>
-                <td className="py-3 text-right text-gray-600">{row.detectes}</td>
-                <td className="py-3 text-right text-gray-600">{row.soumis}</td>
-                <td className="py-3 text-right text-green-600 font-medium">{row.gagnes}</td>
-                <td className="py-3 text-right">
-                  <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
-                    row.taux >= 45 ? 'bg-green-100 text-green-700' :
-                    row.taux >= 35 ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {row.taux}%
-                  </span>
-                </td>
+        {sourcesData.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-8">Aucune donnée source disponible</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-2 font-medium text-gray-500">Source</th>
+                <th className="text-right py-2 font-medium text-gray-500">AOs détectés</th>
+                <th className="text-right py-2 font-medium text-gray-500">Soumis</th>
+                <th className="text-right py-2 font-medium text-gray-500">Gagnés</th>
+                <th className="text-right py-2 font-medium text-gray-500">Taux succès</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sourcesData.map((row: any) => (
+                <tr key={row.source} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="py-3 font-medium text-gray-900">{row.source}</td>
+                  <td className="py-3 text-right text-gray-600">{row.detectes}</td>
+                  <td className="py-3 text-right text-gray-600">{row.soumis}</td>
+                  <td className="py-3 text-right text-green-600 font-medium">{row.gagnes}</td>
+                  <td className="py-3 text-right">
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                      row.taux >= 45 ? 'bg-green-100 text-green-700' :
+                      row.taux >= 35 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {row.taux}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )

@@ -46,6 +46,18 @@ export class AppelsOffresController {
     return this.service.getParSecteur(req.user.organisationId)
   }
 
+  @Get('par-source')
+  @ApiOperation({ summary: 'Performance par source de veille' })
+  getParSource(@Request() req: any) {
+    return this.service.getParSource(req.user.organisationId)
+  }
+
+  @Get('activite')
+  @ApiOperation({ summary: 'Activité récente de l\'organisation' })
+  getActivite(@Request() req: any) {
+    return this.service.getActiviteRecente(req.user.organisationId)
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'un appel d\'offres' })
   findOne(@Request() req: any, @Param('id') id: string) {

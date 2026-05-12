@@ -8,12 +8,13 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Brain, LayoutDashboard, FileSearch, Users, FileText,
   Lightbulb, Settings, LogOut, Bell, User, BarChart3,
-  AlertTriangle, Clock, Shield, X, Radio, Kanban,
+  AlertTriangle, Clock, Shield, X, Radio, Kanban, Search,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { authApi, aoApi, dossiersApi } from '@/lib/api'
 import { toast } from 'sonner'
 import { clsx } from 'clsx'
+import { CommandPalette } from '@/components/CommandPalette'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
@@ -163,6 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <CommandPalette />
       {/* Sidebar */}
       <aside className="w-64 flex-shrink-0 bg-white border-r flex flex-col">
         {/* Logo */}
@@ -238,6 +240,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {[...navigation].reverse().find((n) => pathname.startsWith(n.href))?.name || 'GuineaTender AI'}
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+              className="hidden sm:flex items-center gap-2 text-xs text-gray-400 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Rechercher...
+              <kbd className="ml-1 border border-gray-200 rounded px-1 text-[10px]">⌘K</kbd>
+            </button>
             <NotificationsBell />
           </div>
         </header>

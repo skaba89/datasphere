@@ -147,6 +147,14 @@ export const usersApi = {
   delete: (id: string) => api.delete(`/users/${id}`),
 }
 
+// ── Notifications / Alertes ───────────────────────────────────────────────────
+export const notifApi = {
+  list: (lue?: boolean) => api.get('/notifications', { params: lue !== undefined ? { lue } : {} }),
+  count: () => api.get('/notifications/count'),
+  marquerLue: (id: string) => api.patch(`/notifications/${id}/lire`),
+  marquerToutLu: () => api.patch('/notifications/lire-tout'),
+}
+
 // ── Documents ─────────────────────────────────────────────────────────────────
 export const documentsApi = {
   list: () => api.get('/documents'),

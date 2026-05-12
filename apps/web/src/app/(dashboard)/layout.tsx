@@ -25,6 +25,7 @@ const navigation = [
   { name: 'Dossiers', href: '/dossiers', icon: FileText },
   { name: 'Solutions', href: '/solutions', icon: Lightbulb },
   { name: 'Analytiques', href: '/analytics', icon: BarChart3 },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
   { name: 'Paramètres', href: '/parametres', icon: Settings },
 ]
 

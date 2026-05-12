@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { orgApi, documentsApi, aiApi, usersApi } from '@/lib/api'
+import { orgApi, documentsApi, aiApi, usersApi, authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 import {
   Building2, FileCheck, CreditCard, AlertTriangle,
   CheckCircle2, Clock, Brain, ChevronDown, Zap,
-  Users, Award, Plus, X, UserCheck, UserX, Shield,
+  Users, Award, Plus, X, UserCheck, UserX, Shield, Lock,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -34,6 +34,17 @@ export default function ParametresPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null)
   const [selectedHeavy, setSelectedHeavy] = useState('')
   const [selectedLight, setSelectedLight] = useState('')
+  const [pwForm, setPwForm] = useState({ ancien: '', nouveau: '', confirm: '' })
+
+  const changePwMutation = useMutation({
+    mutationFn: () => authApi.changePassword(pwForm.ancien, pwForm.nouveau).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Mot de passe modifié avec succès')
+      setPwForm({ ancien: '', nouveau: '', confirm: '' })
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
+  })
+
   const [showExpertForm, setShowExpertForm] = useState(false)
   const [showRefForm, setShowRefForm] = useState(false)
   const [showDocForm, setShowDocForm] = useState(false)
@@ -379,6 +390,56 @@ export default function ParametresPage() {
           </button>
           <button className="px-4 py-2 border text-sm rounded-lg hover:bg-gray-50">
             Payer par Orange Money
+          </button>
+        </div>
+      </section>
+
+      {/* Sécurité — changer mot de passe */}
+      <section className="bg-white border rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <Lock className="w-5 h-5 text-gray-500" />
+          <div>
+            <h2 className="font-semibold text-gray-900">Sécurité</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Modifiez votre mot de passe</p>
+          </div>
+        </div>
+        <div className="max-w-sm space-y-3">
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Mot de passe actuel</label>
+            <input
+              type="password"
+              value={pwForm.ancien}
+              onChange={e => setPwForm(f => ({ ...f, ancien: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Nouveau mot de passe</label>
+            <input
+              type="password"
+              value={pwForm.nouveau}
+              onChange={e => setPwForm(f => ({ ...f, nouveau: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Confirmer le nouveau mot de passe</label>
+            <input
+              type="password"
+              value={pwForm.confirm}
+              onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+            />
+          </div>
+          {pwForm.nouveau && pwForm.confirm && pwForm.nouveau !== pwForm.confirm && (
+            <p className="text-xs text-red-600">Les mots de passe ne correspondent pas</p>
+          )}
+          <button
+            onClick={() => changePwMutation.mutate()}
+            disabled={changePwMutation.isPending || !pwForm.ancien || !pwForm.nouveau || pwForm.nouveau !== pwForm.confirm}
+            className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 font-medium"
+          >
+            {changePwMutation.isPending ? 'Modification...' : 'Changer le mot de passe'}
           </button>
         </div>
       </section>

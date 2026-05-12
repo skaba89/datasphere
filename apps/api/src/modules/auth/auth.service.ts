@@ -120,6 +120,18 @@ export class AuthService {
     })
   }
 
+  async changePassword(userId: string, ancienMotDePasse: string, nouveauMotDePasse: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new UnauthorizedException()
+
+    const valid = await compare(ancienMotDePasse, user.passwordHash)
+    if (!valid) throw new UnauthorizedException('Mot de passe actuel incorrect')
+
+    const newHash = await hash(nouveauMotDePasse, 12)
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: newHash } })
+    return { message: 'Mot de passe modifié avec succès' }
+  }
+
   private async generateTokens(userId: string, email: string, organisationId: string, role: string) {
     const payload = { sub: userId, email, organisationId, role }
     const accessToken = this.jwt.sign(payload)

@@ -41,6 +41,8 @@ export const authApi = {
   register: (data: any) => api.post('/auth/register', data),
   me: () => api.get('/auth/me'),
   logout: (refreshToken: string) => api.post('/auth/logout', { refreshToken }),
+  changePassword: (ancienMotDePasse: string, nouveauMotDePasse: string) =>
+    api.post('/auth/change-password', { ancienMotDePasse, nouveauMotDePasse }),
 }
 
 // ── Appels d'Offres ──────────────────────────────────────────────────────────

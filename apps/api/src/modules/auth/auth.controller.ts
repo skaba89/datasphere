@@ -49,4 +49,16 @@ export class AuthController {
   async me(@Request() req: any) {
     return req.user
   }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Changer son mot de passe' })
+  async changePassword(
+    @Request() req: any,
+    @Body() body: { ancienMotDePasse: string; nouveauMotDePasse: string },
+  ) {
+    return this.authService.changePassword(req.user.id, body.ancienMotDePasse, body.nouveauMotDePasse)
+  }
 }

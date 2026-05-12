@@ -11,7 +11,7 @@ import {
   AlertTriangle, Clock, Shield, X, Radio, Kanban, Search,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
-import { authApi, aoApi, dossiersApi } from '@/lib/api'
+import { authApi, aoApi, dossiersApi, notifApi } from '@/lib/api'
 import { toast } from 'sonner'
 import { clsx } from 'clsx'
 import { CommandPalette } from '@/components/CommandPalette'
@@ -32,6 +32,13 @@ const navigation = [
 function NotificationsBell() {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  const { data: notifCount } = useQuery({
+    queryKey: ['notif-count'],
+    queryFn: () => notifApi.count().then(r => r.data.count),
+    refetchInterval: 30_000,
+    initialData: 0,
+  })
 
   const { data: aoData } = useQuery({
     queryKey: ['ao-notifs'],
@@ -91,7 +98,7 @@ function NotificationsBell() {
     })),
   ]
 
-  const count = alertes.length
+  const totalCount = Math.max(alertes.length, notifCount as number)
 
   return (
     <div ref={ref} className="relative">
@@ -100,9 +107,9 @@ function NotificationsBell() {
         className="relative text-gray-500 hover:text-gray-700 p-1"
       >
         <Bell className="w-5 h-5" />
-        {count > 0 && (
+        {totalCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-            {count > 9 ? '9+' : count}
+            {totalCount > 9 ? '9+' : totalCount}
           </span>
         )}
       </button>
@@ -111,7 +118,12 @@ function NotificationsBell() {
         <div className="absolute right-0 top-9 w-80 bg-white rounded-xl border shadow-lg z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <span className="text-sm font-semibold text-gray-900">Alertes</span>
-            <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-gray-400" /></button>
+            <div className="flex items-center gap-2">
+              <Link href="/notifications" onClick={() => setOpen(false)} className="text-xs text-orange-600 hover:underline">
+                Voir tout
+              </Link>
+              <button onClick={() => setOpen(false)}><X className="w-4 h-4 text-gray-400" /></button>
+            </div>
           </div>
           {alertes.length === 0 ? (
             <div className="text-center py-8 text-gray-400 text-sm">

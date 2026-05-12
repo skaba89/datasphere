@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Brain, LayoutDashboard, FileSearch, Users, FileText,
   Lightbulb, Settings, LogOut, Bell, User, BarChart3,
-  AlertTriangle, Clock, Shield, X,
+  AlertTriangle, Clock, Shield, X, Radio,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { authApi, aoApi, dossiersApi } from '@/lib/api'
@@ -17,6 +17,7 @@ import { clsx } from 'clsx'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Veille', href: '/veille', icon: Radio },
   { name: 'Appels d\'offres', href: '/appels-offres', icon: FileSearch },
   { name: 'Contacts', href: '/contacts', icon: Users },
   { name: 'Dossiers', href: '/dossiers', icon: FileText },

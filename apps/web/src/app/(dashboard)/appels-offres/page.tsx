@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { aoApi, scoringApi, scrapingApi } from '@/lib/api'
 import { format } from 'date-fns'
@@ -226,10 +227,16 @@ function JoursRestants({ dateLimite }: { dateLimite: string }) {
 
 export default function AppelsOffresPage() {
   const qc = useQueryClient()
+  const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(() => searchParams.get('status') ?? '')
   const [page, setPage] = useState(1)
   const [showAOModal, setShowAOModal] = useState(false)
+
+  useEffect(() => {
+    const s = searchParams.get('status')
+    if (s) setStatus(s)
+  }, [searchParams])
 
   const { data, isLoading } = useQuery({
     queryKey: ['appels-offres', { search, status, page }],

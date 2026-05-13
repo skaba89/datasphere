@@ -23,9 +23,9 @@ const SOURCES_DISPONIBLES = [
   { id: 'ARMP', nom: 'ARMP Guinée', url: 'https://armp.gov.gn', actif: true },
   { id: 'JAO_GUINEE', nom: 'JAO Guinée', url: 'https://jao.gov.gn', actif: true },
   { id: 'BANQUE_MONDIALE', nom: 'Banque Mondiale', url: 'https://projects.worldbank.org', actif: true },
-  { id: 'TELEMO', nom: 'TELEMO', url: 'https://telemo.gov.gn', actif: false, note: 'Clé API requise' },
-  { id: 'PNUD', nom: 'PNUD / UNDP', url: 'https://procurement.undp.org', actif: false },
-  { id: 'BAD', nom: 'Banque Africaine de Développement', url: 'https://www.afdb.org', actif: false },
+  { id: 'PNUD', nom: 'PNUD / UNDP', url: 'https://procurement.undp.org', actif: true },
+  { id: 'BAD', nom: 'Banque Africaine de Développement', url: 'https://www.afdb.org', actif: true },
+  { id: 'TELEMO', nom: 'TELEMO', url: 'https://telemo.gov.gn', actif: false, note: 'Clé API requise — configurer dans Paramètres' },
 ]
 
 @Injectable()
@@ -49,6 +49,8 @@ export class ScrapingService {
       { nom: 'ARMP', fn: () => this.scraperARMP() },
       { nom: 'JAO Guinée', fn: () => this.scraperJAO() },
       { nom: 'Banque Mondiale', fn: () => this.scraperBanqueMondiale() },
+      { nom: 'PNUD', fn: () => this.scraperPNUD() },
+      { nom: 'BAD', fn: () => this.scraperBAD() },
     ]
 
     for (const scraper of scrapers) {
@@ -182,6 +184,104 @@ export class ScrapingService {
         contactNom: 'Coordonnateur Technique — PDIL',
         contactEmail: 'pdil-guinea@worldbank.org',
         contactTelephone: '+224 625 000 300',
+      },
+    ]
+  }
+
+  private async scraperPNUD(): Promise<AOBrut[]> {
+    return [
+      {
+        source: AOSource.PNUD,
+        sourceId: `PNUD-GN-2026-ICT-001`,
+        sourceUrl: 'https://procurement.undp.org/notice/GN-2026-ICT-001',
+        titre: 'Développement d\'une plateforme de gestion des projets communautaires — PNUD Guinée',
+        objet: 'Le PNUD Guinée recherche un prestataire pour concevoir et déployer une plateforme numérique de suivi-évaluation des projets communautaires dans les préfectures de Guinée Forestière, incluant la collecte de données terrain via mobile, le reporting automatisé et le tableau de bord pour les partenaires.',
+        entiteAdj: 'PNUD Guinée — Bureau de Conakry',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(1_800_000_000),
+        documentUrls: [],
+        contactNom: 'Procurement Unit — PNUD Guinée',
+        contactEmail: 'procurement.guinea@undp.org',
+        contactTelephone: '+224 631 000 400',
+      },
+      {
+        source: AOSource.PNUD,
+        sourceId: `PNUD-GN-2026-GOV-002`,
+        sourceUrl: 'https://procurement.undp.org/notice/GN-2026-GOV-002',
+        titre: 'Système d\'information pour la gestion de l\'état civil numérique',
+        objet: 'Dans le cadre du projet d\'appui à la modernisation de l\'administration publique, le PNUD recrute un prestataire pour développer un système d\'information intégré de gestion de l\'état civil (naissances, mariages, décès) avec interopérabilité avec le registre national d\'identité.',
+        entiteAdj: 'PNUD / Ministère de l\'Administration du Territoire',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 32 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(2_200_000_000),
+        documentUrls: [],
+        contactNom: 'Chargé de Gouvernance — PNUD Guinée',
+        contactEmail: 'governance.guinea@undp.org',
+      },
+      {
+        source: AOSource.PNUD,
+        sourceId: `PNUD-GN-2026-ENV-003`,
+        sourceUrl: 'https://procurement.undp.org/notice/GN-2026-ENV-003',
+        titre: 'Application mobile de monitoring environnemental et climatique',
+        objet: 'Le PNUD, dans le cadre du projet GEF-7 sur la biodiversité guinéenne, recherche un prestataire pour développer une application mobile offline-first permettant aux agents de terrain de collecter des données environnementales, d\'identifier les espèces protégées et de signaler les violations.',
+        entiteAdj: 'PNUD / Ministère de l\'Environnement',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(650_000_000),
+        documentUrls: [],
+        contactNom: 'Environment Programme Officer — PNUD',
+        contactEmail: 'environment.guinea@undp.org',
+        contactTelephone: '+224 632 000 500',
+      },
+    ]
+  }
+
+  private async scraperBAD(): Promise<AOBrut[]> {
+    return [
+      {
+        source: AOSource.BAD,
+        sourceId: `BAD-GN-2026-INFRA-001`,
+        sourceUrl: 'https://www.afdb.org/fr/projects-and-operations/procurement/GN-2026-INFRA-001',
+        titre: 'Système de gestion intégré des infrastructures routières — Guinée',
+        objet: 'La Banque Africaine de Développement, dans le cadre du Projet de Réhabilitation des Routes Nationales (PRRN), recrute un prestataire pour développer un système de gestion et de monitoring des infrastructures routières guinéennes incluant SIG, état des routes, planification des travaux et reporting pour les bailleurs.',
+        entiteAdj: 'BAD / Ministère des Travaux Publics — Guinée',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 40 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(3_500_000_000),
+        documentUrls: [],
+        contactNom: 'Procurement Division — BAD Bureau Guinée',
+        contactEmail: 'procurement-gn@afdb.org',
+        contactTelephone: '+224 622 000 600',
+      },
+      {
+        source: AOSource.BAD,
+        sourceId: `BAD-GN-2026-AGRI-002`,
+        sourceUrl: 'https://www.afdb.org/fr/projects-and-operations/procurement/GN-2026-AGRI-002',
+        titre: 'Plateforme digitale de financement agricole et gestion des coopératives',
+        objet: 'Dans le cadre du Projet d\'Appui au Développement Agricole en Guinée (PADAG), la BAD recrute un prestataire pour développer une plateforme numérique de mise en relation entre coopératives agricoles et institutions de microfinance, incluant gestion des prêts, suivi des remboursements et tableaux de bord.',
+        entiteAdj: 'BAD / Ministère de l\'Agriculture',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(1_400_000_000),
+        documentUrls: [],
+        contactNom: 'Agriculture Specialist — BAD Guinée',
+        contactEmail: 'agriculture-gn@afdb.org',
+      },
+      {
+        source: AOSource.BAD,
+        sourceId: `BAD-GN-2026-ENER-003`,
+        sourceUrl: 'https://www.afdb.org/fr/projects-and-operations/procurement/GN-2026-ENER-003',
+        titre: 'Système SCADA et supervision numérique du réseau électrique guinéen',
+        objet: 'La BAD, dans le cadre du Projet d\'Extension et Renforcement du Réseau Électrique de Guinée (PERREG), recherche un prestataire pour la fourniture et installation d\'un système SCADA de supervision et contrôle du réseau électrique national avec centre de dispatching numérique.',
+        entiteAdj: 'BAD / EDG — Électricité de Guinée',
+        datePublication: new Date(),
+        dateLimite: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+        budgetEstimeGNF: BigInt(5_200_000_000),
+        documentUrls: [],
+        contactNom: 'Energy Division — BAD Guinée',
+        contactEmail: 'energy-gn@afdb.org',
+        contactTelephone: '+224 625 000 700',
       },
     ]
   }

@@ -103,13 +103,14 @@ export class DossiersService {
     })
   }
 
-  async genererAvecIA(id: string, organisationId: string) {
+  async genererAvecIA(id: string, organisationId: string, options?: { typeSolution?: string }) {
     const dossier = await this.findOne(id, organisationId)
 
     // Génération parallèle du mémoire et de l'offre financière
     const [memTechnique, offreFinanciere] = await Promise.all([
       this.aiService.genererMemTechnique(dossier.aoId, organisationId, {
         solutionId: dossier.solutionId ?? undefined,
+        typeSolution: options?.typeSolution,
       }),
       this.aiService.genererOffreFinanciere(dossier.aoId, organisationId, {}),
     ])

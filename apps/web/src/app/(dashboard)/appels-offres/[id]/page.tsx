@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import {
   ArrowLeft, Zap, FileText, Brain, Calendar, Building2,
   TrendingUp, Users, Clock, CheckCircle2, XCircle, AlertCircle,
-  ChevronDown,
+  ChevronDown, Download, ExternalLink, Phone, Mail,
 } from 'lucide-react'
 
 const STATUS_PIPELINE = [
@@ -214,6 +214,99 @@ export default function AODetailPage() {
           Résumé IA
         </button>
       </div>
+
+      {/* Documents source + Contact adjudicateur */}
+      {(ao.documentUrls?.length > 0 || ao.entiteAdj || ao.sourceUrl) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Documents téléchargeables */}
+          {ao.documentUrls?.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Download className="w-4 h-4 text-blue-500" />
+                Documents source ({ao.documentUrls.length})
+              </h2>
+              <ul className="space-y-2">
+                {ao.documentUrls.map((url: string, i: number) => {
+                  const label = url.split('/').pop()?.split('?')[0] || `Document ${i + 1}`
+                  return (
+                    <li key={i}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline truncate"
+                      >
+                        <Download className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{decodeURIComponent(label)}</span>
+                        <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
+
+          {/* Contact adjudicateur */}
+          {(ao.entiteAdj || ao.sourceUrl) && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-orange-500" />
+                Contact adjudicateur
+              </h2>
+              <div className="space-y-3">
+                {ao.entiteAdj && (
+                  <div className="flex items-start gap-3">
+                    <Building2 className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-400">Entité adjudicatrice</p>
+                      <p className="text-sm font-medium text-gray-900">{ao.entiteAdj}</p>
+                    </div>
+                  </div>
+                )}
+                {ao.entitePublique && ao.entitePublique !== ao.entiteAdj && (
+                  <div className="flex items-start gap-3">
+                    <Users className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-400">Entité publique</p>
+                      <p className="text-sm text-gray-700">{ao.entitePublique}</p>
+                    </div>
+                  </div>
+                )}
+                {ao.contactEmail && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <a href={`mailto:${ao.contactEmail}`} className="text-sm text-blue-600 hover:underline">
+                      {ao.contactEmail}
+                    </a>
+                  </div>
+                )}
+                {ao.contactTel && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <a href={`tel:${ao.contactTel}`} className="text-sm text-blue-600 hover:underline">
+                      {ao.contactTel}
+                    </a>
+                  </div>
+                )}
+                {ao.sourceUrl && (
+                  <div className="mt-2 pt-3 border-t border-gray-100">
+                    <a
+                      href={ao.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-800 font-medium hover:underline"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Voir l&apos;annonce officielle
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Scoring Dimensions */}

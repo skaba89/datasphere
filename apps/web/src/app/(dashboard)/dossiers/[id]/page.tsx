@@ -282,12 +282,21 @@ function ValidationModal({ dossierId, titre, mode, onClose }: {
   )
 }
 
+const TYPE_SOLUTION_OPTIONS = [
+  { value: '',             label: 'Type de solution (automatique)' },
+  { value: 'SAAS',         label: 'SaaS — Cloud / Abonnement' },
+  { value: 'WEB',          label: 'Web — Application web / PWA' },
+  { value: 'SYSTEME_INFO', label: "SI — Système d'information / ERP" },
+  { value: 'IT_INFRA',     label: 'IT — Infrastructure / Réseau' },
+]
+
 export default function DossierDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState<Tab>('mem')
   const [modal, setModal] = useState<'valider' | 'rejeter' | 'soumettre_validation' | 'soumettre_final' | null>(null)
+  const [typeSolution, setTypeSolution] = useState('')
   const { user } = useAuthStore()
   const userRole = user?.role ?? 'WRITER'
 
@@ -303,7 +312,7 @@ export default function DossierDetailPage() {
   })
 
   const genererMutation = useMutation({
-    mutationFn: () => dossiersApi.genererIA(id),
+    mutationFn: () => dossiersApi.genererIA(id, typeSolution ? { typeSolution } : undefined),
     onSuccess: () => {
       toast.success('Dossier généré par IA !')
       qc.invalidateQueries({ queryKey: ['dossier', id] })
@@ -460,16 +469,27 @@ export default function DossierDetailPage() {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {['BROUILLON', 'EN_COURS', 'REJETE'].includes(status) && !dossier.generatedByAI && (
-          <button
-            onClick={() => genererMutation.mutate()}
-            disabled={genererMutation.isPending}
-            className="flex items-center gap-2 text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 font-medium"
-          >
-            <Brain className="w-4 h-4" />
-            {genererMutation.isPending ? 'Génération IA...' : 'Générer avec IA'}
-          </button>
+          <>
+            <select
+              value={typeSolution}
+              onChange={(e) => setTypeSolution(e.target.value)}
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+            >
+              {TYPE_SOLUTION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => genererMutation.mutate()}
+              disabled={genererMutation.isPending}
+              className="flex items-center gap-2 text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 font-medium"
+            >
+              <Brain className="w-4 h-4" />
+              {genererMutation.isPending ? 'Génération IA...' : 'Générer avec IA'}
+            </button>
+          </>
         )}
 
         {['BROUILLON', 'EN_COURS', 'REJETE'].includes(status) && (

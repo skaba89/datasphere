@@ -8,6 +8,7 @@ import { AiProviderName, DEFAULT_MODELS } from './providers/ai-provider.interfac
 
 class GenererMemTechniqueDto {
   @IsOptional() @IsString() solutionId?: string
+  @IsOptional() @IsString() typeSolution?: string
 }
 
 class GenererOffreFinanciereDto {

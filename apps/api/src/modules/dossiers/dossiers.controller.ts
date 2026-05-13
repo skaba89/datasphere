@@ -36,8 +36,8 @@ export class DossiersController {
 
   @Post(':id/generer-ia')
   @ApiOperation({ summary: 'Générer le dossier complet avec IA (mémoire + offre financière)' })
-  genererAvecIA(@Request() req: any, @Param('id') id: string) {
-    return this.service.genererAvecIA(id, req.user.organisationId)
+  genererAvecIA(@Request() req: any, @Param('id') id: string, @Body() body: { typeSolution?: string }) {
+    return this.service.genererAvecIA(id, req.user.organisationId, body)
   }
 
   // ── Workflow de validation ──────────────────────────────────────────────────

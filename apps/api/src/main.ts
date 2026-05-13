@@ -6,6 +6,11 @@ import helmet from 'helmet'
 import * as cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 
+// BigInt n'est pas sérialisable en JSON nativement — on le convertit en string
+;(BigInt.prototype as any).toJSON = function () {
+  return this.toString()
+}
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
   const app = await NestFactory.create(AppModule, {

@@ -43,9 +43,10 @@ export default function AODetailPage() {
   const router = useRouter()
   const qc = useQueryClient()
 
-  const { data: ao, isLoading } = useQuery({
+  const { data: ao, isLoading, isError } = useQuery({
     queryKey: ['ao', id],
     queryFn: () => aoApi.get(id).then(r => r.data),
+    retry: 1,
   })
 
   const { data: scoring } = useQuery({
@@ -103,7 +104,21 @@ export default function AODetailPage() {
     )
   }
 
-  if (!ao) return null
+  if (isError || !ao) {
+    return (
+      <div className="max-w-xl mx-auto mt-16 text-center space-y-4">
+        <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
+        <h2 className="text-lg font-semibold text-gray-800">Impossible de charger cet appel d&apos;offres</h2>
+        <p className="text-sm text-gray-500">L&apos;AO est introuvable ou une erreur serveur s&apos;est produite.</p>
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-sm text-orange-600 hover:underline"
+        >
+          <ArrowLeft className="w-4 h-4" /> Retour à la liste
+        </button>
+      </div>
+    )
+  }
 
   const contacts: any[] = contactsData?.data ?? []
   const jours = ao.dateLimite ? joursRestants(ao.dateLimite) : null

@@ -5,9 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatGNF(amount: number | bigint | null | undefined): string {
-  if (!amount) return '—'
-  const n = typeof amount === 'bigint' ? Number(amount) : amount
+export function formatGNF(amount: number | bigint | string | null | undefined): string {
+  if (!amount && amount !== 0) return '—'
+  const n = typeof amount === 'bigint' ? Number(amount) : Number(amount)
+  if (isNaN(n) || n === 0) return '—'
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} Mrd GNF`
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(0)} M GNF`
   return `${n.toLocaleString('fr-FR')} GNF`

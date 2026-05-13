@@ -347,7 +347,7 @@ export class AppelsOffresService {
     const header = ['Référence', 'Titre', 'Source', 'Entité adj.', 'Secteur', 'Budget estimé (GNF)', 'Score', 'Recommandation', 'Statut', 'Date limite', 'Date publication', 'Créé le'].join(',')
 
     const rows = items.map(ao => [
-      escape(ao.reference),
+      escape(ao.sourceId),
       escape(ao.titre),
       escape(ao.source),
       escape(ao.entiteAdj),

@@ -19,7 +19,7 @@ export class ScrapingController {
 
   @Get('sources')
   @ApiOperation({ summary: 'Lister les sources de veille disponibles' })
-  sources() {
-    return this.service.getSources()
+  sources(@Request() req: any) {
+    return this.service.getSourcesForOrg(req.user.organisationId)
   }
 }

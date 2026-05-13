@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { orgApi, documentsApi, aiApi, usersApi, authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 import {
   Building2, FileCheck, CreditCard, AlertTriangle,
   CheckCircle2, Clock, Brain, ChevronDown, Zap,
-  Users, Award, Plus, X, UserCheck, UserX, Shield, Lock,
+  Users, Award, Plus, X, UserCheck, UserX, Shield, Lock, Radio, Key,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -91,6 +91,19 @@ export default function ParametresPage() {
     onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur'),
   })
 
+  const [telemoKey, setTelemoKey] = useState('')
+  const [telemoKeyVisible, setTelemoKeyVisible] = useState(false)
+
+  const saveTelemoKey = useMutation({
+    mutationFn: () => orgApi.update({ settings: { telemoApiKey: telemoKey } }).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Clé API TELEMO sauvegardée')
+      qc.invalidateQueries({ queryKey: ['organisation'] })
+      qc.invalidateQueries({ queryKey: ['scraping-sources'] })
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'Erreur lors de la sauvegarde'),
+  })
+
   const [showExpertForm, setShowExpertForm] = useState(false)
   const [showRefForm, setShowRefForm] = useState(false)
   const [showDocForm, setShowDocForm] = useState(false)
@@ -105,6 +118,10 @@ export default function ParametresPage() {
     queryKey: ['organisation'],
     queryFn: () => orgApi.get().then(r => r.data),
   })
+
+  useEffect(() => {
+    if (org?.settings?.telemoApiKey) setTelemoKey(org.settings.telemoApiKey)
+  }, [org])
 
   const { data: docs } = useQuery({
     queryKey: ['documents'],
@@ -881,6 +898,91 @@ export default function ParametresPage() {
           )}
         </div>
       </section>
+
+      {/* Sources de veille */}
+      {currentUser?.role === 'ADMIN' && (
+        <section className="bg-white border rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <Radio className="w-5 h-5 text-gray-500" />
+            <div>
+              <h2 className="font-semibold text-gray-900">Sources de veille</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Configurez vos accès aux plateformes de publication d&apos;appels d&apos;offres</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* Sources libres */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { id: 'ARMP', nom: 'ARMP Guinée', url: 'armp.gov.gn', actif: true },
+                { id: 'JAO', nom: 'JAO Guinée', url: 'jao.gov.gn', actif: true },
+                { id: 'BANQUE_MONDIALE', nom: 'Banque Mondiale', url: 'projects.worldbank.org', actif: true },
+                { id: 'PNUD', nom: 'PNUD / UNDP', url: 'procurement-notices.undp.org', actif: true },
+                { id: 'BAD', nom: 'Banque Africaine de Dév.', url: 'afdb.org', actif: true },
+              ].map((src) => (
+                <div key={src.id} className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{src.nom}</p>
+                    <p className="text-xs text-gray-500">{src.url}</p>
+                  </div>
+                  <span className="text-xs text-green-700 font-medium bg-green-100 px-2 py-0.5 rounded-full">Actif</span>
+                </div>
+              ))}
+            </div>
+
+            {/* TELEMO — clé API */}
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <Key className="w-4 h-4 text-orange-600" />
+                <span className="text-sm font-semibold text-gray-900">TELEMO</span>
+                {org?.settings?.telemoApiKey ? (
+                  <span className="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-medium">Configuré</span>
+                ) : (
+                  <span className="text-xs text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full font-medium">Clé requise</span>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 mb-3">
+                TELEMO est la plateforme nationale guinéenne de marchés publics électroniques.
+                Une clé API est requise pour accéder aux données en temps réel.
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <input
+                    type={telemoKeyVisible ? 'text' : 'password'}
+                    value={telemoKey}
+                    onChange={e => setTelemoKey(e.target.value)}
+                    placeholder="Entrez votre clé API TELEMO..."
+                    className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none pr-20 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setTelemoKeyVisible(v => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    {telemoKeyVisible ? 'Masquer' : 'Afficher'}
+                  </button>
+                </div>
+                <button
+                  onClick={() => saveTelemoKey.mutate()}
+                  disabled={saveTelemoKey.isPending || !telemoKey.trim()}
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-lg disabled:opacity-50 font-medium transition-colors flex-shrink-0"
+                >
+                  {saveTelemoKey.isPending ? 'Sauvegarde...' : 'Enregistrer'}
+                </button>
+              </div>
+              {org?.settings?.telemoApiKey && (
+                <button
+                  onClick={() => { setTelemoKey(''); orgApi.update({ settings: { telemoApiKey: null } }).then(() => { toast.success('Clé TELEMO supprimée'); qc.invalidateQueries({ queryKey: ['organisation'] }) }) }}
+                  className="mt-2 text-xs text-red-500 hover:text-red-700 underline"
+                >
+                  Supprimer la clé
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Références clients */}
       <section className="bg-white border rounded-xl p-6">

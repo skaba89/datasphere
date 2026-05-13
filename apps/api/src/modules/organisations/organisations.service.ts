@@ -25,11 +25,18 @@ export class OrganisationsService {
   }
 
   async update(id: string, data: any) {
+    let settingsData: any = undefined
+    if (data.settings !== undefined) {
+      const current = await this.prisma.organisation.findUnique({ where: { id }, select: { settings: true } })
+      settingsData = { ...((current?.settings as object) ?? {}), ...data.settings }
+    }
+    const { settings, ...rest } = data
     return this.prisma.organisation.update({
       where: { id },
       data: {
-        ...data,
-        ...(data.caAnnuelGNF && { caAnnuelGNF: BigInt(data.caAnnuelGNF) }),
+        ...rest,
+        ...(rest.caAnnuelGNF && { caAnnuelGNF: BigInt(rest.caAnnuelGNF) }),
+        ...(settingsData !== undefined && { settings: settingsData }),
       },
     })
   }

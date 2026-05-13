@@ -18,6 +18,9 @@ interface AOBrut {
   contactNom?: string
   contactEmail?: string
   contactTelephone?: string
+  contactPoste?: string
+  contactAdresse?: string
+  contactTitre?: string
 }
 
 const SOURCES_DISPONIBLES = [
@@ -644,6 +647,83 @@ export class ScrapingService {
     ]
   }
 
+  // ── Extraction automatique contacts depuis page source ─────────────────────
+
+  private async extraireContactsDepuisPage(url: string): Promise<{
+    email?: string; telephone?: string; nom?: string; poste?: string; adresse?: string
+  }> {
+    const html = await fetchSafe(url)
+    if (!html) return {}
+
+    const $ = cheerio.load(html)
+    // Chercher blocs contact spécifiques
+    const contactBloc = $('[class*="contact"], [id*="contact"], [class*="coordonnee"], [class*="point-focal"]').first().text()
+    const fullText = contactBloc || $('body').text()
+    const text = fullText.replace(/\s+/g, ' ')
+
+    // Email — filtre les emails génériques/système
+    const emailMatches = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g) ?? []
+    const email = emailMatches.find(e =>
+      !e.includes('noreply') && !e.includes('example') && !e.includes('test@') &&
+      !e.includes('webmaster') && !e.includes('info@info') && e.length < 80
+    )
+
+    // Téléphone guinéen (+224 ou format local)
+    const telMatches = text.match(/(\+224[\s.\-]?[\d\s.\-]{8,14}|0[\d\s.\-]{8,12}|\b6[2-8]\d[\s.\-]?\d{2,3}[\s.\-]?\d{2,3}[\s.\-]?\d{2,3})/g) ?? []
+    const telephone = telMatches.find(t => t.replace(/\D/g, '').length >= 8)
+
+    // Nom contact — cherche patterns "Contact: Nom", "M. Nom", "Mme Nom", "Point focal: Nom"
+    const nomMatch = text.match(/(?:contact|point\s+focal|responsable|chef|directeur|chargé)[\s:]+([A-ZÀÂÉÊÈÙÛ][a-zàâéêèùûçî]+(?:\s+[A-ZÀÂÉÊÈÙÛ][a-zàâéêèùûçî]+){1,3})/i)
+    const nom = nomMatch?.[1]
+
+    // Poste
+    const posteMatch = text.match(/(?:^|\s)(Directeur[^,\n]{0,50}|Chef\s+de\s+[^,\n]{0,50}|Chargé[^,\n]{0,40}|Responsable[^,\n]{0,40}|Coordinateur[^,\n]{0,40})/im)
+    const poste = posteMatch?.[1]?.trim()
+
+    // Adresse — cherche "BP", rue, avenue, quartier connus
+    const adresseMatch = text.match(/((?:BP|Boîte\s+postale)[\s\d]+|(?:Avenue|Rue|Boulevard|Quartier)[^,\n]{5,60}|Conakry[^,\n]{5,50})/i)
+    const adresse = adresseMatch?.[0]?.trim()
+
+    return { email, telephone, nom, poste, adresse }
+  }
+
+  private inferEntiteType(nom: string): string {
+    const n = nom.toLowerCase()
+    if (n.includes('ministère') || n.includes('ministere')) return 'MINISTERE'
+    if (n.includes('direction nationale') || n.includes('direction générale')) return 'DIRECTION_NATIONALE'
+    if (n.includes('direction') || n.includes('service')) return 'DIRECTION'
+    if (n.includes('banque') || n.includes('bank')) return 'BANQUE'
+    if (n.includes('mairie') || n.includes('commune')) return 'COLLECTIVITE'
+    if (n.includes('préfecture') || n.includes('prefecture') || n.includes('gouvernorat')) return 'ADMINISTRATION_LOCALE'
+    if (n.includes('université') || n.includes('ecole') || n.includes('école')) return 'ETABLISSEMENT_PUBLIC'
+    if (n.includes('hôpital') || n.includes('hopital') || n.includes('santé')) return 'ETABLISSEMENT_PUBLIC'
+    if (n.includes('pnud') || n.includes('undp') || n.includes('unicef') || n.includes('oms') || n.includes('onu')) return 'ORGANISATION_INTERNATIONALE'
+    if (n.includes('ong') || n.includes('association') || n.includes('fondation')) return 'ONG'
+    return 'ORGANISME_PUBLIC'
+  }
+
+  private async upsertEntite(nom: string, siteWeb?: string): Promise<string | undefined> {
+    try {
+      const existante = await this.prisma.entite.findFirst({
+        where: { nom: { contains: nom.substring(0, 30), mode: 'insensitive' } },
+        select: { id: true },
+      })
+      if (existante) return existante.id
+
+      const entite = await this.prisma.entite.create({
+        data: {
+          nom: nom.substring(0, 200),
+          type: this.inferEntiteType(nom),
+          pays: 'GN',
+          siteWeb,
+        },
+      })
+      return entite.id
+    } catch {
+      return undefined
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   private parseDate(str?: string): Date | null {
@@ -699,11 +779,27 @@ export class ScrapingService {
 
         if (existant) continue
 
-        let contactId: string | undefined
-        if (ao.contactNom || ao.entiteAdj) {
-          contactId = await this.upsertContact(ao, organisationId)
-          if (contactId) contactsCreés++
+        // Enrichir les infos contact depuis la page source si disponible
+        let enrichissement: { email?: string; telephone?: string; nom?: string; poste?: string; adresse?: string } = {}
+        if (ao.sourceUrl && !ao.contactEmail && !ao.contactNom) {
+          try {
+            enrichissement = await this.extraireContactsDepuisPage(ao.sourceUrl)
+          } catch {
+            // enrichissement non bloquant
+          }
         }
+
+        const aoEnrichi: AOBrut = {
+          ...ao,
+          contactEmail: ao.contactEmail ?? enrichissement.email,
+          contactTelephone: ao.contactTelephone ?? enrichissement.telephone,
+          contactNom: ao.contactNom ?? enrichissement.nom,
+          contactPoste: ao.contactPoste ?? enrichissement.poste,
+          contactAdresse: ao.contactAdresse ?? enrichissement.adresse,
+        }
+
+        const contactId = await this.upsertContact(aoEnrichi, organisationId)
+        if (contactId) contactsCreés++
 
         const nouvelAO = await this.prisma.appelOffre.create({
           data: {
@@ -738,30 +834,77 @@ export class ScrapingService {
 
   private async upsertContact(ao: AOBrut, organisationId: string): Promise<string | undefined> {
     try {
+      // Recherche contact existant par email ou nom entité
       const existant = await this.prisma.contact.findFirst({
         where: {
           organisationId,
           ...(ao.contactEmail
             ? { email: { hasSome: [ao.contactEmail] } }
-            : { nom: ao.entiteAdj }),
+            : { notes: { contains: ao.entiteAdj.substring(0, 40), mode: 'insensitive' } }),
         },
       })
 
-      if (existant) return existant.id
+      // Upsert de l'entité institutionnelle
+      const entiteId = await this.upsertEntite(ao.entiteAdj, ao.sourceUrl)
 
-      const nomContact = ao.contactNom || ao.entiteAdj
-      const parts = nomContact.split(/\s[—\-]\s/)
-      const prenom = parts.length > 1 ? parts[0].trim() : 'Direction'
-      const nom = parts.length > 1 ? parts[1].trim() : nomContact
+      if (existant) {
+        // Enrichir le contact existant avec les nouvelles infos
+        const updates: any = {}
+        if (entiteId && !existant.entiteId) updates.entiteId = entiteId
+        if (ao.contactEmail && !existant.email.includes(ao.contactEmail))
+          updates.email = [...existant.email, ao.contactEmail]
+        if (ao.contactTelephone && !existant.telephone.includes(ao.contactTelephone))
+          updates.telephone = [...existant.telephone, ao.contactTelephone]
+        if (ao.contactPoste && !existant.poste) updates.poste = ao.contactPoste
+        if (ao.contactAdresse && !existant.notes?.includes(ao.contactAdresse))
+          updates.notes = `${existant.notes ?? ''}\nAdresse : ${ao.contactAdresse}`.trim()
+        if (Object.keys(updates).length > 0) {
+          await this.prisma.contact.update({ where: { id: existant.id }, data: updates })
+        }
+        return existant.id
+      }
+
+      // Nouveau contact
+      const nomComplet = ao.contactNom || ao.entiteAdj
+      const parts = nomComplet.split(/\s[—\-]\s|,\s*/)
+      let prenom = 'Direction'
+      let nom = nomComplet
+
+      if (parts.length > 1 && parts[0].length < 40) {
+        prenom = parts[0].trim()
+        nom = parts.slice(1).join(' ').trim()
+      } else if (/^(M\.|Mme|Mlle|Dr|Prof)\s/i.test(nomComplet)) {
+        const m = nomComplet.match(/^(M\.|Mme|Mlle|Dr|Prof)\s+(\S+)\s+(.+)$/i)
+        if (m) { prenom = m[2]; nom = m[3] }
+      }
+
+      // Déterminer un poste par défaut selon le type d'entité
+      const posteDefault = ao.contactPoste
+        ?? (ao.entiteAdj.toLowerCase().includes('ministère') ? 'Direction des marchés publics'
+          : ao.entiteAdj.toLowerCase().includes('mairie') ? 'Service des marchés publics'
+          : ao.entiteAdj.toLowerCase().includes('banque') ? 'Procurement Officer'
+          : ao.entiteAdj.toLowerCase().includes('pnud') || ao.entiteAdj.toLowerCase().includes('onu') ? 'Procurement Associate'
+          : 'Direction des marchés publics')
+
+      const lignesNotes = [
+        `Entité adjudicatrice : ${ao.entiteAdj}`,
+        ao.sourceUrl ? `Source : ${ao.sourceUrl}` : null,
+        ao.contactAdresse ? `Adresse : ${ao.contactAdresse}` : null,
+      ].filter(Boolean).join('\n')
 
       const contact = await this.prisma.contact.create({
         data: {
           prenom,
           nom,
+          titre: ao.contactTitre,
+          poste: posteDefault,
           email: ao.contactEmail ? [ao.contactEmail] : [],
           telephone: ao.contactTelephone ? [ao.contactTelephone] : [],
-          tags: ['prospect', 'veille-auto'],
-          notes: `Entité adjudicatrice : ${ao.entiteAdj}`,
+          tags: ['prospect', 'veille-auto', ao.source.toLowerCase().replace('_', '-')],
+          notes: lignesNotes,
+          entiteId,
+          enrichiAuto: true,
+          enrichiAt: new Date(),
           organisationId,
         },
       })

@@ -1,22 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { Prisma } from '@guineatender/database'
 
+async function fetchSafe(url: string): Promise<string | null> {
+  try {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 10_000)
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      headers: { 'User-Agent': 'GuineaTenderBot/1.0', 'Accept': 'text/html' },
+    })
+    clearTimeout(timer)
+    return res.ok ? res.text() : null
+  } catch { return null }
+}
+
 @Injectable()
 export class ContactsService {
+  private readonly logger = new Logger(ContactsService.name)
+
   constructor(private prisma: PrismaService) {}
 
-  async findAll(organisationId: string, query: { search?: string; entiteId?: string; page?: number; limit?: number }) {
+  async findAll(organisationId: string, query: { search?: string; entiteId?: string; tag?: string; page?: number; limit?: number }) {
     const page = query.page ?? 1
     const limit = query.limit ?? 20
     const where: Prisma.ContactWhereInput = {
       organisationId,
       ...(query.entiteId && { entiteId: query.entiteId }),
+      ...(query.tag && { tags: { has: query.tag } }),
       ...(query.search && {
         OR: [
           { prenom: { contains: query.search, mode: 'insensitive' } },
           { nom: { contains: query.search, mode: 'insensitive' } },
           { poste: { contains: query.search, mode: 'insensitive' } },
+          { notes: { contains: query.search, mode: 'insensitive' } },
+          { tags: { has: query.search.toLowerCase() } },
         ],
       }),
     }
@@ -130,5 +148,50 @@ export class ContactsService {
   async delete(id: string, organisationId: string) {
     await this.findOne(id, organisationId)
     return this.prisma.contact.delete({ where: { id } })
+  }
+
+  async enrichir(id: string, organisationId: string) {
+    const contact = await this.findOne(id, organisationId)
+
+    // Extraire l'URL source depuis les notes
+    const sourceMatch = contact.notes?.match(/Source\s*:\s*(https?:\/\/\S+)/)
+    const sourceUrl = sourceMatch?.[1]
+
+    if (!sourceUrl) return { enrichi: false, message: 'Aucune URL source trouvée dans les notes' }
+
+    const html = await fetchSafe(sourceUrl)
+    if (!html) return { enrichi: false, message: 'Page source inaccessible' }
+
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+
+    const emailMatches = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g) ?? []
+    const email = emailMatches.find(e =>
+      !e.includes('noreply') && !e.includes('example') && !e.includes('test@') &&
+      !e.includes('webmaster') && e.length < 80
+    )
+
+    const telMatches = text.match(/(\+224[\s.\-]?[\d\s.\-]{8,14}|6[2-8]\d[\s.\-]?\d{2,3}[\s.\-]?\d{2,3}[\s.\-]?\d{2,3})/g) ?? []
+    const telephone = telMatches.find(t => t.replace(/\D/g, '').length >= 8)
+
+    const adresseMatch = text.match(/((?:BP|Boîte\s+postale)\s*\d+|(?:Avenue|Rue|Boulevard|Quartier|Commune)[^,\n]{5,60})/i)
+    const adresse = adresseMatch?.[0]?.trim()
+
+    const updates: any = { enrichiAuto: true, enrichiAt: new Date() }
+
+    if (email && !contact.email.includes(email))
+      updates.email = [...contact.email, email]
+    if (telephone && !contact.telephone.includes(telephone))
+      updates.telephone = [...contact.telephone, telephone]
+    if (adresse && !contact.notes?.includes(adresse))
+      updates.notes = `${contact.notes ?? ''}\nAdresse : ${adresse}`.trim()
+
+    if (Object.keys(updates).length > 2) {
+      await this.prisma.contact.update({ where: { id }, data: updates })
+      this.logger.log(`Contact ${id} enrichi depuis ${sourceUrl}`)
+      return { enrichi: true, email, telephone, adresse }
+    }
+
+    await this.prisma.contact.update({ where: { id }, data: { enrichiAuto: true, enrichiAt: new Date() } })
+    return { enrichi: false, message: 'Aucune nouvelle information trouvée' }
   }
 }

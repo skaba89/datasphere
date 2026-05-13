@@ -70,6 +70,7 @@ export const contactsApi = {
   create: (data: any) => api.post('/contacts', data),
   update: (id: string, data: any) => api.put(`/contacts/${id}`, data),
   addInteraction: (id: string, data: any) => api.post(`/contacts/${id}/interactions`, data),
+  enrichir: (id: string) => api.post(`/contacts/${id}/enrichir`),
   delete: (id: string) => api.delete(`/contacts/${id}`),
 }
 

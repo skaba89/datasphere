@@ -73,6 +73,12 @@ export class ContactsController {
     return this.service.addInteraction(id, req.user.organisationId, req.user.id, body)
   }
 
+  @Post(':id/enrichir')
+  @ApiOperation({ summary: 'Ré-enrichir automatiquement un contact depuis sa source' })
+  enrichir(@Request() req: any, @Param('id') id: string) {
+    return this.service.enrichir(id, req.user.organisationId)
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Supprimer un contact' })

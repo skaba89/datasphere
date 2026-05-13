@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { aoApi, scoringApi, aiApi, dossiersApi } from '@/lib/api'
+import { aoApi, scoringApi, aiApi, dossiersApi, contactsApi } from '@/lib/api'
 import { formatGNF, joursRestants, scoreColor, scoreRecommandation } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -54,6 +54,12 @@ export default function AODetailPage() {
     enabled: !!ao,
   })
 
+  const { data: contactsData } = useQuery({
+    queryKey: ['ao-contacts', ao?.entiteAdj],
+    queryFn: () => contactsApi.list({ search: ao!.entiteAdj, limit: 5 }).then(r => r.data),
+    enabled: !!ao?.entiteAdj,
+  })
+
   const scoreMutation = useMutation({
     mutationFn: () => scoringApi.calculer(id).then(r => r.data),
     onSuccess: () => {
@@ -99,6 +105,7 @@ export default function AODetailPage() {
 
   if (!ao) return null
 
+  const contacts: any[] = contactsData?.data ?? []
   const jours = ao.dateLimite ? joursRestants(ao.dateLimite) : null
   const score = ao.scoreFinal ?? scoring?.scoreFinal
   const recommandation = score ? scoreRecommandation(score) : null
@@ -248,13 +255,14 @@ export default function AODetailPage() {
           )}
 
           {/* Contact adjudicateur */}
-          {(ao.entiteAdj || ao.sourceUrl) && (
+          {(ao.entiteAdj || ao.sourceUrl || contacts.length > 0) && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-orange-500" />
                 Contact adjudicateur
               </h2>
               <div className="space-y-3">
+                {/* Entité */}
                 {ao.entiteAdj && (
                   <div className="flex items-start gap-3">
                     <Building2 className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -264,33 +272,47 @@ export default function AODetailPage() {
                     </div>
                   </div>
                 )}
-                {ao.entitePublique && ao.entitePublique !== ao.entiteAdj && (
-                  <div className="flex items-start gap-3">
-                    <Users className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-gray-400">Entité publique</p>
-                      <p className="text-sm text-gray-700">{ao.entitePublique}</p>
-                    </div>
+
+                {/* Contacts CRM liés */}
+                {contacts.length > 0 && (
+                  <div className="mt-2 space-y-3 pt-2 border-t border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Contacts ({contacts.length})
+                    </p>
+                    {contacts.map((c: any) => (
+                      <div key={c.id} className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-orange-700">
+                            {c.prenom?.[0]}{c.nom?.[0]}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">
+                            {c.prenom} {c.nom}
+                          </p>
+                          {c.poste && <p className="text-xs text-gray-500 truncate">{c.poste}</p>}
+                          {c.email?.length > 0 && (
+                            <a href={`mailto:${c.email[0]}`} className="flex items-center gap-1 text-xs text-blue-600 hover:underline mt-0.5">
+                              <Mail className="w-3 h-3" /> {c.email[0]}
+                            </a>
+                          )}
+                          {c.telephone?.length > 0 && (
+                            <a href={`tel:${c.telephone[0]}`} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                              <Phone className="w-3 h-3" /> {c.telephone[0]}
+                            </a>
+                          )}
+                        </div>
+                        {c.enrichiAuto && (
+                          <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded flex-shrink-0">auto</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
-                {ao.contactEmail && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <a href={`mailto:${ao.contactEmail}`} className="text-sm text-blue-600 hover:underline">
-                      {ao.contactEmail}
-                    </a>
-                  </div>
-                )}
-                {ao.contactTel && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <a href={`tel:${ao.contactTel}`} className="text-sm text-blue-600 hover:underline">
-                      {ao.contactTel}
-                    </a>
-                  </div>
-                )}
+
+                {/* Lien source officielle */}
                 {ao.sourceUrl && (
-                  <div className="mt-2 pt-3 border-t border-gray-100">
+                  <div className="pt-2 border-t border-gray-100">
                     <a
                       href={ao.sourceUrl}
                       target="_blank"

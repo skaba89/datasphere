@@ -4,6 +4,24 @@ import { AiService } from '../ai/ai.service'
 import { NotificationsService } from '../notifications/notifications.service'
 import { DossierStatus } from '@guineatender/database'
 
+// ── Transitions légales de statut ────────────────────────────────────────────────
+// Chaque clé indique les statuts sources autorisés pour une transition donnée
+const STATUS_TRANSITIONS: Record<string, DossierStatus[]> = {
+  EN_COURS:     ['BROUILLON', 'EN_COURS'],
+  REVUE:        ['BROUILLON', 'EN_COURS'],
+  EN_VALIDATION: ['BROUILLON', 'EN_COURS', 'REVUE', 'REJETE'],
+  VALIDE:       ['EN_VALIDATION'],
+  REJETE:       ['EN_VALIDATION'],
+  SOUMIS:       ['VALIDE'],
+  ARCHIVE:      ['SOUMIS', 'REJETE', 'VALIDE'],
+  BROUILLON:    ['REJETE'], // Retour en brouillon après rejet
+}
+
+function canTransition(current: DossierStatus, target: DossierStatus): boolean {
+  const allowed = STATUS_TRANSITIONS[target]
+  return allowed ? allowed.includes(current) : false
+}
+
 @Injectable()
 export class DossiersService {
   constructor(
@@ -130,10 +148,10 @@ export class DossiersService {
   async soumettreValidation(id: string, organisationId: string, userId: string) {
     const dossier = await this.findOne(id, organisationId)
 
-    const statusesAutorisés: DossierStatus[] = ['BROUILLON', 'EN_COURS', 'REVUE', 'REJETE']
+    const statusesAutorisés: DossierStatus[] = STATUS_TRANSITIONS['EN_VALIDATION']
     if (!statusesAutorisés.includes(dossier.status as DossierStatus)) {
       throw new BadRequestException(
-        `Le dossier est en statut "${dossier.status}" et ne peut pas être envoyé en validation.`,
+        `Transition invalide: "${dossier.status}" → "EN_VALIDATION". Statuts sources autorisés: ${statusesAutorisés.join(', ')}`,
       )
     }
 
@@ -192,8 +210,10 @@ export class DossiersService {
     }
 
     const dossier = await this.findOne(id, organisationId)
-    if (dossier.status !== 'EN_VALIDATION') {
-      throw new BadRequestException('Le dossier n\'est pas en attente de validation.')
+    if (!canTransition(dossier.status as DossierStatus, 'VALIDE')) {
+      throw new BadRequestException(
+        `Transition invalide: "${dossier.status}" → "VALIDE". Le dossier doit être en EN_VALIDATION.`,
+      )
     }
 
     await this.prisma.dossierValidation.create({
@@ -246,8 +266,10 @@ export class DossiersService {
     }
 
     const dossier = await this.findOne(id, organisationId)
-    if (dossier.status !== 'EN_VALIDATION') {
-      throw new BadRequestException('Le dossier n\'est pas en attente de validation.')
+    if (!canTransition(dossier.status as DossierStatus, 'REJETE')) {
+      throw new BadRequestException(
+        `Transition invalide: "${dossier.status}" → "REJETE". Le dossier doit être en EN_VALIDATION.`,
+      )
     }
 
     if (!data.commentaire?.trim()) {
@@ -303,9 +325,9 @@ export class DossiersService {
   async soumettre(id: string, organisationId: string, reference?: string) {
     const dossier = await this.findOne(id, organisationId)
 
-    if (dossier.status !== 'VALIDE') {
+    if (!canTransition(dossier.status as DossierStatus, 'SOUMIS')) {
       throw new BadRequestException(
-        'Le dossier doit être validé par un manager avant soumission officielle.',
+        `Transition invalide: "${dossier.status}" → "SOUMIS". Le dossier doit être VALIDÉ avant soumission.`,
       )
     }
 

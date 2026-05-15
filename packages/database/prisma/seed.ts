@@ -158,17 +158,17 @@ async function main() {
 
   // Entités publiques
   const entites = [
-    { nom: 'ANDE', type: 'AGENCE', pays: 'GN', secteur: 'NUMERIQUE' },
-    { nom: 'ARMP', type: 'AUTORITE_REGULATION', pays: 'GN', secteur: 'MARCHES_PUBLICS' },
-    { nom: 'Ministère de l\'Économie Numérique', type: 'MINISTERE', pays: 'GN', secteur: 'NUMERIQUE' },
-    { nom: 'Ministère du Budget', type: 'MINISTERE', pays: 'GN', secteur: 'FINANCE' },
-    { nom: 'Banque Mondiale - Guinée', type: 'BAILLEUR', pays: 'GN', secteur: 'DEVELOPPEMENT' },
-    { nom: 'BAD - Bureau Conakry', type: 'BAILLEUR', pays: 'GN', secteur: 'DEVELOPPEMENT' },
+    { nom: 'ANDE', slug: 'ande-gn', type: 'AGENCE', pays: 'GN', secteur: 'NUMERIQUE' },
+    { nom: 'ARMP', slug: 'armp-gn', type: 'AUTORITE_REGULATION', pays: 'GN', secteur: 'MARCHES_PUBLICS' },
+    { nom: 'Ministère de l\'Économie Numérique', slug: 'ministere-economie-numerique-gn', type: 'MINISTERE', pays: 'GN', secteur: 'NUMERIQUE' },
+    { nom: 'Ministère du Budget', slug: 'ministere-budget-gn', type: 'MINISTERE', pays: 'GN', secteur: 'FINANCE' },
+    { nom: 'Banque Mondiale - Guinée', slug: 'banque-mondiale-guinee-gn', type: 'BAILLEUR', pays: 'GN', secteur: 'DEVELOPPEMENT' },
+    { nom: 'BAD - Bureau Conakry', slug: 'bad-conakry-gn', type: 'BAILLEUR', pays: 'GN', secteur: 'DEVELOPPEMENT' },
   ]
 
   for (const entite of entites) {
     await prisma.entite.upsert({
-      where: { id: entite.nom.toLowerCase().replace(/\s/g, '-') + '-gn' } as any,
+      where: { slug: entite.slug },
       update: {},
       create: entite,
     })

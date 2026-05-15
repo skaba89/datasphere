@@ -710,9 +710,16 @@ export class ScrapingService {
       })
       if (existante) return existante.id
 
+      const slug = nom
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 100) + '-' + Date.now().toString(36)
+
       const entite = await this.prisma.entite.create({
         data: {
           nom: nom.substring(0, 200),
+          slug,
           type: this.inferEntiteType(nom),
           pays: 'GN',
           siteWeb,

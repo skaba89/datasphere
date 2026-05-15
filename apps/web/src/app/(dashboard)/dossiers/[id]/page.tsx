@@ -16,11 +16,12 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 
-type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
+type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'REVUE' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
 
 const STATUS_CONFIG: Record<DossierStatus, { label: string; color: string; bg: string }> = {
   BROUILLON:     { label: 'Brouillon',     color: 'text-gray-600',   bg: 'bg-gray-100' },
   EN_COURS:      { label: 'En cours',      color: 'text-blue-700',   bg: 'bg-blue-100' },
+  REVUE:         { label: 'En révision',   color: 'text-indigo-700', bg: 'bg-indigo-100' },
   EN_VALIDATION: { label: 'En validation', color: 'text-orange-700', bg: 'bg-orange-100' },
   VALIDE:        { label: 'Validé ✓',      color: 'text-green-700',  bg: 'bg-green-100' },
   REJETE:        { label: 'Rejeté',        color: 'text-red-700',    bg: 'bg-red-100' },

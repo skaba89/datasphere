@@ -130,7 +130,7 @@ export class DossiersService {
   async soumettreValidation(id: string, organisationId: string, userId: string) {
     const dossier = await this.findOne(id, organisationId)
 
-    const statusesAutorisés: DossierStatus[] = ['BROUILLON', 'EN_COURS', 'REJETE']
+    const statusesAutorisés: DossierStatus[] = ['BROUILLON', 'EN_COURS', 'REVUE', 'REJETE']
     if (!statusesAutorisés.includes(dossier.status as DossierStatus)) {
       throw new BadRequestException(
         `Le dossier est en statut "${dossier.status}" et ne peut pas être envoyé en validation.`,

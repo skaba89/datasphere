@@ -37,12 +37,21 @@ import { PrismaModule } from './common/prisma/prisma.module'
     // Tâches planifiées (cron jobs)
     ScheduleModule.forRoot(),
 
-    // Queue BullMQ pour tâches async
+    // Queue Bull pour tâches async
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        redis: config.get<string>('REDIS_URL', 'redis://localhost:6379'),
-      }),
+      useFactory: (config: ConfigService) => {
+        const redisUrl = config.get<string>('REDIS_URL', 'redis://localhost:6379')
+        return {
+          redis: {
+            host: new URL(redisUrl).hostname || 'localhost',
+            port: Number(new URL(redisUrl).port) || 6379,
+            password: new URL(redisUrl).password || undefined,
+            enableReadyCheck: true,
+            maxRetriesPerRequest: null,
+          },
+        }
+      },
     }),
 
     // Modules applicatifs

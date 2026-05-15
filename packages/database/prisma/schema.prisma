@@ -6,7 +6,7 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../generated"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -23,6 +23,7 @@ enum UserRole {
   MANAGER
   WRITER
   READER
+  VIEWER
 }
 
 enum SubscriptionPlan {
@@ -104,6 +105,7 @@ enum InteractionType {
 enum DossierStatus {
   BROUILLON
   EN_COURS
+  REVUE
   EN_VALIDATION
   VALIDE
   REJETE
@@ -396,6 +398,7 @@ model Entite {
   updatedAt DateTime @updatedAt
 
   nom         String
+  slug        String   @unique
   type        String
   siteWeb     String?
   adresse     String?
@@ -406,6 +409,7 @@ model Entite {
 
   contacts    Contact[]
 
+  @@index([slug])
   @@map("entites")
 }
 

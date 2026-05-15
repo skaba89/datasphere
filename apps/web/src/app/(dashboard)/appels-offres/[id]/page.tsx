@@ -122,7 +122,7 @@ export default function AODetailPage() {
 
   const contacts: any[] = contactsData?.data ?? []
   const jours = ao.dateLimite ? joursRestants(ao.dateLimite) : null
-  const score = ao.scoreFinal ?? scoring?.scoreFinal
+  const score = ao.score ?? scoring?.scoreFinal
   const recommandation = score ? scoreRecommandation(score) : null
   const dimensions = scoring?.dimensions ?? []
   const currentStatusCfg = STATUS_PIPELINE.find(s => s.value === ao.status) ?? STATUS_PIPELINE[0]
@@ -151,7 +151,7 @@ export default function AODetailPage() {
               <span className="text-xs font-medium bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
                 {ao.source}
               </span>
-              {ao.reference && <span className="text-xs text-gray-400">{ao.reference}</span>}
+              {ao.sourceId && <span className="text-xs text-gray-400">Réf: {ao.sourceId}</span>}
 
               {/* Status selector */}
               <div className="relative">
@@ -169,7 +169,7 @@ export default function AODetailPage() {
               </div>
             </div>
             <h1 className="text-xl font-bold text-gray-900">{ao.titre}</h1>
-            <p className="text-gray-500 mt-1">{ao.entiteAdj ?? ao.entitePublique}</p>
+            <p className="text-gray-500 mt-1">{ao.entiteAdj}</p>
           </div>
 
           {score && (
@@ -395,12 +395,14 @@ export default function AODetailPage() {
         {/* Description / Résumé */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Description</h2>
-          {ao.description ? (
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{ao.description}</p>
+          {ao.objet ? (
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{ao.objet}</p>
+          ) : ao.resumeIA ? (
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{ao.resumeIA}</p>
           ) : (
             <div className="text-center py-8 text-gray-400">
               <Brain className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">Aucune description.</p>
+              <p className="text-sm">Aucune description disponible.</p>
               <button
                 onClick={() => resumeMutation.mutate()}
                 className="mt-3 text-xs text-orange-600 hover:underline"
@@ -410,24 +412,63 @@ export default function AODetailPage() {
             </div>
           )}
 
-          {ao.criteres && (
+          {ao.criteresEligibilite && typeof ao.criteresEligibilite === 'object' && Object.keys(ao.criteresEligibilite).length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Critères de sélection</h3>
-              <p className="text-sm text-gray-600 whitespace-pre-line">{ao.criteres}</p>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Critères d&apos;éligibilité</h3>
+              {Array.isArray(ao.criteresEligibilite) ? (
+                <ul className="space-y-1">
+                  {ao.criteresEligibilite.map((c: any, i: number) => (
+                    <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                      <CheckCircle2 className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
+                      {typeof c === 'string' ? c : c.critere || c.label || JSON.stringify(c)}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-600 whitespace-pre-line">
+                  {typeof ao.criteresEligibilite === 'string' ? ao.criteresEligibilite : JSON.stringify(ao.criteresEligibilite, null, 2)}
+                </p>
+              )}
             </div>
           )}
 
-          {ao.documentsRequis?.length > 0 && (
+          {ao.criteresEvaluation && typeof ao.criteresEvaluation === 'object' && Object.keys(ao.criteresEvaluation).length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Critères d&apos;évaluation</h3>
+              {Array.isArray(ao.criteresEvaluation) ? (
+                <ul className="space-y-1">
+                  {ao.criteresEvaluation.map((c: any, i: number) => (
+                    <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                      <CheckCircle2 className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
+                      {typeof c === 'string' ? c : c.critere || c.label || JSON.stringify(c)}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-600 whitespace-pre-line">
+                  {typeof ao.criteresEvaluation === 'string' ? ao.criteresEvaluation : JSON.stringify(ao.criteresEvaluation, null, 2)}
+                </p>
+              )}
+            </div>
+          )}
+
+          {ao.documentParsed && typeof ao.documentParsed === 'object' && Object.keys(ao.documentParsed).length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Documents requis</h3>
-              <ul className="space-y-1">
-                {ao.documentsRequis.map((doc: string, i: number) => (
-                  <li key={i} className="text-xs text-gray-600 flex gap-1.5">
-                    <CheckCircle2 className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
-                    {doc}
-                  </li>
-                ))}
-              </ul>
+              {ao.documentParsed.documentsRequis ? (
+                <ul className="space-y-1">
+                  {(Array.isArray(ao.documentParsed.documentsRequis) ? ao.documentParsed.documentsRequis : []).map((doc: string, i: number) => (
+                    <li key={i} className="text-xs text-gray-600 flex gap-1.5">
+                      <CheckCircle2 className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
+                      {doc}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-600 whitespace-pre-line">
+                  {JSON.stringify(ao.documentParsed, null, 2)}
+                </p>
+              )}
             </div>
           )}
         </div>

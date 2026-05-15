@@ -14,13 +14,21 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 
 const SOURCES = [
+  { value: 'TELEMO', label: 'TELEMO' },
   { value: 'ARMP', label: 'ARMP Guinée' },
   { value: 'JAO_GUINEE', label: 'JAO Guinée' },
-  { value: 'BANQUE_MONDIALE', label: 'Banque Mondiale' },
-  { value: 'TELEMO', label: 'TELEMO' },
-  { value: 'PNUD', label: 'PNUD' },
-  { value: 'BAD', label: 'BAD' },
   { value: 'ANDE', label: 'ANDE' },
+  { value: 'MINISTERE_BUDGET', label: 'Ministère du Budget' },
+  { value: 'MINISTERE_NUMERIQUE', label: 'Ministère du Numérique' },
+  { value: 'BANQUE_MONDIALE', label: 'Banque Mondiale' },
+  { value: 'BAD', label: 'BAD' },
+  { value: 'PNUD', label: 'PNUD' },
+  { value: 'UNICEF', label: 'UNICEF' },
+  { value: 'OMS', label: 'OMS' },
+  { value: 'FAO', label: 'FAO' },
+  { value: 'CEDEAO', label: 'CEDEAO' },
+  { value: 'DCMP_SENEGAL', label: 'DCMP Sénégal' },
+  { value: 'DMP_COTE_IVOIRE', label: 'DMP Côte d\'Ivoire' },
   { value: 'AUTRE', label: 'Autre' },
 ]
 
@@ -28,11 +36,15 @@ const SECTEURS = [
   { value: 'NUMERIQUE', label: 'Numérique / IT' },
   { value: 'SANTE', label: 'Santé' },
   { value: 'EDUCATION', label: 'Éducation' },
-  { value: 'INFRASTRUCTURE', label: 'Infrastructure' },
+  { value: 'TRANSPORT', label: 'Transport' },
   { value: 'AGRICULTURE', label: 'Agriculture' },
-  { value: 'ENERGIE', label: 'Énergie' },
   { value: 'FINANCE', label: 'Finance' },
+  { value: 'SECURITE', label: 'Sécurité' },
+  { value: 'ENVIRONNEMENT', label: 'Environnement' },
   { value: 'GOUVERNANCE', label: 'Gouvernance' },
+  { value: 'INFRASTRUCTURE', label: 'Infrastructure' },
+  { value: 'ENERGIE', label: 'Énergie' },
+  { value: 'EAU', label: 'Eau & Assainissement' },
   { value: 'AUTRE', label: 'Autre' },
 ]
 
@@ -200,10 +212,18 @@ const SOURCE_LABELS: Record<string, string> = {
   TELEMO: 'TELEMO',
   ARMP: 'ARMP',
   JAO_GUINEE: 'JAO',
-  BANQUE_MONDIALE: 'Banque Mondiale',
   ANDE: 'ANDE',
+  MINISTERE_BUDGET: 'Min. Budget',
+  MINISTERE_NUMERIQUE: 'Min. Numérique',
+  BANQUE_MONDIALE: 'Banque Mondiale',
   BAD: 'BAD',
   PNUD: 'PNUD',
+  UNICEF: 'UNICEF',
+  OMS: 'OMS',
+  FAO: 'FAO',
+  CEDEAO: 'CEDEAO',
+  DCMP_SENEGAL: 'DCMP SN',
+  DMP_COTE_IVOIRE: 'DMP CI',
   AUTRE: 'Autre',
 }
 

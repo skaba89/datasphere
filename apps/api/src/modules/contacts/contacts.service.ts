@@ -21,9 +21,9 @@ export class ContactsService {
 
   constructor(private prisma: PrismaService) {}
 
-  async findAll(organisationId: string, query: { search?: string; entiteId?: string; tag?: string; page?: number; limit?: number }) {
-    const page = query.page ?? 1
-    const limit = query.limit ?? 20
+  async findAll(organisationId: string, query: { search?: string; entiteId?: string; tag?: string; page?: number | string; limit?: number | string }) {
+    const page = Math.max(1, Number(query.page) || 1)
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 20))
     const where: Prisma.ContactWhereInput = {
       organisationId,
       ...(query.entiteId && { entiteId: query.entiteId }),

@@ -173,12 +173,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [isAuthenticated, router])
 
   // Redirect to /onboarding if org needs setup (no secteurs or no rccm/ifu)
+  // Only redirect from main pages, not from sub-pages like AO detail or dossiers
   useEffect(() => {
     if (!isAuthenticated || !orgData || pathname === '/onboarding') return
     const needsOnboarding =
       !orgData.secteurs || orgData.secteurs.length === 0 ||
       (!orgData.rccm && !orgData.ifu)
-    if (needsOnboarding) {
+    if (needsOnboarding && (pathname === '/dashboard' || pathname === '/')) {
       router.replace('/onboarding')
     }
   }, [isAuthenticated, orgData, pathname, router])

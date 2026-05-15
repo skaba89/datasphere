@@ -51,14 +51,16 @@ export default function AODetailPage() {
 
   const { data: scoring } = useQuery({
     queryKey: ['scoring', id],
-    queryFn: () => scoringApi.get(id).then(r => r.data),
+    queryFn: () => scoringApi.get(id).then(r => r.data).catch(() => null),
     enabled: !!ao,
+    retry: false,
   })
 
   const { data: contactsData } = useQuery({
     queryKey: ['ao-contacts', ao?.entiteAdj],
-    queryFn: () => contactsApi.list({ search: ao!.entiteAdj, limit: 5 }).then(r => r.data),
+    queryFn: () => contactsApi.list({ search: ao!.entiteAdj, limit: 5 }).then(r => r.data).catch(() => ({ data: [] })),
     enabled: !!ao?.entiteAdj,
+    retry: false,
   })
 
   const scoreMutation = useMutation({
@@ -73,7 +75,11 @@ export default function AODetailPage() {
 
   const resumeMutation = useMutation({
     mutationFn: () => aiApi.resumer(id).then(r => r.data),
-    onSuccess: () => toast.success('Résumé IA généré'),
+    onSuccess: () => {
+      toast.success('Résumé IA généré')
+      qc.invalidateQueries({ queryKey: ['ao', id] })
+    },
+    onError: () => toast.error('Erreur lors de la génération du résumé IA'),
   })
 
   const dossierMutation = useMutation({
@@ -360,15 +366,15 @@ export default function AODetailPage() {
                       </span>
                       {DIMENSIONS_LABELS[dim.nom] ?? dim.nom}
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">{dim.score}/{dim.poids}</span>
+                    <span className="text-sm font-semibold text-gray-900">{dim.score}/{Math.round(dim.poids * 100)}</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all ${
-                        dim.score / dim.poids >= 0.65 ? 'bg-green-500' :
-                        dim.score / dim.poids >= 0.50 ? 'bg-yellow-500' : 'bg-red-400'
+                        dim.score / (dim.poids * 100) >= 0.65 ? 'bg-green-500' :
+                        dim.score / (dim.poids * 100) >= 0.50 ? 'bg-yellow-500' : 'bg-red-400'
                       }`}
-                      style={{ width: `${(dim.score / dim.poids) * 100}%` }}
+                      style={{ width: `${(dim.score / (dim.poids * 100)) * 100}%` }}
                     />
                   </div>
                   {dim.detail && <p className="text-xs text-gray-400 mt-0.5">{dim.detail}</p>}

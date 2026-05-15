@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { AiProviderFactory } from './ai-provider.factory'
 
@@ -114,12 +114,12 @@ ADAPTATION CONTEXTE GUINÉEN: Adapte la solution aux spécificités locales — 
 
     const typeSpecificSection = this.buildTypeSpecificSection(options?.typeSolution)
 
-    const referencesContext = org.references.map(r =>
+    const referencesContext = (org.references ?? []).map(r =>
       `- ${r.titre} (${r.client}, ${r.secteur}, ${new Date(r.dateDebut).getFullYear()})`
     ).join('\n')
 
-    const expertsContext = org.experts.map(e =>
-      `- ${e.prenom} ${e.nom} — ${e.titre} — ${e.specialites.join(', ')} (${e.anneesExp} ans d'exp.)`
+    const expertsContext = (org.experts ?? []).map(e =>
+      `- ${e.prenom} ${e.nom} — ${e.titre} — ${(e.specialites ?? []).join(', ')} (${e.anneesExp} ans d'exp.)`
     ).join('\n')
 
     const prompt = `Tu es un expert en rédaction de dossiers de réponse aux appels d'offres publics en Guinée.
@@ -135,9 +135,9 @@ ${solutionContext}
 
 ENTREPRISE SOUMISSIONNAIRE:
 - Nom: ${org.nom}
-- Secteurs d'expertise: ${org.secteurs.join(', ')}
+- Secteurs d'expertise: ${(org.secteurs ?? []).join(', ') || 'NC'}
 - Effectif: ${org.effectif || 'NC'} collaborateurs
-- Certifications: ${org.certifications.join(', ') || 'NC'}
+- Certifications: ${(org.certifications ?? []).join(', ') || 'NC'}
 
 RÉFÉRENCES TECHNIQUES:
 ${referencesContext || 'Aucune référence disponible'}
@@ -149,13 +149,18 @@ ADAPTATION SOLUTION:${typeSpecificSection}
 
 MISSION: Rédige un mémoire technique professionnel et structuré en français pour répondre à cet appel d'offres. Le document doit impérativement couvrir: compréhension approfondie du besoin, méthodologie de mise en œuvre, solution technique détaillée (en tenant compte des directives ci-dessus), équipe projet avec rôles et responsabilités, références techniques pertinentes, plan de formation et transfert de compétences, gestion des risques et mesures d'atténuation, garanties et maintenance post-déploiement. Environ 3500-4500 mots.`
 
-    const result = await providers.heavy.generate(prompt, {
-      maxTokens: 8000,
-      model: providers.heavy.model,
-    })
+    try {
+      const result = await providers.heavy.generate(prompt, {
+        maxTokens: 8000,
+        model: providers.heavy.model,
+      })
 
-    this.logger.log(`Mémoire technique générée — provider: ${providers.config.provider}, modèle: ${providers.heavy.model}, ${result.length} chars`)
-    return result
+      this.logger.log(`Mémoire technique générée — provider: ${providers.config.provider}, modèle: ${providers.heavy.model}, ${result.length} chars`)
+      return result
+    } catch (error: any) {
+      this.logger.error(`Erreur mémoire technique IA pour AO ${aoId}: ${error?.message}`)
+      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
+    }
   }
 
   async genererOffreFinanciere(
@@ -196,37 +201,55 @@ CONSIGNE: Génère un tableau de décomposition du prix en JSON avec la structur
 
 Inclure: développement logiciel, infrastructure/hébergement, formation, maintenance (12 mois), management de projet, documentation. Prix réalistes du marché guinéen. Réponds UNIQUEMENT en JSON valide.`
 
-    const raw = await providers.light.generate(prompt, {
-      maxTokens: 3000,
-      model: providers.light.model,
-    })
+    try {
+      const raw = await providers.light.generate(prompt, {
+        maxTokens: 3000,
+        model: providers.light.model,
+      })
 
-    const jsonMatch = raw.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      try { return JSON.parse(jsonMatch[0]) } catch {}
+      const jsonMatch = raw.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try { return JSON.parse(jsonMatch[0]) } catch {}
+      }
+      return { raw }
+    } catch (error: any) {
+      this.logger.error(`Erreur offre financière IA pour AO ${aoId}: ${error?.message}`)
+      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
     }
-    return { raw }
   }
 
-  async resumerAO(aoId: string, organisationId: string): Promise<string> {
+  async resumerAO(aoId: string, organisationId: string): Promise<{ resume: string }> {
     const [ao, providers] = await Promise.all([
       this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
       this.getProviders(organisationId),
     ])
     if (!ao) throw new NotFoundException('AO introuvable')
 
-    return providers.light.generate(
-      `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
+    try {
+      const resume = await providers.light.generate(
+        `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
 
 Titre: ${ao.titre}
 Entité: ${ao.entiteAdj}
 Objet: ${ao.objet}
 Budget: ${ao.budgetEstimeGNF ? Number(ao.budgetEstimeGNF).toLocaleString('fr-FR') + ' GNF' : 'NC'}
-Date limite: ${ao.dateLimite.toLocaleDateString('fr-FR')}
+Date limite: ${ao.dateLimite ? new Date(ao.dateLimite).toLocaleDateString('fr-FR') : 'Non précisée'}
 
 Focus: enjeux principaux, opportunités, risques évidents.`,
-      { maxTokens: 500, model: providers.light.model },
-    )
+        { maxTokens: 500, model: providers.light.model },
+      )
+
+      // Sauvegarder le résumé dans l'AO
+      await this.prisma.appelOffre.update({
+        where: { id: aoId },
+        data: { resumeIA: resume },
+      })
+
+      return { resume }
+    } catch (error: any) {
+      this.logger.error(`Erreur résumé IA pour AO ${aoId}: ${error?.message}`)
+      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
+    }
   }
 
   async analyserDocument(texte: string, typeDocument: string): Promise<Record<string, any>> {

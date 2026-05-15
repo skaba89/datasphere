@@ -13,11 +13,12 @@ import {
   Upload, Eye, Search, Filter,
 } from 'lucide-react'
 
-type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
+type DossierStatus = 'BROUILLON' | 'EN_COURS' | 'REVUE' | 'EN_VALIDATION' | 'VALIDE' | 'REJETE' | 'SOUMIS' | 'ARCHIVE'
 
 const STATUS_CONFIG: Record<DossierStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   BROUILLON:     { label: 'Brouillon',    color: 'text-gray-600',   bg: 'bg-gray-100',   icon: <FileText className="w-3.5 h-3.5" /> },
   EN_COURS:      { label: 'En cours',     color: 'text-blue-700',   bg: 'bg-blue-100',   icon: <Clock className="w-3.5 h-3.5" /> },
+  REVUE:         { label: 'En revue',     color: 'text-indigo-700', bg: 'bg-indigo-100', icon: <Eye className="w-3.5 h-3.5" /> },
   EN_VALIDATION: { label: 'En validation',color: 'text-orange-700', bg: 'bg-orange-100', icon: <Shield className="w-3.5 h-3.5" /> },
   VALIDE:        { label: 'Validé ✓',     color: 'text-green-700',  bg: 'bg-green-100',  icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
   REJETE:        { label: 'Rejeté',       color: 'text-red-700',    bg: 'bg-red-100',    icon: <XCircle className="w-3.5 h-3.5" /> },
@@ -244,7 +245,7 @@ export default function DossiersPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Workflow de validation</p>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-wrap">
-          {(['BROUILLON', 'EN_COURS', 'EN_VALIDATION', 'VALIDE', 'SOUMIS'] as DossierStatus[]).map((s, i, arr) => (
+          {(['BROUILLON', 'EN_COURS', 'REVUE', 'EN_VALIDATION', 'VALIDE', 'SOUMIS'] as DossierStatus[]).map((s, i, arr) => (
             <div key={s} className="flex items-center gap-2 flex-shrink-0">
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${STATUS_CONFIG[s].bg} ${STATUS_CONFIG[s].color}`}>
                 {STATUS_CONFIG[s].icon}
@@ -271,6 +272,7 @@ export default function DossiersPage() {
           { value: 'EN_COURS', label: 'En cours' },
           { value: 'EN_VALIDATION', label: 'En validation' },
           { value: 'VALIDE', label: 'Validés' },
+          { value: 'REVUE', label: 'En revue' },
           { value: 'REJETE', label: 'Rejetés' },
           { value: 'SOUMIS', label: 'Soumis' },
         ].map((opt) => (

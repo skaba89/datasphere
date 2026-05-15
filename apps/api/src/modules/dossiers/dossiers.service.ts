@@ -100,6 +100,21 @@ export class DossiersService {
   async update(id: string, organisationId: string, data: any) {
     const dossier = await this.findOne(id, organisationId)
 
+    // Vérifier que le dossier est dans un statut modifiable
+    const editableStatuses: DossierStatus[] = ['BROUILLON', 'EN_COURS', 'REVUE', 'REJETE']
+    if (!editableStatuses.includes(dossier.status as DossierStatus)) {
+      throw new BadRequestException(
+        `Impossible de modifier un dossier en statut "${dossier.status}". Statuts modifiables : ${editableStatuses.join(', ')}`,
+      )
+    }
+
+    // Exclure les champs protégés
+    const protectedFields = ['status', 'organisationId', 'aoId', 'createdById', 'validatedById', 'validatedAt', 'validationNote', 'soumisAt', 'referenceSoumission']
+    const filteredData = { ...data }
+    for (const field of protectedFields) {
+      delete filteredData[field]
+    }
+
     // Sauvegarder une version avant modification
     if (dossier.memTechnique || dossier.offreFinanciere) {
       await this.prisma.dossierVersion.create({
@@ -117,7 +132,7 @@ export class DossiersService {
 
     return this.prisma.dossier.update({
       where: { id },
-      data: { ...data, version: { increment: 1 } },
+      data: { ...filteredData, version: { increment: 1 } },
     })
   }
 

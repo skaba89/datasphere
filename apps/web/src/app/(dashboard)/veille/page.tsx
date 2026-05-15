@@ -25,7 +25,7 @@ const SOURCE_META: Record<string, { icon: string; desc: string; color: string }>
   BAD:            { icon: '🏦', desc: 'Banque Africaine de Développement',            color: 'text-amber-700 bg-amber-50 border-amber-200' },
 }
 
-export default function ViellePage() {
+export default function VeillePage() {
   const qc = useQueryClient()
   const [lastResults, setLastResults] = useState<ScrapingResult[] | null>(null)
   const [sourceFilter, setSourceFilter] = useState('')

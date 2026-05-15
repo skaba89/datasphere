@@ -141,14 +141,16 @@ export default function ParametresPage() {
   const { data: aiConfig } = useQuery({
     queryKey: ['ai-config'],
     queryFn: () => aiApi.get('/config').then(r => r.data),
-    onSuccess: (data: any) => {
-      if (!selectedProvider) {
-        setSelectedProvider(data.provider)
-        setSelectedHeavy(data.modelHeavy)
-        setSelectedLight(data.modelLight)
-      }
-    },
-  } as any)
+  })
+
+  // Remplace le onSuccess deprecated de TanStack Query v5
+  useEffect(() => {
+    if (aiConfig && !selectedProvider) {
+      setSelectedProvider(aiConfig.provider)
+      setSelectedHeavy(aiConfig.modelHeavy)
+      setSelectedLight(aiConfig.modelLight)
+    }
+  }, [aiConfig, selectedProvider])
 
   const { data: teamUsers } = useQuery({
     queryKey: ['team-users'],
@@ -750,7 +752,16 @@ export default function ParametresPage() {
 
         <div className="space-y-2">
           {docs?.map((doc: any) => {
-            const conf = STATUT_DOC[doc.statut] || STATUT_DOC.VALIDE
+            // Calculer le statut du document côté client (le backend l'ajoute via findAll)
+            let docStatut = 'VALIDE'
+            if (doc.dateExpiration) {
+              const expDate = new Date(doc.dateExpiration)
+              const now = new Date()
+              const dans30j = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+              if (expDate < now) docStatut = 'EXPIRE'
+              else if (expDate < dans30j) docStatut = 'EXPIRE_BIENTOT'
+            }
+            const conf = STATUT_DOC[docStatut] || STATUT_DOC.VALIDE
             const Icon = conf.icon
             return (
               <div key={doc.id} className="flex items-center gap-3 py-2 border-b last:border-0">

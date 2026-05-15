@@ -26,7 +26,8 @@ api.interceptors.response.use(
           error.config.headers.Authorization = `Bearer ${data.accessToken}`
           return api(error.config)
         } catch {
-          localStorage.clear()
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
           window.location.href = '/login'
         }
       }
@@ -163,4 +164,11 @@ export const documentsApi = {
   create: (data: any) => api.post('/documents', data),
   update: (id: string, data: any) => api.put(`/documents/${id}`, data),
   delete: (id: string) => api.delete(`/documents/${id}`),
+}
+
+// ── Paiements ─────────────────────────────────────────────────────────────────
+export const paymentsApi = {
+  initier: (data: { plan: string; methode: string }) => api.post('/payments/initier', data),
+  confirmer: (id: string, data: { transactionId: string }) => api.post(`/payments/${id}/confirmer`, data),
+  historique: () => api.get('/payments/historique'),
 }

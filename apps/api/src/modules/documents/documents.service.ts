@@ -39,6 +39,13 @@ export class DocumentsService {
   }
 
   async update(id: string, organisationId: string, data: any) {
+    // Vérifier que le document appartient à l'organisation
+    const doc = await this.prisma.orgDocument.findFirst({
+      where: { id, organisationId },
+    })
+    if (!doc) {
+      throw new NotFoundException('Document non trouvé ou accès non autorisé')
+    }
     return this.prisma.orgDocument.update({
       where: { id },
       data: {

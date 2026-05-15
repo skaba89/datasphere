@@ -18,8 +18,9 @@ const INTERACTION_TYPES = [
   { value: 'APPEL_TELEPHONIQUE', label: 'Appel téléphonique', icon: Phone },
   { value: 'EMAIL', label: 'Email', icon: Mail },
   { value: 'EVENEMENT', label: 'Événement', icon: Video },
-  { value: 'DOCUMENT_REMIS', label: 'Document remis', icon: FileText },
+  { value: 'VISITE', label: 'Visite', icon: FileText },
   { value: 'NOTE', label: 'Note interne', icon: MessageSquare },
+  { value: 'WEBINAIRE', label: 'Webinaire', icon: Video },
 ]
 
 function ProximiteLabel({ score }: { score: number }) {
@@ -47,9 +48,9 @@ export default function ContactDetailPage() {
   const [showInteractionForm, setShowInteractionForm] = useState(false)
   const [editing, setEditing] = useState(false)
   const [interactionForm, setInteractionForm] = useState({
-    type: 'REUNION',
-    description: '',
-    resultat: '',
+    type: 'REUNION' as string,
+    objet: '',
+    suivi: '',
   })
   const [editForm, setEditForm] = useState<Record<string, string>>({})
 
@@ -59,12 +60,18 @@ export default function ContactDetailPage() {
   })
 
   const interactionMutation = useMutation({
-    mutationFn: () => contactsApi.addInteraction(id, interactionForm),
+    mutationFn: () => contactsApi.addInteraction(id, {
+      type: interactionForm.type,
+      objet: interactionForm.objet,
+      resume: interactionForm.objet,
+      suivi: interactionForm.suivi,
+      date: new Date().toISOString(),
+    }),
     onSuccess: () => {
       toast.success('Interaction enregistrée')
       qc.invalidateQueries({ queryKey: ['contact', id] })
       setShowInteractionForm(false)
-      setInteractionForm({ type: 'REUNION', description: '', resultat: '' })
+      setInteractionForm({ type: 'REUNION', objet: '', suivi: '' })
     },
     onError: () => toast.error('Erreur lors de l\'enregistrement'),
   })
@@ -311,15 +318,15 @@ export default function ContactDetailPage() {
                 ))}
               </div>
               <textarea
-                value={interactionForm.description}
-                onChange={(e) => setInteractionForm((f) => ({ ...f, description: e.target.value }))}
+                value={interactionForm.objet}
+                onChange={(e) => setInteractionForm((f) => ({ ...f, objet: e.target.value }))}
                 rows={3}
                 placeholder="Décrivez l'interaction : contexte, points discutés..."
                 className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
               />
               <input
-                value={interactionForm.resultat}
-                onChange={(e) => setInteractionForm((f) => ({ ...f, resultat: e.target.value }))}
+                value={interactionForm.suivi}
+                onChange={(e) => setInteractionForm((f) => ({ ...f, suivi: e.target.value }))}
                 placeholder="Résultat / prochaine étape"
                 className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
               />
@@ -332,7 +339,7 @@ export default function ContactDetailPage() {
                 </button>
                 <button
                   onClick={() => interactionMutation.mutate()}
-                  disabled={!interactionForm.description || interactionMutation.isPending}
+                  disabled={!interactionForm.objet || interactionMutation.isPending}
                   className="text-sm bg-primary-500 text-white px-4 py-1.5 rounded-lg hover:bg-primary-600 disabled:opacity-50 font-medium flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />

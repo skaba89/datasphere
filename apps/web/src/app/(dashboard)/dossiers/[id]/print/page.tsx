@@ -39,8 +39,33 @@ export default function DossierPrintPage() {
 
   if (!dossier) return <p className="p-8 text-gray-500">Dossier introuvable</p>
 
-  const ao = dossier.appelOffre
-  const contenu = (dossier.contenu ?? {}) as Record<string, string>
+  const ao = dossier.ao
+  // Construire le contenu à partir des champs structurés du dossier
+  const contenu: Record<string, string> = {}
+  if (dossier.memTechnique && typeof dossier.memTechnique === 'object') {
+    const mt = dossier.memTechnique as Record<string, any>
+    contenu.memTechnique = mt.content ?? mt.text ?? JSON.stringify(mt, null, 2)
+  }
+  if (dossier.offreFinanciere && typeof dossier.offreFinanciere === 'object') {
+    const of2 = dossier.offreFinanciere as Record<string, any>
+    contenu.offreFinanciere = of2.content ?? of2.text ?? JSON.stringify(of2, null, 2)
+  }
+  if (dossier.planning && typeof dossier.planning === 'object') {
+    const pl = dossier.planning as Record<string, any>
+    contenu.planning = pl.content ?? pl.text ?? JSON.stringify(pl, null, 2)
+  }
+  if (dossier.team && typeof dossier.team === 'object') {
+    const tm = dossier.team as Record<string, any>
+    contenu.team = tm.content ?? tm.text ?? JSON.stringify(tm, null, 2)
+  }
+  if (dossier.risques && typeof dossier.risques === 'object') {
+    const rk = dossier.risques as Record<string, any>
+    contenu.risques = rk.content ?? rk.text ?? JSON.stringify(rk, null, 2)
+  }
+  if (dossier.piecesAdmin && typeof dossier.piecesAdmin === 'object') {
+    const pa = dossier.piecesAdmin as Record<string, any>
+    contenu.piecesAdmin = pa.content ?? pa.text ?? JSON.stringify(pa, null, 2)
+  }
 
   return (
     <div className="print-container">
@@ -71,7 +96,7 @@ export default function DossierPrintPage() {
             <div className="meta-block">
               <p><strong>Appel d&apos;offres :</strong> {ao.titre}</p>
               {ao.entiteAdj && <p><strong>Entité adjudicatrice :</strong> {ao.entiteAdj}</p>}
-              {ao.reference && <p><strong>Référence :</strong> {ao.reference}</p>}
+              {ao.sourceId && <p><strong>Référence :</strong> {ao.sourceId}</p>}
               {ao.budgetEstimeGNF && <p><strong>Budget estimé :</strong> {formatGNF(Number(ao.budgetEstimeGNF))}</p>}
               {ao.dateLimite && <p><strong>Date limite :</strong> {new Date(ao.dateLimite).toLocaleDateString('fr-FR')}</p>}
             </div>

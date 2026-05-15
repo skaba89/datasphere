@@ -30,6 +30,8 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (user, accessToken, refreshToken) => {
+        // zustand/persist gère déjà la persistance, mais on garde les tokens séparés
+        // pour l'intercepteur axios qui lit directement localStorage
         localStorage.setItem('access_token', accessToken)
         localStorage.setItem('refresh_token', refreshToken)
         set({ user, accessToken, refreshToken, isAuthenticated: true })

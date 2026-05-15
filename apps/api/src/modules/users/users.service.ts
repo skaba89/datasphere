@@ -26,15 +26,19 @@ export class UsersService {
 
   async update(id: string, organisationId: string, data: any) {
     await this.findOne(id, organisationId)
-    const updateData: any = { ...data }
+    // Liste blanche des champs autorisés — empêche la modification de role, organisationId, etc.
+    const allowedFields = ['prenom', 'nom', 'telephone', 'avatarUrl']
+    const updateData: any = {}
+    for (const key of allowedFields) {
+      if (data[key] !== undefined) updateData[key] = data[key]
+    }
     if (data.password) {
       updateData.passwordHash = await hash(data.password, 12)
-      delete updateData.password
     }
     return this.prisma.user.update({
       where: { id },
       data: updateData,
-      select: { id: true, email: true, prenom: true, nom: true, role: true },
+      select: { id: true, email: true, prenom: true, nom: true, role: true, telephone: true, avatarUrl: true },
     })
   }
 

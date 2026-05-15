@@ -173,7 +173,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     toast.success('Déconnexion réussie')
   }
 
-  if (!isAuthenticated || !user) return null
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">

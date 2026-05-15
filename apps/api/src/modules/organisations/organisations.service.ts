@@ -25,12 +25,19 @@ export class OrganisationsService {
   }
 
   async update(id: string, data: any) {
-    let settingsData: any = undefined
-    if (data.settings !== undefined) {
-      const current = await this.prisma.organisation.findUnique({ where: { id }, select: { settings: true } })
-      settingsData = { ...((current?.settings as object) ?? {}), ...data.settings }
+    // Exclure les champs protégés — empêche la modification de plan, planStatus, planExpiresAt
+    const protectedFields = ['plan', 'planStatus', 'planExpiresAt', 'trialEndsAt', 'scoringConfig', 'aiConfig']
+    const filteredData = { ...data }
+    for (const field of protectedFields) {
+      delete filteredData[field]
     }
-    const { settings, ...rest } = data
+
+    let settingsData: any = undefined
+    if (filteredData.settings !== undefined) {
+      const current = await this.prisma.organisation.findUnique({ where: { id }, select: { settings: true } })
+      settingsData = { ...((current?.settings as object) ?? {}), ...filteredData.settings }
+    }
+    const { settings, ...rest } = filteredData
     return this.prisma.organisation.update({
       where: { id },
       data: {

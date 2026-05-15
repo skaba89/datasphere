@@ -20,6 +20,22 @@ export interface ScoringResult {
 export class ScoringService {
   constructor(private prisma: PrismaService) {}
 
+  async getScoring(aoId: string, organisationId: string) {
+    const ao = await this.prisma.appelOffre.findFirst({
+      where: { id: aoId, organisationId },
+      select: { score: true, scoreDetails: true, scoreUpdatedAt: true },
+    })
+    if (!ao) throw new NotFoundException('AO introuvable')
+    const details = ao.scoreDetails as any
+    return {
+      scoreFinal: ao.score,
+      scoreUpdatedAt: ao.scoreUpdatedAt,
+      dimensions: details?.dimensions ?? [],
+      recommandation: details?.recommandation ?? null,
+      alertes: details?.alertes ?? [],
+    }
+  }
+
   async calculerScore(aoId: string, organisationId: string): Promise<ScoringResult> {
     const [ao, org] = await Promise.all([
       this.prisma.appelOffre.findFirst({

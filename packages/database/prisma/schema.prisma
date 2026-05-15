@@ -389,6 +389,7 @@ model Contact {
   interactions    Interaction[]
 
   @@index([organisationId])
+  @@index([scoreProximite])
   @@index([entiteId])
   @@map("contacts")
 }
@@ -433,10 +434,11 @@ model Interaction {
   ao        AppelOffre? @relation(fields: [aoId], references: [id])
 
   userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contactId])
   @@index([aoId])
+  @@index([userId])
   @@map("interactions")
 }
 
@@ -497,6 +499,8 @@ model Dossier {
   @@index([aoId])
   @@index([organisationId])
   @@index([status])
+  @@index([createdById])
+  @@index([validatedById])
   @@map("dossiers")
 }
 
@@ -515,6 +519,7 @@ model DossierValidation {
   valideur     User    @relation("ValidationValideur", fields: [valideurId], references: [id])
 
   @@index([dossierId])
+  @@index([valideurId])
   @@map("dossier_validations")
 }
 
@@ -683,6 +688,7 @@ model Alerte {
 
   @@index([lue])
   @@index([organisationId])
+  @@index([aoId])
   @@map("alertes")
 }
 
@@ -708,6 +714,7 @@ model Payment {
 
   @@index([organisationId])
   @@index([status])
+  @@index([transactionId])
   @@map("payments")
 }
 
@@ -728,7 +735,7 @@ model AuditLog {
   userAgent  String?
 
   userId     String?
-  user       User?   @relation(fields: [userId], references: [id])
+  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([entity, entityId])

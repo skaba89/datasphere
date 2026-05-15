@@ -119,9 +119,11 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
-            <strong>Compte démo :</strong> admin@techguinee.gn / Admin@2026!
-          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+              <strong>Compte démo :</strong> admin@techguinee.gn / Admin@2026!
+            </div>
+          )}
         </div>
       </div>
     </div>

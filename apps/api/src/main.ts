@@ -19,7 +19,7 @@ async function bootstrap() {
 
   const config = app.get(ConfigService)
   const port = config.get<number>('PORT', 4000)
-  const corsOrigins = config.get<string>('CORS_ORIGINS', 'http://localhost:3000')
+  const corsOrigins = config.get<string>('CORS_ORIGINS', 'http://localhost:3000,http://localhost:3001')
 
   // Security
   app.use(helmet())

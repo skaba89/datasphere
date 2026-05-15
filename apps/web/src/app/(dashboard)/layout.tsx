@@ -11,7 +11,7 @@ import {
   AlertTriangle, Clock, Shield, X, Radio, Kanban, Search,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
-import { authApi, aoApi, dossiersApi, notifApi } from '@/lib/api'
+import { authApi, aoApi, dossiersApi, notifApi, orgApi } from '@/lib/api'
 import { toast } from 'sonner'
 import { clsx } from 'clsx'
 import { CommandPalette } from '@/components/CommandPalette'
@@ -159,9 +159,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const pathname = usePathname()
 
+  // Fetch org data to check onboarding status
+  const { data: orgData } = useQuery({
+    queryKey: ['organisation'],
+    queryFn: () => orgApi.get().then(r => r.data),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // Redirect to /login if not authenticated
   useEffect(() => {
     if (!isAuthenticated) router.push('/login')
   }, [isAuthenticated, router])
+
+  // Redirect to /onboarding if org needs setup (no secteurs or no rccm/ifu)
+  useEffect(() => {
+    if (!isAuthenticated || !orgData || pathname === '/onboarding') return
+    const needsOnboarding =
+      !orgData.secteurs || orgData.secteurs.length === 0 ||
+      (!orgData.rccm && !orgData.ifu)
+    if (needsOnboarding) {
+      router.replace('/onboarding')
+    }
+  }, [isAuthenticated, orgData, pathname, router])
 
   const handleLogout = async () => {
     try {
@@ -174,6 +194,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   if (!isAuthenticated || !user) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+
+  // While org data is loading, show spinner to prevent flash of dashboard
+  // before the onboarding redirect kicks in
+  if (!orgData && pathname !== '/onboarding') {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />

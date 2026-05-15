@@ -18,14 +18,25 @@ export function joursRestants(dateLimite: string | Date): number {
   return Math.floor((new Date(dateLimite).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 }
 
-export function scoreRecommandation(score: number): 'GO' | 'MAYBE' | 'NO_GO' {
-  if (score >= 65) return 'GO'
-  if (score >= 50) return 'MAYBE'
+// Seuils de scoring — doivent correspondre au backend (scoring.service.ts)
+// Le backend utilise config.seuilGo (default 65) et seuilGo - 15 pour MAYBE
+const SCORING_THRESHOLDS = {
+  go: 65,
+  maybe: 50,
+} as const
+
+export function scoreRecommandation(score: number, seuilGo?: number): 'GO' | 'MAYBE' | 'NO_GO' {
+  const go = seuilGo ?? SCORING_THRESHOLDS.go
+  const maybe = go - 15
+  if (score >= go) return 'GO'
+  if (score >= maybe) return 'MAYBE'
   return 'NO_GO'
 }
 
-export function scoreColor(score: number): string {
-  if (score >= 65) return 'text-green-700 bg-green-100'
-  if (score >= 50) return 'text-yellow-700 bg-yellow-100'
+export function scoreColor(score: number, seuilGo?: number): string {
+  const go = seuilGo ?? SCORING_THRESHOLDS.go
+  const maybe = go - 15
+  if (score >= go) return 'text-green-700 bg-green-100'
+  if (score >= maybe) return 'text-yellow-700 bg-yellow-100'
   return 'text-red-700 bg-red-100'
 }

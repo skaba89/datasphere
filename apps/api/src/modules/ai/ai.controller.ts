@@ -1,6 +1,9 @@
-import { Controller, Post, Get, Param, Body, UseGuards, Request } from '@nestjs/common'
+import { Controller, Post, Get, Param, Body, UseGuards, Request, NotFoundException } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../../common/guards/roles.guard'
+import { Roles } from '../../common/decorators/roles.decorator'
+import { UserRole } from '@guineatender/database'
 import { AiService } from './ai.service'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { IsOptional, IsNumber, IsString, IsIn } from 'class-validator'
@@ -17,7 +20,7 @@ class GenererOffreFinanciereDto {
 }
 
 class UpdateAiConfigDto {
-  @IsIn(['anthropic', 'openrouter', 'groq', 'glm', 'qwen', 'gemini'])
+  @IsIn(['anthropic', 'openrouter', 'groq', 'glm', 'qwen', 'gemini', 'mistral'])
   provider: AiProviderName
 
   @IsOptional() @IsString() modelHeavy?: string
@@ -86,11 +89,21 @@ const PROVIDERS_CATALOG = {
       { id: 'gemini-1.5-flash',      label: 'Gemini 1.5 Flash',      tier: 'light' },
     ],
   },
+  mistral: {
+    label: 'Mistral AI',
+    description: 'Modèles Mistral — excellence francophone, idéal pour la rédaction en français',
+    models: [
+      { id: 'mistral-large-latest',  label: 'Mistral Large',   tier: 'heavy' },
+      { id: 'mistral-medium-latest', label: 'Mistral Medium',  tier: 'heavy' },
+      { id: 'mistral-small-latest',  label: 'Mistral Small',   tier: 'light' },
+      { id: 'open-mistral-nemo',     label: 'Mistral Nemo',    tier: 'light' },
+    ],
+  },
 }
 
 @ApiTags('AI')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('ai')
 export class AiController {
   constructor(
@@ -136,6 +149,7 @@ export class AiController {
   }
 
   @Post('config')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Configurer le provider IA de l\'organisation (ADMIN/MANAGER)' })
   async updateConfig(@Request() req: any, @Body() dto: UpdateAiConfigDto) {
     const defaults = DEFAULT_MODELS[dto.provider]

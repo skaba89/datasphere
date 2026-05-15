@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { AiProviderFactory } from './ai-provider.factory'
 
@@ -102,7 +102,7 @@ ADAPTATION CONTEXTE GUINÉEN: Adapte la solution aux spécificités locales — 
       this.getProviders(organisationId),
     ])
 
-    if (!ao || !org) throw new Error('AO ou organisation introuvable')
+    if (!ao || !org) throw new NotFoundException('AO ou organisation introuvable')
 
     let solutionContext = ''
     if (options?.solutionId) {
@@ -152,7 +152,7 @@ MISSION: Rédige un mémoire technique professionnel et structuré en français 
     const result = await providers.heavy.generate(prompt, {
       maxTokens: 8000,
       model: providers.heavy.model,
-    } as any)
+    })
 
     this.logger.log(`Mémoire technique générée — provider: ${providers.config.provider}, modèle: ${providers.heavy.model}, ${result.length} chars`)
     return result
@@ -171,7 +171,7 @@ MISSION: Rédige un mémoire technique professionnel et structuré en français 
       this.getProviders(organisationId),
     ])
 
-    if (!ao) throw new Error('AO introuvable')
+    if (!ao) throw new NotFoundException('AO introuvable')
 
     const prompt = `Tu es un expert financier en marchés publics en Guinée. Génère une offre financière détaillée et réaliste.
 
@@ -199,7 +199,7 @@ Inclure: développement logiciel, infrastructure/hébergement, formation, mainte
     const raw = await providers.light.generate(prompt, {
       maxTokens: 3000,
       model: providers.light.model,
-    } as any)
+    })
 
     const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
@@ -213,7 +213,7 @@ Inclure: développement logiciel, infrastructure/hébergement, formation, mainte
       this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
       this.getProviders(organisationId),
     ])
-    if (!ao) throw new Error('AO introuvable')
+    if (!ao) throw new NotFoundException('AO introuvable')
 
     return providers.light.generate(
       `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
@@ -225,7 +225,7 @@ Budget: ${ao.budgetEstimeGNF ? Number(ao.budgetEstimeGNF).toLocaleString('fr-FR'
 Date limite: ${ao.dateLimite.toLocaleDateString('fr-FR')}
 
 Focus: enjeux principaux, opportunités, risques évidents.`,
-      { maxTokens: 500, model: providers.light.model } as any,
+      { maxTokens: 500, model: providers.light.model },
     )
   }
 
@@ -241,7 +241,7 @@ ${texte.substring(0, 8000)}
 
 Extrais: titre, entite_adj, objet, budget_estime, date_publication, date_limite, duree_marche, criteres_eligibilite (liste), criteres_evaluation (liste), secteur, type_marche.
 Réponds UNIQUEMENT en JSON valide.`,
-      { maxTokens: 2000, model: provider.model } as any,
+      { maxTokens: 2000, model: provider.model },
     )
 
     try {

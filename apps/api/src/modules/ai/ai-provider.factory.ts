@@ -82,6 +82,13 @@ export class AiProviderFactory {
           'https://generativelanguage.googleapis.com/v1beta/openai',
         )
 
+      case 'mistral':
+        return new OpenAICompatibleProvider(
+          'mistral',
+          this.config.getOrThrow('MISTRAL_API_KEY'),
+          'https://api.mistral.ai/v1',
+        )
+
       default:
         this.logger.warn(`Provider inconnu "${name}", fallback sur Anthropic`)
         return new AnthropicProvider(

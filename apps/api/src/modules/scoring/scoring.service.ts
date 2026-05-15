@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 
 export interface ScoringDimension {
@@ -35,7 +35,7 @@ export class ScoringService {
       }),
     ])
 
-    if (!ao || !org) throw new Error('AO ou organisation introuvable')
+    if (!ao || !org) throw new NotFoundException('AO ou organisation introuvable')
 
     const config = org.scoringConfig as any || {}
     const dimensions: ScoringDimension[] = []

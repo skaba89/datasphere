@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { InternalServerErrorException } from '@nestjs/common'
 import { AiProvider, AiGenerateOptions } from './ai-provider.interface'
 
 /**
@@ -32,14 +33,14 @@ export class OpenAICompatibleProvider implements AiProvider {
     messages.push({ role: 'user', content: prompt })
 
     const response = await this.client.chat.completions.create({
-      model: options['model'] ?? 'gpt-4o-mini',
+      model: options.model ?? 'gpt-4o-mini',
       max_tokens: options.maxTokens ?? 4096,
       temperature: options.temperature ?? 0.7,
       messages,
     })
 
     const content = response.choices[0]?.message?.content
-    if (!content) throw new Error(`Réponse ${this.name} invalide ou vide`)
+    if (!content) throw new InternalServerErrorException(`Réponse ${this.name} invalide ou vide`)
     return content
   }
 }

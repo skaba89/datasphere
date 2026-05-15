@@ -213,6 +213,7 @@ model Organisation {
   payments         Payment[]
   references       Reference[]
   experts          Expert[]
+  alertes          Alerte[]
 
   @@index([slug])
   @@map("organisations")
@@ -677,7 +678,11 @@ model Alerte {
   aoId     String?
   ao       AppelOffre? @relation(fields: [aoId], references: [id])
 
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
   @@index([lue])
+  @@index([organisationId])
   @@map("alertes")
 }
 

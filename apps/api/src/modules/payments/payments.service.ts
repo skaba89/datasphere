@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { PaymentMethod, SubscriptionPlan } from '@guineatender/database'
@@ -72,7 +72,15 @@ export class PaymentsService {
     }
   }
 
-  async confirmerPaiement(paymentId: string, transactionId: string) {
+  async confirmerPaiement(paymentId: string, transactionId: string, organisationId: string) {
+    // Vérifier que le paiement appartient à l'organisation
+    const existing = await this.prisma.payment.findFirst({
+      where: { id: paymentId, organisationId },
+    })
+    if (!existing) {
+      throw new NotFoundException('Paiement non trouvé ou accès non autorisé')
+    }
+
     const payment = await this.prisma.payment.update({
       where: { id: paymentId },
       data: {

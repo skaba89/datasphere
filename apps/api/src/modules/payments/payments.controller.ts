@@ -18,8 +18,8 @@ export class PaymentsController {
 
   @Post(':id/confirmer')
   @ApiOperation({ summary: 'Confirmer un paiement (webhook ou manuel)' })
-  confirmer(@Param('id') id: string, @Body() body: { transactionId: string }) {
-    return this.service.confirmerPaiement(id, body.transactionId)
+  confirmer(@Request() req: any, @Param('id') id: string, @Body() body: { transactionId: string }) {
+    return this.service.confirmerPaiement(id, body.transactionId, req.user.organisationId)
   }
 
   @Get('historique')

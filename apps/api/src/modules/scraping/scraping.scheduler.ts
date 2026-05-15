@@ -59,6 +59,7 @@ export class ScrapingScheduler {
           message: `L'AO "${ao.titre}" expire dans ${heuresRestantes}h. Vérifiez que votre dossier est prêt à soumettre.`,
           type: 'DEADLINE_URGENTE',
           aoId: ao.id,
+          organisationId: ao.organisationId,
         },
       })
     }

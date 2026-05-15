@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { DocumentType } from '@guineatender/database'
 
@@ -48,7 +48,14 @@ export class DocumentsService {
     })
   }
 
-  async delete(id: string) {
+  async delete(id: string, organisationId: string) {
+    // Vérifier que le document appartient à l'organisation
+    const doc = await this.prisma.orgDocument.findFirst({
+      where: { id, organisationId },
+    })
+    if (!doc) {
+      throw new NotFoundException('Document non trouvé ou accès non autorisé')
+    }
     return this.prisma.orgDocument.delete({ where: { id } })
   }
 

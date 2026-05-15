@@ -37,7 +37,7 @@ export class DocumentsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Supprimer un document' })
-  delete(@Param('id') id: string) {
-    return this.service.delete(id)
+  delete(@Request() req: any, @Param('id') id: string) {
+    return this.service.delete(id, req.user.organisationId)
   }
 }

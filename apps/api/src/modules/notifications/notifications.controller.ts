@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, UseGuards, Request } from '@nestjs/common'
+import { Controller, Get, Patch, Param, Query, UseGuards, Request, NotFoundException } from '@nestjs/common'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PrismaService } from '../../common/prisma/prisma.service'
@@ -15,11 +15,8 @@ export class NotificationsController {
   async findAll(@Request() req: any, @Query('lue') lue?: string) {
     const alertes = await this.prisma.alerte.findMany({
       where: {
+        organisationId: req.user.organisationId,
         ...(lue !== undefined ? { lue: lue === 'true' } : {}),
-        OR: [
-          { ao: { organisationId: req.user.organisationId } },
-          { aoId: null },
-        ],
       },
       include: {
         ao: { select: { id: true, titre: true } },
@@ -35,11 +32,8 @@ export class NotificationsController {
   async countUnread(@Request() req: any) {
     const count = await this.prisma.alerte.count({
       where: {
+        organisationId: req.user.organisationId,
         lue: false,
-        OR: [
-          { ao: { organisationId: req.user.organisationId } },
-          { aoId: null },
-        ],
       },
     })
     return { count }
@@ -47,7 +41,14 @@ export class NotificationsController {
 
   @Patch(':id/lire')
   @ApiOperation({ summary: 'Marquer une alerte comme lue' })
-  async marquerLue(@Param('id') id: string) {
+  async marquerLue(@Request() req: any, @Param('id') id: string) {
+    // Vérifier que l'alerte appartient à l'organisation de l'utilisateur
+    const alerte = await this.prisma.alerte.findFirst({
+      where: { id, organisationId: req.user.organisationId },
+    })
+    if (!alerte) {
+      throw new NotFoundException('Alerte non trouvée')
+    }
     return this.prisma.alerte.update({
       where: { id },
       data: { lue: true, lueAt: new Date() },
@@ -59,11 +60,8 @@ export class NotificationsController {
   async marquerToutLu(@Request() req: any) {
     await this.prisma.alerte.updateMany({
       where: {
+        organisationId: req.user.organisationId,
         lue: false,
-        OR: [
-          { ao: { organisationId: req.user.organisationId } },
-          { aoId: null },
-        ],
       },
       data: { lue: true, lueAt: new Date() },
     })

@@ -253,7 +253,7 @@ export default function VeillePage() {
               <div className="divide-y">
                 {nouveaux.map((ao: any) => {
                   const jours = ao.dateLimite ? joursRestants(ao.dateLimite) : null
-                  const score = ao.scoreFinal ?? ao.score
+                  const score = ao.score
                   const sourceMeta = SOURCE_META[ao.source] ?? { icon: '📄', desc: '', color: '' }
                   return (
                     <div key={ao.id} className="p-4 hover:bg-gray-50 transition-colors">
@@ -275,9 +275,12 @@ export default function VeillePage() {
                               </span>
                             )}
                           </div>
-                          <h3 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2">
+                          <Link
+                            href={`/appels-offres/${ao.id}`}
+                            className="text-sm font-semibold text-gray-900 hover:text-orange-600 leading-tight line-clamp-2 block"
+                          >
                             {ao.titre}
-                          </h3>
+                          </Link>
                           <p className="text-xs text-gray-500 mt-0.5 truncate">{ao.entiteAdj}</p>
                           {ao.budgetEstimeGNF && (
                             <p className="text-xs text-orange-600 font-medium mt-1">{formatGNF(ao.budgetEstimeGNF)}</p>

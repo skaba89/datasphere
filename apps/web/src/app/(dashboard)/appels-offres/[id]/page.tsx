@@ -21,21 +21,21 @@ const STATUS_PIPELINE = [
 ]
 
 const DIMENSIONS_LABELS: Record<string, string> = {
-  alignementSectoriel: 'Alignement sectoriel',
-  capaciteFinanciere: 'Capacité financière',
-  eligibilite: 'Éligibilité',
-  concurrence: 'Concurrence',
-  relationInstitutionnelle: 'Relation institutionnelle',
-  delai: 'Délai réaliste',
+  'Alignement sectoriel': 'Alignement sectoriel',
+  'Capacité financière': 'Capacité financière',
+  'Critères d\'éligibilité': 'Éligibilité',
+  'Concurrence estimée': 'Concurrence',
+  'Relation institutionnelle': 'Relation institutionnelle',
+  'Délai de réponse': 'Délai réaliste',
 }
 
 const DIMENSIONS_ICONS: Record<string, React.ReactNode> = {
-  alignementSectoriel: <TrendingUp className="w-4 h-4" />,
-  capaciteFinanciere: <Building2 className="w-4 h-4" />,
-  eligibilite: <CheckCircle2 className="w-4 h-4" />,
-  concurrence: <Users className="w-4 h-4" />,
-  relationInstitutionnelle: <Users className="w-4 h-4" />,
-  delai: <Clock className="w-4 h-4" />,
+  'Alignement sectoriel': <TrendingUp className="w-4 h-4" />,
+  'Capacité financière': <Building2 className="w-4 h-4" />,
+  'Critères d\'éligibilité': <CheckCircle2 className="w-4 h-4" />,
+  'Concurrence estimée': <Users className="w-4 h-4" />,
+  'Relation institutionnelle': <Users className="w-4 h-4" />,
+  'Délai de réponse': <Clock className="w-4 h-4" />,
 }
 
 export default function AODetailPage() {
@@ -377,7 +377,7 @@ export default function AODetailPage() {
                       style={{ width: `${(dim.score / (dim.poids * 100)) * 100}%` }}
                     />
                   </div>
-                  {dim.detail && <p className="text-xs text-gray-400 mt-0.5">{dim.detail}</p>}
+                  {dim.raison && <p className="text-xs text-gray-400 mt-0.5">{dim.raison}</p>}
                 </div>
               ))}
             </div>

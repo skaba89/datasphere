@@ -15,7 +15,7 @@ export class NotificationsController {
   async findAll(@Request() req: any, @Query('lue') lue?: string) {
     const alertes = await this.prisma.alerte.findMany({
       where: {
-        organisationId: req.user.organisationId,
+        ao: { organisationId: req.user.organisationId },
         ...(lue !== undefined ? { lue: lue === 'true' } : {}),
       },
       include: {
@@ -32,7 +32,7 @@ export class NotificationsController {
   async countUnread(@Request() req: any) {
     const count = await this.prisma.alerte.count({
       where: {
-        organisationId: req.user.organisationId,
+        ao: { organisationId: req.user.organisationId },
         lue: false,
       },
     })
@@ -42,9 +42,12 @@ export class NotificationsController {
   @Patch(':id/lire')
   @ApiOperation({ summary: 'Marquer une alerte comme lue' })
   async marquerLue(@Request() req: any, @Param('id') id: string) {
-    // Vérifier que l'alerte appartient à l'organisation de l'utilisateur
+    // Vérifier que l'alerte appartient à l'organisation de l'utilisateur via la relation ao
     const alerte = await this.prisma.alerte.findFirst({
-      where: { id, organisationId: req.user.organisationId },
+      where: {
+        id,
+        ao: { organisationId: req.user.organisationId },
+      },
     })
     if (!alerte) {
       throw new NotFoundException('Alerte non trouvée')
@@ -58,13 +61,22 @@ export class NotificationsController {
   @Patch('lire-tout')
   @ApiOperation({ summary: 'Marquer toutes les alertes comme lues' })
   async marquerToutLu(@Request() req: any) {
-    await this.prisma.alerte.updateMany({
+    // Récupérer les IDs des alertes de l'organisation via la relation ao
+    const alertes = await this.prisma.alerte.findMany({
       where: {
-        organisationId: req.user.organisationId,
+        ao: { organisationId: req.user.organisationId },
         lue: false,
       },
-      data: { lue: true, lueAt: new Date() },
+      select: { id: true },
     })
+    const ids = alertes.map(a => a.id)
+
+    if (ids.length > 0) {
+      await this.prisma.alerte.updateMany({
+        where: { id: { in: ids } },
+        data: { lue: true, lueAt: new Date() },
+      })
+    }
     return { message: 'Toutes les alertes marquées comme lues' }
   }
 }

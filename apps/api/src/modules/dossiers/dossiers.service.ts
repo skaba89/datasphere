@@ -31,8 +31,8 @@ export class DossiersService {
   ) {}
 
   async findAll(organisationId: string, query: { aoId?: string; status?: string; page?: number; limit?: number }) {
-    const page = query.page ?? 1
-    const limit = query.limit ?? 20
+    const page = Number(query.page) || 1
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 20))
     const where = {
       organisationId,
       ...(query.aoId && { aoId: query.aoId }),

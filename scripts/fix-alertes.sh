@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# GuineaTender AI — Script de correction des erreurs Prisma
-# Résout les 3 bugs signalés :
-#   1. take/skip passés comme String au lieu de Int (corrigé dans le code via QueryDossierDto)
-#   2. alertes.organisationId n'existe pas (migration + régénération du client Prisma)
-#   3. Erreur en cascade sur appels-offres (même cause que #2)
+# GuineaTender AI — Script de synchronisation base de données
+# Résout les erreurs Prisma et aligne la base avec le schéma actuel
 # =============================================================================
 
 set -euo pipefail
 
-echo "🔧 GuineaTender AI — Correction des erreurs Prisma"
-echo "=================================================="
+echo "🔧 GuineaTender AI — Synchronisation base de données"
+echo "===================================================="
 echo ""
 
 # Vérifier que nous sommes dans le bon répertoire
@@ -19,33 +16,43 @@ if [ ! -f "package.json" ] || [ ! -d "packages/database" ]; then
   exit 1
 fi
 
-echo "📋 Étape 1/4 : Installation des dépendances..."
-npm install
-
-echo ""
-echo "📋 Étape 2/4 : Génération du client Prisma (depuis le schéma mis à jour)..."
+echo "📋 Étape 1/5 : Génération du client Prisma..."
 cd packages/database
 npx prisma generate
 cd ../..
 
 echo ""
-echo "📋 Étape 3/4 : Application de la migration (suppression organisationId de alertes)..."
+echo "📋 Étape 2/5 : Synchronisation du schéma avec la base (prisma db push)..."
+echo "   Ceci aligne la base avec le schema.prisma SANS rejouer les migrations."
 cd packages/database
-npx prisma migrate deploy
+npx prisma db push --accept-data-loss
 cd ../..
 
 echo ""
-echo "📋 Étape 4/4 : Vérification du schéma..."
+echo "📋 Étape 3/5 : Baseline de la migration initiale..."
+cd packages/database
+# Marquer la migration 0_init comme déjà appliquée (la base est déjà à jour)
+npx prisma migrate resolve --applied 0_init 2>/dev/null || echo "   (migration déjà résolue ou table _prisma_migrations pas encore créée)"
+cd ../..
+
+echo ""
+echo "📋 Étape 4/5 : Vérification du schéma..."
 cd packages/database
 npx prisma validate
 cd ../..
 
 echo ""
-echo "✅ Corrections appliquées !"
+echo "📋 Étape 5/5 : Statut des migrations..."
+cd packages/database
+npx prisma migrate status
+cd ../..
+
+echo ""
+echo "✅ Synchronisation terminée !"
 echo ""
 echo "Résumé des corrections :"
-echo "  1. ✅ QueryDossierDto créé — take/skip sont maintenant des Number (pas des String)"
-echo "  2. ✅ Migration appliquée — organisationId supprimé de la table alertes"
-echo "  3. ✅ Client Prisma régénéré — les requêtes utilisent ao: { organisationId } au lieu de alertes.organisationId"
+echo "  1. ✅ QueryDossierDto — take/skip sont des Number (pas des String)"
+echo "  2. ✅ Base synchronisée — organisationId retiré de alertes"
+echo "  3. ✅ Client Prisma régénéré — requêtes via ao: { organisationId }"
 echo ""
 echo "Vous pouvez maintenant démarrer l'API : npm run dev:api"

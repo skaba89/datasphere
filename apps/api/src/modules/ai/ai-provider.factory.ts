@@ -43,11 +43,12 @@ export class AiProviderFactory {
       }
     }
 
-    // Aucun provider disponible
-    this.logger.error('❌ Aucun provider IA configuré ! Veuillez ajouter au moins une clé API dans le fichier .env')
-    // Retourner un provider qui donnera une erreur claire
-    const providerAny = new OpenAICompatibleProvider('none', 'no-key', 'http://localhost:1')
-    return Object.assign(providerAny, { model })
+    // Aucun provider disponible — lancer une erreur descriptive immédiatement
+    this.logger.error('❌ Aucun provider IA configuré ! Veuillez ajouter au moins une clé API dans le fichier .env (GEMINI_API_KEY, GLM_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, MISTRAL_API_KEY, QWEN_API_KEY ou ANTHROPIC_API_KEY)')
+    throw new Error(
+      'Aucun provider IA configuré. Configurez au moins une clé API dans le fichier .env : ' +
+      'GEMINI_API_KEY, GLM_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, MISTRAL_API_KEY, QWEN_API_KEY ou ANTHROPIC_API_KEY',
+    )
   }
 
   /**

@@ -159,7 +159,10 @@ MISSION: Rédige un mémoire technique professionnel et structuré en français 
       return result
     } catch (error: any) {
       this.logger.error(`Erreur mémoire technique IA pour AO ${aoId}: ${error?.message}`)
-      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
+      const detail = error?.message?.includes('Aucun provider') 
+        ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
+        : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
+      throw new ServiceUnavailableException(detail)
     }
   }
 
@@ -214,7 +217,10 @@ Inclure: développement logiciel, infrastructure/hébergement, formation, mainte
       return { raw }
     } catch (error: any) {
       this.logger.error(`Erreur offre financière IA pour AO ${aoId}: ${error?.message}`)
-      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
+      const detail = error?.message?.includes('Aucun provider') 
+        ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
+        : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
+      throw new ServiceUnavailableException(detail)
     }
   }
 
@@ -248,7 +254,10 @@ Focus: enjeux principaux, opportunités, risques évidents.`,
       return { resume }
     } catch (error: any) {
       this.logger.error(`Erreur résumé IA pour AO ${aoId}: ${error?.message}`)
-      throw new ServiceUnavailableException('Service IA temporairement indisponible. Veuillez réessayer.')
+      const detail = error?.message?.includes('Aucun provider') 
+        ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
+        : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
+      throw new ServiceUnavailableException(detail)
     }
   }
 

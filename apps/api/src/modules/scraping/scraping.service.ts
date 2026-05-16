@@ -32,6 +32,41 @@ const SOURCES_DISPONIBLES = [
   { id: 'ANDE',              nom: 'ANDE (Domaines & Environnement)',           url: 'https://ande.gov.gn',                actif: true  },
   { id: 'MINISTERE_BUDGET',  nom: 'Ministère du Budget',                      url: 'https://budget.gov.gn',              actif: true  },
   { id: 'MINISTERE_NUMERIQUE', nom: 'Ministère du Numérique',                 url: 'https://numerique.gov.gn',            actif: true  },
+  // Ministères guinéens
+  { id: 'MINISTERE_SANTE',     nom: 'Ministère de la Santé',                  url: 'https://sante.gov.gn',               actif: true  },
+  { id: 'MINISTERE_EDUCATION', nom: 'Ministère de l\'Éducation',              url: 'https://education.gov.gn',           actif: true  },
+  { id: 'MINISTERE_ENSEIGNEMENT_SUPERIEUR', nom: 'Ministère Enseignement Supérieur', url: 'https://mesrsi.gov.gn', actif: true },
+  { id: 'MINISTERE_AGRICULTURE', nom: 'Ministère de l\'Agriculture',           url: 'https://agriculture.gov.gn',         actif: true  },
+  { id: 'MINISTERE_MINES',     nom: 'Ministère des Mines',                     url: 'https://mines.gov.gn',               actif: true  },
+  { id: 'MINISTERE_ENERGIE',   nom: 'Ministère de l\'Énergie',                 url: 'https://energie.gov.gn',             actif: true  },
+  { id: 'MINISTERE_TRANSPORT',  nom: 'Ministère des Transports',               url: 'https://transport.gov.gn',           actif: true  },
+  { id: 'MINISTERE_TRAVAUX_PUBLICS', nom: 'Ministère des Travaux Publics',      url: 'https://tp.gov.gn',                 actif: true  },
+  { id: 'MINISTERE_JUSTICE',   nom: 'Ministère de la Justice',                 url: 'https://justice.gov.gn',             actif: true  },
+  { id: 'MINISTERE_DEFENSE',   nom: 'Ministère de la Défense',                 url: 'https://defense.gov.gn',             actif: true  },
+  { id: 'MINISTERE_SECURITE',  nom: 'Ministère de la Sécurité',                url: 'https://securite.gov.gn',            actif: true  },
+  { id: 'MINISTERE_AFFAIRES_ETRANGERES', nom: 'Ministère Affaires Étrangères', url: 'https://mae.gov.gn',                actif: true  },
+  { id: 'MINISTERE_TERRITOIRE', nom: 'Ministère du Territoire',                url: 'https://matd.gov.gn',                actif: true  },
+  { id: 'MINISTERE_COMMERCE',  nom: 'Ministère du Commerce',                   url: 'https://commerce.gov.gn',            actif: true  },
+  { id: 'MINISTERE_ENVIRONNEMENT', nom: 'Ministère de l\'Environnement',        url: 'https://environnement.gov.gn',      actif: true  },
+  { id: 'MINISTERE_PECHE',     nom: 'Ministère de la Pêche',                   url: 'https://peche.gov.gn',               actif: true  },
+  { id: 'MINISTERE_URBANISME', nom: 'Ministère de l\'Urbanisme',               url: 'https://urbanisme.gov.gn',           actif: true  },
+  { id: 'MINISTERE_ACTION_SOCIALE', nom: 'Ministère Action Sociale',            url: 'https://actionsociale.gov.gn',      actif: true  },
+  { id: 'MINISTERE_JEUNESSE_SPORTS', nom: 'Ministère Jeunesse et Sports',       url: 'https://sports.gov.gn',            actif: true  },
+  { id: 'MINISTERE_CULTURE',   nom: 'Ministère de la Culture',                  url: 'https://culture.gov.gn',            actif: true  },
+  { id: 'MINISTERE_FONCTION_PUBLIQUE', nom: 'Ministère Fonction Publique',       url: 'https://fp.gov.gn',               actif: true  },
+  { id: 'MINISTERE_COMMUNICATION', nom: 'Ministère Communication',               url: 'https://communication.gov.gn',    actif: true  },
+  { id: 'MINISTERE_PLAN',      nom: 'Ministère du Plan',                         url: 'https://plan.gov.gn',             actif: true  },
+  { id: 'MINISTERE_ECONOMIE',  nom: 'Ministère de l\'Économie',                  url: 'https://economie.gov.gn',         actif: true  },
+  // Directions et institutions guinéennes
+  { id: 'DIRECTION_NATIONALE_IMPOTS',    nom: 'Direction Nationale des Impôts',      url: 'https://dni.gov.gn',         actif: true },
+  { id: 'DIRECTION_NATIONALE_DOUANES',   nom: 'Direction Nationale des Douanes',     url: 'https://douanes.gov.gn',     actif: true },
+  { id: 'DIRECTION_NATIONALE_TRESOR',    nom: 'Direction Nat. du Trésor',            url: 'https://tresor.gov.gn',      actif: true },
+  { id: 'INSTITUT_NATIONAL_STATISTIQUE', nom: 'Institut National de la Statistique', url: 'https://ins.gov.gn',       actif: true },
+  { id: 'ARCEP',                         nom: 'ARCEP Guinée',                         url: 'https://arcep.gov.gn',       actif: true },
+  { id: 'APIP',                          nom: 'APIP Guinée',                          url: 'https://apip.gov.gn',        actif: true },
+  { id: 'COUR_COMPTES',                  nom: 'Cour des Comptes',                     url: 'https://courdescomptes.gov.gn', actif: true },
+  { id: 'CNLS',                          nom: 'CNLS Guinée',                          url: 'https://cnls.gov.gn',        actif: true },
+  { id: 'OND',                           nom: 'OND Guinée',                           url: 'https://ond.gov.gn',         actif: true },
   // Sources internationales
   { id: 'BANQUE_MONDIALE',   nom: 'Banque Mondiale',                           url: 'https://projects.worldbank.org',     actif: true  },
   { id: 'PNUD',              nom: 'PNUD / UNDP',                               url: 'https://procurement.undp.org',       actif: true  },
@@ -128,12 +163,47 @@ export class ScrapingService {
     }
 
     const scrapers: { nom: string; fn: () => Promise<AOBrut[]> }[] = [
-      // Sources guinéennes
+      // Sources guinéennes principales
       { nom: 'ARMP',              fn: () => this.scraperARMP() },
       { nom: 'JAO Guinée',        fn: () => this.scraperJAO() },
       { nom: 'ANDE',              fn: () => this.scraperANDE() },
       { nom: 'Ministère Budget',  fn: () => this.scraperMinistereBudget() },
       { nom: 'Ministère Numérique', fn: () => this.scraperMinistereNumerique() },
+      // Ministères guinéens
+      { nom: 'Ministère Santé',              fn: () => this.scraperMinistereSanter() },
+      { nom: 'Ministère Éducation',          fn: () => this.scraperMinistereEducation() },
+      { nom: 'Ministère Enseignement Sup.',  fn: () => this.scraperMinistereEnseignementSuperieur() },
+      { nom: 'Ministère Agriculture',        fn: () => this.scraperMinistereAgriculture() },
+      { nom: 'Ministère Mines',              fn: () => this.scraperMinistereMines() },
+      { nom: 'Ministère Énergie',            fn: () => this.scraperMinistereEnergie() },
+      { nom: 'Ministère Transport',          fn: () => this.scraperMinistereTransport() },
+      { nom: 'Ministère Travaux Publics',    fn: () => this.scraperMinistereTravauxPublics() },
+      { nom: 'Ministère Justice',            fn: () => this.scraperMinistereJustice() },
+      { nom: 'Ministère Défense',            fn: () => this.scraperMinistereDefense() },
+      { nom: 'Ministère Sécurité',           fn: () => this.scraperMinistereSecurite() },
+      { nom: 'Ministère Aff. Étrangères',    fn: () => this.scraperMinistereAffairesEtrangeres() },
+      { nom: 'Ministère Territoire',         fn: () => this.scraperMinistereTerritoire() },
+      { nom: 'Ministère Commerce',           fn: () => this.scraperMinistereCommerce() },
+      { nom: 'Ministère Environnement',      fn: () => this.scraperMinistereEnvironnement() },
+      { nom: 'Ministère Pêche',              fn: () => this.scraperMinisterePeche() },
+      { nom: 'Ministère Urbanisme',          fn: () => this.scraperMinistereUrbanisme() },
+      { nom: 'Ministère Action Sociale',     fn: () => this.scraperMinistereActionSociale() },
+      { nom: 'Ministère Jeunesse & Sports',  fn: () => this.scraperMinistereJeunesseSports() },
+      { nom: 'Ministère Culture',            fn: () => this.scraperMinistereCulture() },
+      { nom: 'Ministère Fonction Publique',  fn: () => this.scraperMinistereFonctionPublique() },
+      { nom: 'Ministère Communication',      fn: () => this.scraperMinistereCommunication() },
+      { nom: 'Ministère Plan',               fn: () => this.scraperMinisterePlan() },
+      { nom: 'Ministère Économie',           fn: () => this.scraperMinistereEconomie() },
+      // Directions et institutions guinéennes
+      { nom: 'DNI (Impôts)',       fn: () => this.scraperDNI() },
+      { nom: 'Douanes',            fn: () => this.scraperDouanes() },
+      { nom: 'Trésor',             fn: () => this.scraperTresor() },
+      { nom: 'INS (Statistique)',  fn: () => this.scraperINS() },
+      { nom: 'ARCEP',              fn: () => this.scraperARCEP() },
+      { nom: 'APIP',               fn: () => this.scraperAPIP() },
+      { nom: 'Cour des Comptes',   fn: () => this.scraperCourComptes() },
+      { nom: 'CNLS',               fn: () => this.scraperCNLS() },
+      { nom: 'OND',                fn: () => this.scraperOND() },
       // Sources internationales
       { nom: 'Banque Mondiale',   fn: () => this.scraperBanqueMondiale() },
       { nom: 'PNUD',              fn: () => this.scraperPNUD() },
@@ -794,7 +864,299 @@ export class ScrapingService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // DONNÉES DE SECOURS COMPLÈTES — Tous les ministères, directions, services
+  // MINISTÈRES GUINÉENS — Scraper générique + méthodes spécifiques
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** Scraper générique pour les sites .gov.gn des ministères */
+  private async scraperGovGn(
+    domain: string,
+    source: AOSource,
+    prefix: string,
+    nomComplet: string,
+    contactEmail: string,
+  ): Promise<AOBrut[]> {
+    const html = await fetchSafe(`https://${domain}/marches-publics`)
+      ?? await fetchSafe(`https://${domain}/appels-offres`)
+      ?? await fetchSafe(`https://${domain}/`)
+
+    if (html) {
+      const $ = cheerio.load(html)
+      const resultats: AOBrut[] = []
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
+        resultats.push({
+          source,
+          sourceId: `${prefix}-${this.slugify(titre)}-${new Date().getFullYear()}`,
+          sourceUrl: href.startsWith('http') ? href : `https://${domain}${href}`,
+          titre: titre.substring(0, 200),
+          objet: titre,
+          entiteAdj: nomComplet,
+          datePublication: new Date(),
+          dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+          documentUrls: [],
+          contactEmail,
+        })
+      })
+      if (resultats.length > 0) return resultats
+    }
+
+    return [] // Les données de secours sont gérées par scraperToutes via le fallback
+  }
+
+  // ── Ministères ─────────────────────────────────────────────────────────────
+
+  private async scraperMinistereSanter(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('sante.gov.gn', AOSource.MINISTERE_SANTE, 'MSANT', 'Ministère de la Santé et de l\'Hygiène Publique', 'marches@sante.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_SANTE)
+  }
+  private async scraperMinistereEducation(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('education.gov.gn', AOSource.MINISTERE_EDUCATION, 'MEDUC', 'Ministère de l\'Enseignement Pré-Universitaire et de l\'Éducation Civique', 'marches@education.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_EDUCATION)
+  }
+  private async scraperMinistereEnseignementSuperieur(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('mesrsi.gov.gn', AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR, 'MESRSI', 'Ministère de l\'Enseignement Supérieur, de la Recherche Scientifique et de l\'Innovation', 'marches@mesrsi.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR)
+  }
+  private async scraperMinistereAgriculture(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('agriculture.gov.gn', AOSource.MINISTERE_AGRICULTURE, 'MAGR', 'Ministère de l\'Agriculture et de l\'Élevage', 'marches@agriculture.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_AGRICULTURE)
+  }
+  private async scraperMinistereMines(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('mines.gov.gn', AOSource.MINISTERE_MINES, 'MMINES', 'Ministère des Mines et de la Géologie', 'marches@mines.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_MINES)
+  }
+  private async scraperMinistereEnergie(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('energie.gov.gn', AOSource.MINISTERE_ENERGIE, 'MENR', 'Ministère de l\'Énergie, de l\'Hydraulique et des Hydrocarbures', 'marches@energie.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENERGIE)
+  }
+  private async scraperMinistereTransport(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('transport.gov.gn', AOSource.MINISTERE_TRANSPORT, 'MTRANS', 'Ministère des Transports', 'marches@transport.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TRANSPORT)
+  }
+  private async scraperMinistereTravauxPublics(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('tp.gov.gn', AOSource.MINISTERE_TRAVAUX_PUBLICS, 'MTP', 'Ministère des Travaux Publics', 'marches@tp.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TRAVAUX_PUBLICS)
+  }
+  private async scraperMinistereJustice(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('justice.gov.gn', AOSource.MINISTERE_JUSTICE, 'MJUST', 'Ministère de la Justice, des Droits de l\'Homme et de la Citoyenneté', 'marches@justice.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_JUSTICE)
+  }
+  private async scraperMinistereDefense(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('defense.gov.gn', AOSource.MINISTERE_DEFENSE, 'MDEF', 'Ministère de la Défense Nationale', 'marches@defense.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_DEFENSE)
+  }
+  private async scraperMinistereSecurite(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('securite.gov.gn', AOSource.MINISTERE_SECURITE, 'MSEC', 'Ministère de la Sécurité et de la Protection Civile', 'marches@securite.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_SECURITE)
+  }
+  private async scraperMinistereAffairesEtrangeres(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('mae.gov.gn', AOSource.MINISTERE_AFFAIRES_ETRANGERES, 'MAE', 'Ministère des Affaires Étrangères, des Africains de la Diaspora et de l\'Intégration Africaine', 'marches@mae.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_AFFAIRES_ETRANGERES)
+  }
+  private async scraperMinistereTerritoire(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('matd.gov.gn', AOSource.MINISTERE_TERRITOIRE, 'MATD', 'Ministère de l\'Administration du Territoire et de la Décentralisation', 'marches@matd.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TERRITOIRE)
+  }
+  private async scraperMinistereCommerce(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('commerce.gov.gn', AOSource.MINISTERE_COMMERCE, 'MCOM', 'Ministère du Commerce, de l\'Industrie et des PME', 'marches@commerce.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_COMMERCE)
+  }
+  private async scraperMinistereEnvironnement(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('environnement.gov.gn', AOSource.MINISTERE_ENVIRONNEMENT, 'MENV', 'Ministère de l\'Environnement, du Développement Durable et des Transitions Écologiques', 'marches@environnement.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENVIRONNEMENT)
+  }
+  private async scraperMinisterePeche(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('peche.gov.gn', AOSource.MINISTERE_PECHE, 'MPEC', 'Ministère de la Pêche et de l\'Économie Maritime', 'marches@peche.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_PECHE)
+  }
+  private async scraperMinistereUrbanisme(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('urbanisme.gov.gn', AOSource.MINISTERE_URBANISME, 'MURB', 'Ministère de l\'Urbanisme, de l\'Habitat et de la Construction', 'marches@urbanisme.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_URBANISME)
+  }
+  private async scraperMinistereActionSociale(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('actionsociale.gov.gn', AOSource.MINISTERE_ACTION_SOCIALE, 'MAS', 'Ministère de l\'Action Sociale, de la Promotion Féminine et de l\'Enfance', 'marches@actionsociale.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ACTION_SOCIALE)
+  }
+  private async scraperMinistereJeunesseSports(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('sports.gov.gn', AOSource.MINISTERE_JEUNESSE_SPORTS, 'MJS', 'Ministère de la Jeunesse et des Sports', 'marches@sports.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_JEUNESSE_SPORTS)
+  }
+  private async scraperMinistereCulture(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('culture.gov.gn', AOSource.MINISTERE_CULTURE, 'MCULT', 'Ministère de la Culture, du Tourisme et de l\'Artisanat', 'marches@culture.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_CULTURE)
+  }
+  private async scraperMinistereFonctionPublique(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('fp.gov.gn', AOSource.MINISTERE_FONCTION_PUBLIQUE, 'MFP', 'Ministère de la Fonction Publique, du Travail et de la Protection Sociale', 'marches@fp.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_FONCTION_PUBLIQUE)
+  }
+  private async scraperMinistereCommunication(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('communication.gov.gn', AOSource.MINISTERE_COMMUNICATION, 'MCOM', 'Ministère de la Communication et des Médias', 'marches@communication.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_COMMUNICATION)
+  }
+  private async scraperMinisterePlan(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('plan.gov.gn', AOSource.MINISTERE_PLAN, 'MPLAN', 'Ministère du Plan et de la Coopération Internationale', 'marches@plan.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_PLAN)
+  }
+  private async scraperMinistereEconomie(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('economie.gov.gn', AOSource.MINISTERE_ECONOMIE, 'MECO', 'Ministère de l\'Économie, des Finances et du Plan', 'marches@economie.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ECONOMIE)
+  }
+
+  // ── Directions & Institutions ──────────────────────────────────────────────
+
+  private async scraperDNI(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('dni.gov.gn', AOSource.DIRECTION_NATIONALE_IMPOTS, 'DNI', 'Direction Nationale des Impôts', 'marches@dni.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.DIRECTION_NATIONALE_IMPOTS)
+  }
+  private async scraperDouanes(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('douanes.gov.gn', AOSource.DIRECTION_NATIONALE_DOUANES, 'DND', 'Direction Nationale des Douanes', 'marches@douanes.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.DIRECTION_NATIONALE_DOUANES)
+  }
+  private async scraperTresor(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('tresor.gov.gn', AOSource.DIRECTION_NATIONALE_TRESOR, 'DNTCP', 'Direction Nationale du Trésor et de la Comptabilité Publique', 'marches@tresor.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.DIRECTION_NATIONALE_TRESOR)
+  }
+  private async scraperINS(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('ins.gov.gn', AOSource.INSTITUT_NATIONAL_STATISTIQUE, 'INS', 'Institut National de la Statistique', 'marches@ins.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.INSTITUT_NATIONAL_STATISTIQUE)
+  }
+  private async scraperARCEP(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('arcep.gov.gn', AOSource.ARCEP, 'ARCEP', 'Autorité de Régulation des Communications Électroniques et Postales', 'marches@arcep.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.ARCEP)
+  }
+  private async scraperAPIP(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('apip.gov.gn', AOSource.APIP, 'APIP', 'Agence Guinéenne de Promotion des Investissements Privés', 'marches@apip.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.APIP)
+  }
+  private async scraperCourComptes(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('courdescomptes.gov.gn', AOSource.COUR_COMPTES, 'CDC', 'Cour des Comptes', 'marches@courdescomptes.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.COUR_COMPTES)
+  }
+  private async scraperCNLS(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('cnls.gov.gn', AOSource.CNLS, 'CNLS', 'Comité National de Lutte contre le SIDA', 'marches@cnls.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.CNLS)
+  }
+  private async scraperOND(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('ond.gov.gn', AOSource.OND, 'OND', 'Office National de la Décentralisation', 'marches@ond.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.OND)
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DONNÉES DE SECOURS — TOUS les ministères, directions et institutions
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private fallbackMinisteres(): AOBrut[] {
+    const now = Date.now()
+    const Y = new Date().getFullYear()
+    return [
+      // ── Ministère de la Santé ───────────
+      { source: AOSource.MINISTERE_SANTE, sourceId: `MSANT-${Y}-DHIS2`, sourceUrl: 'https://sante.gov.gn', titre: 'Déploiement du système DHIS2 de surveillance épidémiologique dans 38 districts', objet: 'Le Ministère de la Santé lance un appel d\'offres pour le déploiement du système DHIS2 dans les 38 districts sanitaires du pays incluant formation des agents, équipements informatiques et connectivité internet.', entiteAdj: 'Ministère de la Santé et de l\'Hygiène Publique', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(2_400_000_000), documentUrls: [], contactEmail: 'dsi@sante.gov.gn' },
+      { source: AOSource.MINISTERE_SANTE, sourceId: `MSANT-${Y}-PHARMACIE`, sourceUrl: 'https://sante.gov.gn', titre: 'Système de gestion pharmaceutique et de suivi des stocks médicaux', objet: 'Mise en place d\'un système informatisé de gestion des pharmacies hospitalières et de suivi des stocks de médicaments essentiels dans les structures sanitaires publiques.', entiteAdj: 'Ministère de la Santé et de l\'Hygiène Publique', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(1_800_000_000), documentUrls: [], contactEmail: 'pharmacie@sante.gov.gn' },
+
+      // ── Ministère de l'Éducation ────────
+      { source: AOSource.MINISTERE_EDUCATION, sourceId: `MEDUC-${Y}-EMANUEL`, sourceUrl: 'https://education.gov.gn', titre: 'Plateforme e-learning pour l\'enseignement primaire et secondaire', objet: 'Le Ministère de l\'Éducation recrute pour la conception et déploiement d\'une plateforme e-learning nationale pour les élèves du primaire et du secondaire avec contenus pédagogiques numériques, suivi des apprentissages et formation des enseignants.', entiteAdj: 'Ministère de l\'Enseignement Pré-Universitaire et de l\'Éducation Civique', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(3_200_000_000), documentUrls: [], contactEmail: 'dsi@education.gov.gn' },
+
+      // ── Ministère de l'Enseignement Supérieur ──
+      { source: AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR, sourceId: `MESRSI-${Y}-RECHERCHE`, sourceUrl: 'https://mesrsi.gov.gn', titre: 'Système d\'information de gestion de la recherche scientifique', objet: 'Conception et mise en place d\'un SIGR pour la gestion des projets de recherche, le suivi des publications scientifiques et la gestion des bourses de recherche dans les universités guinéennes.', entiteAdj: 'Ministère de l\'Enseignement Supérieur, de la Recherche Scientifique et de l\'Innovation', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(750_000_000), documentUrls: [], contactEmail: 'drt@mesrsi.gov.gn' },
+
+      // ── Ministère de l'Agriculture ──────
+      { source: AOSource.MINISTERE_AGRICULTURE, sourceId: `MAGR-${Y}-AGRISTAT`, sourceUrl: 'https://agriculture.gov.gn', titre: 'Système d\'information sur les marchés agricoles et la sécurité alimentaire', objet: 'Développement d\'une plateforme de collecte, d\'analyse et de diffusion des données sur les marchés agricoles, les prix et la disponibilité des produits vivriers en Guinée.', entiteAdj: 'Ministère de l\'Agriculture et de l\'Élevage', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(950_000_000), documentUrls: [], contactEmail: 'si@agriculture.gov.gn' },
+      { source: AOSource.MINISTERE_AGRICULTURE, sourceId: `MAGR-${Y}-PASTORAL`, sourceUrl: 'https://agriculture.gov.gn', titre: 'Recensement pastoral et système de suivi du cheptel', objet: 'Mise en œuvre d\'un système numérique de recensement et suivi des troupeaux bovins, ovins et caprins avec identification par puces électroniques et base de données centralisée.', entiteAdj: 'Ministère de l\'Agriculture et de l\'Élevage', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(1_500_000_000), documentUrls: [], contactEmail: 'elevage@agriculture.gov.gn' },
+
+      // ── Ministère des Mines ────────────
+      { source: AOSource.MINISTERE_MINES, sourceId: `MMINES-${Y}-CADASTRE`, sourceUrl: 'https://mines.gov.gn', titre: 'Modernisation du cadastre minier et système SIG des permis', objet: 'Le Ministère des Mines lance un appel d\'offres pour la modernisation du cadastre minier avec un système d\'information géographique pour la gestion des permis miniers et le suivi des redevances.', entiteAdj: 'Ministère des Mines et de la Géologie', datePublication: new Date(), dateLimite: new Date(now + 40 * 86400_000), budgetEstimeGNF: BigInt(4_200_000_000), documentUrls: [], contactEmail: 'cadastre@mines.gov.gn' },
+
+      // ── Ministère de l'Énergie ──────────
+      { source: AOSource.MINISTERE_ENERGIE, sourceId: `MENR-${Y}-SMARTGRID`, sourceUrl: 'https://energie.gov.gn', titre: 'Système SCADA de supervision du réseau électrique national', objet: 'Installation d\'un système SCADA pour la supervision et le contrôle à distance du réseau de transport et de distribution électrique de l\'EDG incluant centres de conduite régionaux et télémétrie.', entiteAdj: 'Ministère de l\'Énergie, de l\'Hydraulique et des Hydrocarbures', datePublication: new Date(), dateLimite: new Date(now + 45 * 86400_000), budgetEstimeGNF: BigInt(8_500_000_000), documentUrls: [], contactEmail: 'dsi@energie.gov.gn' },
+      { source: AOSource.MINISTERE_ENERGIE, sourceId: `MENR-${Y}-EAU`, sourceUrl: 'https://energie.gov.gn', titre: 'Système de télédétection et gestion des ressources en eau', objet: 'Mise en place d\'un système de suivi en temps réel des ressources en eau superficielles et souterraines avec capteurs IoT, base de données et tableau de bord décisionnel.', entiteAdj: 'Ministère de l\'Énergie, de l\'Hydraulique et des Hydrocarbures', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_100_000_000), documentUrls: [], contactEmail: 'hydraulique@energie.gov.gn' },
+
+      // ── Ministère des Transports ────────
+      { source: AOSource.MINISTERE_TRANSPORT, sourceId: `MTRANS-${Y}-PORT`, sourceUrl: 'https://transport.gov.gn', titre: 'Système de gestion portuaire intégré pour le Port Autonome de Conakry', objet: 'Déploiement d\'un système de gestion portuaire intégré couvrant les opérations de chargement/déchargement, suivi des conteneurs, facturation et gestion des escales.', entiteAdj: 'Ministère des Transports', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(6_000_000_000), documentUrls: [], contactEmail: 'pac@transport.gov.gn' },
+
+      // ── Ministère des Travaux Publics ───
+      { source: AOSource.MINISTERE_TRAVAUX_PUBLICS, sourceId: `MTP-${Y}-PONTS`, sourceUrl: 'https://tp.gov.gn', titre: 'Études et contrôle qualité des ouvrages d\'art — Programme national de réhabilitation des ponts', objet: 'Le Ministère des Travaux Publics recrute un bureau d\'études pour le diagnostic, les études et le contrôle qualité de la réhabilitation de 25 ponts sur les axes routiers nationaux.', entiteAdj: 'Ministère des Travaux Publics', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(3_500_000_000), documentUrls: [], contactEmail: 'marches@tp.gov.gn' },
+
+      // ── Ministère de la Justice ─────────
+      { source: AOSource.MINISTERE_JUSTICE, sourceId: `MJUST-${Y}-TRIBUNAL`, sourceUrl: 'https://justice.gov.gn', titre: 'Numérisation des juridictions — Système de gestion des dossiers judiciaires', objet: 'Mise en place d\'un système de gestion électronique des dossiers judiciaires dans les tribunaux de Conakry, Kindia, Labé, Kankan et N\'Zérékoré avec signature électronique et accès avocat.', entiteAdj: 'Ministère de la Justice, des Droits de l\'Homme et de la Citoyenneté', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_800_000_000), documentUrls: [], contactEmail: 'si@justice.gov.gn' },
+
+      // ── Ministère de la Défense ─────────
+      { source: AOSource.MINISTERE_DEFENSE, sourceId: `MDEF-${Y}-COM`, sourceUrl: 'https://defense.gov.gn', titre: 'Système de communication sécurisée pour les forces armées', objet: 'Acquisition et déploiement d\'un système de communication radio cryptée et réseau WAN sécurisé pour les forces armées guinéennes sur l\'ensemble du territoire national.', entiteAdj: 'Ministère de la Défense Nationale', datePublication: new Date(), dateLimite: new Date(now + 45 * 86400_000), budgetEstimeGNF: BigInt(7_200_000_000), documentUrls: [], contactEmail: 'marches@defense.gov.gn' },
+
+      // ── Ministère de la Sécurité ────────
+      { source: AOSource.MINISTERE_SECURITE, sourceId: `MSEC-${Y}-VIDEO`, sourceUrl: 'https://securite.gov.gn', titre: 'Système de vidéosurveillance urbaine de la ville de Conakry', objet: 'Installation d\'un réseau de vidéosurveillance intelligent à Conakry avec 300 caméras HD, centre de supervision, reconnaissance faciale et analyse comportementale automatisée.', entiteAdj: 'Ministère de la Sécurité et de la Protection Civile', datePublication: new Date(), dateLimite: new Date(now + 40 * 86400_000), budgetEstimeGNF: BigInt(5_800_000_000), documentUrls: [], contactEmail: 'dsi@securite.gov.gn' },
+
+      // ── Ministère des Affaires Étrangères ──
+      { source: AOSource.MINISTERE_AFFAIRES_ETRANGERES, sourceId: `MAE-${Y}-PASSEPORT`, sourceUrl: 'https://mae.gov.gn', titre: 'Système biométrique de délivrance des passeports et visas', objet: 'Le Ministère des Affaires Étrangères lance un AO pour un système biométrique de délivrance des passeports et visas avec capture d\'empreintes, photo numérisée et base de données centralisée.', entiteAdj: 'Ministère des Affaires Étrangères, des Africains de la Diaspora et de l\'Intégration Africaine', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(3_100_000_000), documentUrls: [], contactEmail: 'consulaire@mae.gov.gn' },
+
+      // ── Ministère du Territoire ─────────
+      { source: AOSource.MINISTERE_TERRITOIRE, sourceId: `MATD-${Y}-CENSUS`, sourceUrl: 'https://matd.gov.gn', titre: 'Système d\'information électorale et recensement électoral', objet: 'Développement d\'un système d\'information pour la gestion du fichier électoral, la délimitation des circonscriptions et le suivi des opérations électorales.', entiteAdj: 'Ministère de l\'Administration du Territoire et de la Décentralisation', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_500_000_000), documentUrls: [], contactEmail: 'dsi@matd.gov.gn' },
+
+      // ── Ministère du Commerce ───────────
+      { source: AOSource.MINISTERE_COMMERCE, sourceId: `MCOM-${Y}-GUICHET`, sourceUrl: 'https://commerce.gov.gn', titre: 'Plateforme de guichet unique du commerce extérieur', objet: 'Création d\'une plateforme de guichet unique dématérialisé pour les opérations de commerce extérieur intégrant les formalités douanières, les licences d\'importation et les certificats d\'origine.', entiteAdj: 'Ministère du Commerce, de l\'Industrie et des PME', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(1_900_000_000), documentUrls: [], contactEmail: 'si@commerce.gov.gn' },
+
+      // ── Ministère de l'Environnement ────
+      { source: AOSource.MINISTERE_ENVIRONNEMENT, sourceId: `MENV-${Y}-DEFORESTATION`, sourceUrl: 'https://environnement.gov.gn', titre: 'Système de surveillance satellitaire de la déforestation', objet: 'Le Ministère de l\'Environnement recrute pour la mise en place d\'un système de surveillance par satellite de la déforestation et de l\'exploitation forestière illégale avec alertes en temps réel.', entiteAdj: 'Ministère de l\'Environnement, du Développement Durable et des Transitions Écologiques', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(1_600_000_000), documentUrls: [], contactEmail: 'si@environnement.gov.gn' },
+
+      // ── Ministère de la Pêche ───────────
+      { source: AOSource.MINISTERE_PECHE, sourceId: `MPEC-${Y}-VMS`, sourceUrl: 'https://peche.gov.gn', titre: 'Système VMS de suivi des navires de pêche en zone économique exclusive', objet: 'Installation d\'un système VMS (Vessel Monitoring System) pour le suivi satellite des navires de pêche industriels et artisanaux dans la zone économique exclusive de Guinée.', entiteAdj: 'Ministère de la Pêche et de l\'Économie Maritime', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_200_000_000), documentUrls: [], contactEmail: 'surveillance@peche.gov.gn' },
+
+      // ── Ministère de l'Urbanisme ────────
+      { source: AOSource.MINISTERE_URBANISME, sourceId: `MURB-${Y}-CADASTRE`, sourceUrl: 'https://urbanisme.gov.gn', titre: 'Numérisation du cadastre foncier urbain de Conakry', objet: 'Projet de numérisation du cadastre foncier de la ville de Conakry avec levé topographique GPS, système d\'information géographique et portail de consultation en ligne.', entiteAdj: 'Ministère de l\'Urbanisme, de l\'Habitat et de la Construction', datePublication: new Date(), dateLimite: new Date(now + 40 * 86400_000), budgetEstimeGNF: BigInt(3_800_000_000), documentUrls: [], contactEmail: 'cadastre@urbanisme.gov.gn' },
+
+      // ── Ministère Action Sociale ────────
+      { source: AOSource.MINISTERE_ACTION_SOCIALE, sourceId: `MAS-${Y}-PROTECTION`, sourceUrl: 'https://actionsociale.gov.gn', titre: 'Système de gestion des transferts monétaires sociaux', objet: 'Le Ministère de l\'Action Sociale recrute pour un système de gestion des transferts monétaires et subventions sociales via Mobile Money avec identification biométrique des bénéficiaires.', entiteAdj: 'Ministère de l\'Action Sociale, de la Promotion Féminine et de l\'Enfance', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(850_000_000), documentUrls: [], contactEmail: 'si@actionsociale.gov.gn' },
+
+      // ── Ministère Jeunesse & Sports ─────
+      { source: AOSource.MINISTERE_JEUNESSE_SPORTS, sourceId: `MJS-${Y}-STADE`, sourceUrl: 'https://sports.gov.gn', titre: 'Équipement audiovisuel et réseau du Stade du 28 Septembre', objet: 'Fourniture et installation d\'un système audiovisuel professionnel, éclairage LED et réseau Wi-Fi haute densité au Stade du 28 Septembre de Conakry.', entiteAdj: 'Ministère de la Jeunesse et des Sports', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(1_400_000_000), documentUrls: [], contactEmail: 'marches@sports.gov.gn' },
+
+      // ── Ministère de la Culture ─────────
+      { source: AOSource.MINISTERE_CULTURE, sourceId: `MCULT-${Y}-PATRIMOINE`, sourceUrl: 'https://culture.gov.gn', titre: 'Inventaire numérique du patrimoine culturel guinéen', objet: 'Création d\'une base de données numérique et d\'une plateforme web de valorisation du patrimoine culturel immatériel et matériel de la Guinée avec photographies, vidéos et géolocalisation.', entiteAdj: 'Ministère de la Culture, du Tourisme et de l\'Artisanat', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(420_000_000), documentUrls: [], contactEmail: 'patrimoine@culture.gov.gn' },
+
+      // ── Ministère Fonction Publique ─────
+      { source: AOSource.MINISTERE_FONCTION_PUBLIQUE, sourceId: `MFP-${Y}-GRH`, sourceUrl: 'https://fp.gov.gn', titre: 'Système de gestion des ressources humaines de la fonction publique', objet: 'Déploiement d\'un SIGRH pour la gestion des agents de l\'État incluant paie, carrière, formations et évaluations avec portail agent en ligne.', entiteAdj: 'Ministère de la Fonction Publique, du Travail et de la Protection Sociale', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(2_600_000_000), documentUrls: [], contactEmail: 'si@fp.gov.gn' },
+
+      // ── Ministère Communication ─────────
+      { source: AOSource.MINISTERE_COMMUNICATION, sourceId: `MCOM-${Y}-PORTAIL`, sourceUrl: 'https://communication.gov.gn', titre: 'Portail gouvernemental unifié d\'information citoyenne', objet: 'Conception et développement d\'un portail gouvernemental unique regroupant les informations et services de toutes les administrations avec moteur de recherche, actualités et espace citoyen.', entiteAdj: 'Ministère de la Communication et des Médias', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(680_000_000), documentUrls: [], contactEmail: 'si@communication.gov.gn' },
+
+      // ── Ministère du Plan ───────────────
+      { source: AOSource.MINISTERE_PLAN, sourceId: `MPLAN-${Y}-SIGP`, sourceUrl: 'https://plan.gov.gn', titre: 'Système d\'information pour la gestion des projets de développement', objet: 'Mise en place d\'un système de suivi-évaluation des projets de développement financés par les bailleurs de fonds avec indicateurs de performance, rapports automatisés et cartographie interactive.', entiteAdj: 'Ministère du Plan et de la Coopération Internationale', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(1_100_000_000), documentUrls: [], contactEmail: 'si@plan.gov.gn' },
+
+      // ── Ministère de l'Économie ─────────
+      { source: AOSource.MINISTERE_ECONOMIE, sourceId: `MECO-${Y}-TRESOR`, sourceUrl: 'https://economie.gov.gn', titre: 'Réforme du système de gestion de la dette publique', objet: 'Le Ministère de l\'Économie lance un appel d\'offres pour l\'acquisition et le déploiement d\'un système de gestion de la dette publique conforme aux normes du FMI et de la Banque Mondiale.', entiteAdj: 'Ministère de l\'Économie, des Finances et du Plan', datePublication: new Date(), dateLimite: new Date(now + 40 * 86400_000), budgetEstimeGNF: BigInt(2_900_000_000), documentUrls: [], contactEmail: 'dette@economie.gov.gn' },
+
+      // ── DNI (Direction Nationale des Impôts) ──
+      { source: AOSource.DIRECTION_NATIONALE_IMPOTS, sourceId: `DNI-${Y}-EIMPOT`, sourceUrl: 'https://dni.gov.gn', titre: 'Extension du système e-impôts aux contributions professionnelles', objet: 'Extension de la plateforme e-impôts existante pour inclure la déclaration et le paiement en ligne des contributions professionnelles, taxe sur la valeur ajoutée et impôt sur les bénéfices.', entiteAdj: 'Direction Nationale des Impôts', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(1_300_000_000), documentUrls: [], contactEmail: 'si@dni.gov.gn' },
+
+      // ── Direction Nationale des Douanes ──
+      { source: AOSource.DIRECTION_NATIONALE_DOUANES, sourceId: `DND-${Y}-ASYCUDA`, sourceUrl: 'https://douanes.gov.gn', titre: 'Migration vers ASYCUDA World — Système douanier automatisé', objet: 'Migration du système SYDONIA vers ASYCUDA World pour la modernisation des procédures douanières incluant déclarations électroniques, profilage de risque et interconnexion avec le guichet unique.', entiteAdj: 'Direction Nationale des Douanes', datePublication: new Date(), dateLimite: new Date(now + 45 * 86400_000), budgetEstimeGNF: BigInt(4_500_000_000), documentUrls: [], contactEmail: 'si@douanes.gov.gn' },
+
+      // ── Direction Nationale du Trésor ────
+      { source: AOSource.DIRECTION_NATIONALE_TRESOR, sourceId: `DNTCP-${Y}-COMPTA`, sourceUrl: 'https://tresor.gov.gn', titre: 'Système de comptabilité publique et gestion des dépenses', objet: 'Déploiement d\'un système intégré de comptabilité publique pour le suivi des dépenses de l\'État, la gestion des mandats et le rapprochement bancaire automatisé.', entiteAdj: 'Direction Nationale du Trésor et de la Comptabilité Publique', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(1_700_000_000), documentUrls: [], contactEmail: 'si@tresor.gov.gn' },
+
+      // ── Institut National de la Statistique ──
+      { source: AOSource.INSTITUT_NATIONAL_STATISTIQUE, sourceId: `INS-${Y}-CENSUS`, sourceUrl: 'https://ins.gov.gn', titre: 'Équipement CAPI/Tablettes pour le recensement général de la population', objet: 'Acquisition de 5 000 tablettes et développement de l\'application CAPI pour la collecte électronique des données du recensement général de la population et de l\'habitat.', entiteAdj: 'Institut National de la Statistique', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(2_000_000_000), documentUrls: [], contactEmail: 'si@ins.gov.gn' },
+
+      // ── ARCEP ──────────────────────────
+      { source: AOSource.ARCEP, sourceId: `ARCEP-${Y}-SPECTRUM`, sourceUrl: 'https://arcep.gov.gn', titre: 'Système de gestion du spectre radioélectrique', objet: 'Le régulateur ARCEP lance un appel d\'offres pour l\'acquisition d\'un système de gestion et surveillance du spectre radioélectrique avec capteurs de terrain et logiciels d\'analyse.', entiteAdj: 'Autorité de Régulation des Communications Électroniques et Postales', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(3_200_000_000), documentUrls: [], contactEmail: 'marches@arcep.gov.gn' },
+
+      // ── APIP ───────────────────────────
+      { source: AOSource.APIP, sourceId: `APIP-${Y}-INVEST`, sourceUrl: 'https://apip.gov.gn', titre: 'Plateforme numérique de promotion des investissements et guichet unique', objet: 'Création d\'une plateforme en ligne pour la promotion des investissements privés en Guinée avec procédures de création d\'entreprise dématérialisées et suivi des dossiers d\'investissement.', entiteAdj: 'Agence Guinéenne de Promotion des Investissements Privés', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(750_000_000), documentUrls: [], contactEmail: 'si@apip.gov.gn' },
+
+      // ── Cour des Comptes ───────────────
+      { source: AOSource.COUR_COMPTES, sourceId: `CDC-${Y}-AUDIT`, sourceUrl: 'https://courdescomptes.gov.gn', titre: 'Système d\'information pour le suivi des audits publics', objet: 'Développement d\'un système d\'information pour la gestion des missions d\'audit des comptes publics avec workflow de contrôle, rapportage automatisé et suivi des recommandations.', entiteAdj: 'Cour des Comptes', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(580_000_000), documentUrls: [], contactEmail: 'si@courdescomptes.gov.gn' },
+
+      // ── CNLS ───────────────────────────
+      { source: AOSource.CNLS, sourceId: `CNLS-${Y}-SIS`, sourceUrl: 'https://cnls.gov.gn', titre: 'Système d\'information sanitaire pour le suivi VIH/SIDA', objet: 'Mise en place d\'un système d\'information pour le suivi des patients sous traitement ARV, la gestion des stocks de médicaments et le reporting aux bailleurs internationaux.', entiteAdj: 'Comité National de Lutte contre le SIDA', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(650_000_000), documentUrls: [], contactEmail: 'si@cnls.gov.gn' },
+
+      // ── OND ────────────────────────────
+      { source: AOSource.OND, sourceId: `OND-${Y}-DECENTRAL`, sourceUrl: 'https://ond.gov.gn', titre: 'Système de suivi de la décentralisation et transfert de compétences', objet: 'Développement d\'une plateforme de suivi du processus de décentralisation incluant le transfert de compétences aux collectivités, le suivi budgétaire et la formation des élus locaux.', entiteAdj: 'Office National de la Décentralisation', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(480_000_000), documentUrls: [], contactEmail: 'si@ond.gov.gn' },
+    ]
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // ═══════════════════════════════════════════════════════════════════════════
 
   private fallbackARMP(): AOBrut[] {

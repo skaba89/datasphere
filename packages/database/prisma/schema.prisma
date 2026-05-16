@@ -82,6 +82,21 @@ enum AOSource {
   COUR_COMPTES
   CNLS
   OND
+  // Autres institutions et agences guinéennes
+  EDG
+  SEG
+  AGEROUTE
+  PORT_AUTONOME_CONAKRY
+  BCRG
+  CENI
+  ANAIM
+  ONT
+  DNEF
+  // Ministères supplémentaires
+  MINISTERE_EAU_ASSAINISSEMENT
+  MINISTERE_ENSEIGNEMENT_TECHNIQUE
+  MINISTERE_AFFAIRES_RELIGIEUSES
+  MINISTERE_BONNE_GOUVERNANCE
   // Sources internationales
   BANQUE_MONDIALE
   BAD

@@ -17,11 +17,7 @@ export class AiService {
       select: { aiConfig: true },
     })
     const config = this.providerFactory.resolveConfig((org?.aiConfig as any) ?? {})
-    return {
-      heavy: this.providerFactory.getProvider(config, 'heavy'),
-      light: this.providerFactory.getProvider(config, 'light'),
-      config,
-    }
+    return config
   }
 
   private buildTypeSpecificSection(typeSolution?: string): string {
@@ -93,7 +89,7 @@ ADAPTATION CONTEXTE GUINÉEN: Adapte la solution aux spécificités locales — 
   }
 
   async genererMemTechnique(aoId: string, organisationId: string, options?: { solutionId?: string; typeSolution?: string }): Promise<string> {
-    const [ao, org, providers] = await Promise.all([
+    const [ao, org, config] = await Promise.all([
       this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
       this.prisma.organisation.findUnique({
         where: { id: organisationId },
@@ -150,16 +146,15 @@ ADAPTATION SOLUTION:${typeSpecificSection}
 MISSION: Rédige un mémoire technique professionnel et structuré en français pour répondre à cet appel d'offres. Le document doit impérativement couvrir: compréhension approfondie du besoin, méthodologie de mise en œuvre, solution technique détaillée (en tenant compte des directives ci-dessus), équipe projet avec rôles et responsabilités, références techniques pertinentes, plan de formation et transfert de compétences, gestion des risques et mesures d'atténuation, garanties et maintenance post-déploiement. Environ 3500-4500 mots.`
 
     try {
-      const result = await providers.heavy.generate(prompt, {
+      const result = await this.providerFactory.generateWithFallback(config, 'heavy', prompt, {
         maxTokens: 8000,
-        model: providers.heavy.model,
       })
 
-      this.logger.log(`Mémoire technique générée — provider: ${providers.config.provider}, modèle: ${providers.heavy.model}, ${result.length} chars`)
-      return result
+      this.logger.log(`Mémoire technique générée — provider: ${result.provider}, modèle: ${result.model}, ${result.text.length} chars`)
+      return result.text
     } catch (error: any) {
       this.logger.error(`Erreur mémoire technique IA pour AO ${aoId}: ${error?.message}`)
-      const detail = error?.message?.includes('Aucun provider') 
+      const detail = error?.message?.includes('Aucun provider')
         ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
         : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
       throw new ServiceUnavailableException(detail)
@@ -171,7 +166,7 @@ MISSION: Rédige un mémoire technique professionnel et structuré en français 
     organisationId: string,
     params: { margePercent?: number; dureeM?: number },
   ) {
-    const [ao, providers] = await Promise.all([
+    const [ao, config] = await Promise.all([
       this.prisma.appelOffre.findFirst({
         where: { id: aoId, organisationId },
         include: { dossiers: { include: { solution: true }, take: 1 } },
@@ -205,19 +200,18 @@ CONSIGNE: Génère un tableau de décomposition du prix en JSON avec la structur
 Inclure: développement logiciel, infrastructure/hébergement, formation, maintenance (12 mois), management de projet, documentation. Prix réalistes du marché guinéen. Réponds UNIQUEMENT en JSON valide.`
 
     try {
-      const raw = await providers.light.generate(prompt, {
+      const result = await this.providerFactory.generateWithFallback(config, 'light', prompt, {
         maxTokens: 3000,
-        model: providers.light.model,
       })
 
-      const jsonMatch = raw.match(/\{[\s\S]*\}/)
+      const jsonMatch = result.text.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         try { return JSON.parse(jsonMatch[0]) } catch {}
       }
-      return { raw }
+      return { raw: result.text }
     } catch (error: any) {
       this.logger.error(`Erreur offre financière IA pour AO ${aoId}: ${error?.message}`)
-      const detail = error?.message?.includes('Aucun provider') 
+      const detail = error?.message?.includes('Aucun provider')
         ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
         : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
       throw new ServiceUnavailableException(detail)
@@ -225,14 +219,14 @@ Inclure: développement logiciel, infrastructure/hébergement, formation, mainte
   }
 
   async resumerAO(aoId: string, organisationId: string): Promise<{ resume: string }> {
-    const [ao, providers] = await Promise.all([
+    const [ao, config] = await Promise.all([
       this.prisma.appelOffre.findFirst({ where: { id: aoId, organisationId } }),
       this.getProviders(organisationId),
     ])
     if (!ao) throw new NotFoundException('AO introuvable')
 
     try {
-      const resume = await providers.light.generate(
+      const result = await this.providerFactory.generateWithFallback(config, 'light',
         `Résume en 3-5 phrases clés cet appel d'offres pour une décision rapide Go/No-Go:
 
 Titre: ${ao.titre}
@@ -242,19 +236,19 @@ Budget: ${ao.budgetEstimeGNF ? Number(ao.budgetEstimeGNF).toLocaleString('fr-FR'
 Date limite: ${ao.dateLimite ? new Date(ao.dateLimite).toLocaleDateString('fr-FR') : 'Non précisée'}
 
 Focus: enjeux principaux, opportunités, risques évidents.`,
-        { maxTokens: 500, model: providers.light.model },
+        { maxTokens: 500 },
       )
 
       // Sauvegarder le résumé dans l'AO
       await this.prisma.appelOffre.update({
         where: { id: aoId },
-        data: { resumeIA: resume },
+        data: { resumeIA: result.text },
       })
 
-      return { resume }
+      return { resume: result.text }
     } catch (error: any) {
       this.logger.error(`Erreur résumé IA pour AO ${aoId}: ${error?.message}`)
-      const detail = error?.message?.includes('Aucun provider') 
+      const detail = error?.message?.includes('Aucun provider')
         ? 'Aucune clé API IA configurée. Veuillez ajouter au moins une clé (GEMINI_API_KEY, GLM_API_KEY, etc.) dans le fichier .env.'
         : `Service IA indisponible (${error?.message || 'erreur inconnue'}). Veuillez réessayer.`
       throw new ServiceUnavailableException(detail)
@@ -262,24 +256,28 @@ Focus: enjeux principaux, opportunités, risques évidents.`,
   }
 
   async analyserDocument(texte: string, typeDocument: string): Promise<Record<string, any>> {
-    // Utiliser le provider par défaut (Anthropic) pour l'analyse de documents
+    // Utiliser la config par défaut pour l'analyse de documents
     const defaultConfig = this.providerFactory.resolveConfig({})
-    const provider = this.providerFactory.getProvider(defaultConfig, 'light')
 
-    const raw = await provider.generate(
-      `Analyse ce document de type "${typeDocument}" et extrais les informations clés en JSON:
+    try {
+      const result = await this.providerFactory.generateWithFallback(defaultConfig, 'light',
+        `Analyse ce document de type "${typeDocument}" et extrais les informations clés en JSON:
 
 ${texte.substring(0, 8000)}
 
 Extrais: titre, entite_adj, objet, budget_estime, date_publication, date_limite, duree_marche, criteres_eligibilite (liste), criteres_evaluation (liste), secteur, type_marche.
 Réponds UNIQUEMENT en JSON valide.`,
-      { maxTokens: 2000, model: provider.model },
-    )
+        { maxTokens: 2000 },
+      )
 
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/)
-      return jsonMatch ? JSON.parse(jsonMatch[0]) : {}
-    } catch {
+      try {
+        const jsonMatch = result.text.match(/\{[\s\S]*\}/)
+        return jsonMatch ? JSON.parse(jsonMatch[0]) : {}
+      } catch {
+        return {}
+      }
+    } catch (error: any) {
+      this.logger.error(`Erreur analyse document IA: ${error?.message}`)
       return {}
     }
   }

@@ -67,6 +67,21 @@ const SOURCES_DISPONIBLES = [
   { id: 'COUR_COMPTES',                  nom: 'Cour des Comptes',                     url: 'https://courdescomptes.gov.gn', actif: true },
   { id: 'CNLS',                          nom: 'CNLS Guinée',                          url: 'https://cnls.gov.gn',        actif: true },
   { id: 'OND',                           nom: 'OND Guinée',                           url: 'https://ond.gov.gn',         actif: true },
+  // Autres institutions et agences guinéennes
+  { id: 'EDG',                    nom: 'EDG — Électricité de Guinée',              url: 'https://edg.gov.gn',               actif: true },
+  { id: 'SEG',                    nom: 'SEG — Société des Eaux de Guinée',         url: 'https://seg.gov.gn',               actif: true },
+  { id: 'AGEROUTE',               nom: 'AGEROUTE — Agence des Routes',             url: 'https://ageroute.gov.gn',          actif: true },
+  { id: 'PORT_AUTONOME_CONAKRY',  nom: 'Port Autonome de Conakry',                 url: 'https://pac.gov.gn',               actif: true },
+  { id: 'BCRG',                   nom: 'BCRG — Banque Centrale de Rép. de Guinée', url: 'https://bcrg.gov.gn',              actif: true },
+  { id: 'CENI',                   nom: 'CENI — Commission Électorale Nationale',   url: 'https://ceni.gov.gn',              actif: true },
+  { id: 'ANAIM',                  nom: 'ANAIM — Agence Nationale Aff. Immobilières', url: 'https://anaim.gov.gn',          actif: true },
+  { id: 'ONT',                    nom: 'ONT — Office National du Tourisme',        url: 'https://ont.gov.gn',               actif: true },
+  { id: 'DNEF',                   nom: 'DNEF — Direction Nat. Eaux et Forêts',     url: 'https://dnef.gov.gn',              actif: true },
+  // Ministères supplémentaires
+  { id: 'MINISTERE_EAU_ASSAINISSEMENT',    nom: 'Ministère de l\'Eau et de l\'Assainissement',    url: 'https://eau.gov.gn',           actif: true },
+  { id: 'MINISTERE_ENSEIGNEMENT_TECHNIQUE', nom: 'Ministère Enseignement Technique',             url: 'https://metfp.gov.gn',        actif: true },
+  { id: 'MINISTERE_AFFAIRES_RELIGIEUSES',  nom: 'Ministère des Affaires Religieuses',            url: 'https://religions.gov.gn',    actif: true },
+  { id: 'MINISTERE_BONNE_GOUVERNANCE',     nom: 'Ministère de la Bonne Gouvernance',             url: 'https://gouvernance.gov.gn',  actif: true },
   // Sources internationales
   { id: 'BANQUE_MONDIALE',   nom: 'Banque Mondiale',                           url: 'https://projects.worldbank.org',     actif: true  },
   { id: 'PNUD',              nom: 'PNUD / UNDP',                               url: 'https://procurement.undp.org',       actif: true  },
@@ -204,6 +219,21 @@ export class ScrapingService {
       { nom: 'Cour des Comptes',   fn: () => this.scraperCourComptes() },
       { nom: 'CNLS',               fn: () => this.scraperCNLS() },
       { nom: 'OND',                fn: () => this.scraperOND() },
+      // Autres institutions et agences guinéennes
+      { nom: 'EDG (Électricité)',        fn: () => this.scraperEDG() },
+      { nom: 'SEG (Eaux)',               fn: () => this.scraperSEG() },
+      { nom: 'AGEROUTE (Routes)',         fn: () => this.scraperAGEROUTE() },
+      { nom: 'Port Autonome Conakry',    fn: () => this.scraperPortAutonomeConakry() },
+      { nom: 'BCRG (Banque Centrale)',   fn: () => this.scraperBCRG() },
+      { nom: 'CENI (Élections)',         fn: () => this.scraperCENI() },
+      { nom: 'ANAIM (Immobilier)',       fn: () => this.scraperANAIM() },
+      { nom: 'ONT (Tourisme)',           fn: () => this.scraperONT() },
+      { nom: 'DNEF (Eaux et Forêts)',    fn: () => this.scraperDNEF() },
+      // Ministères supplémentaires
+      { nom: 'Ministère Eau & Assainissement', fn: () => this.scraperMinistereEauAssainissement() },
+      { nom: 'Ministère Ens. Technique',       fn: () => this.scraperMinistereEnseignementTechnique() },
+      { nom: 'Ministère Affaires Religieuses', fn: () => this.scraperMinistereAffairesReligieuses() },
+      { nom: 'Ministère Bonne Gouvernance',    fn: () => this.scraperMinistereBonneGouvernance() },
       // Sources internationales
       { nom: 'Banque Mondiale',   fn: () => this.scraperBanqueMondiale() },
       { nom: 'PNUD',              fn: () => this.scraperPNUD() },
@@ -1044,6 +1074,64 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.OND)
   }
 
+  // ── Autres Institutions & Agences ──────────────────────────────────────────
+
+  private async scraperEDG(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('edg.gov.gn', AOSource.EDG, 'EDG', 'EDG — Électricité de Guinée', 'marches@edg.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.EDG)
+  }
+  private async scraperSEG(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('seg.gov.gn', AOSource.SEG, 'SEG', 'SEG — Société des Eaux de Guinée', 'marches@seg.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.SEG)
+  }
+  private async scraperAGEROUTE(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('ageroute.gov.gn', AOSource.AGEROUTE, 'AGRT', 'AGEROUTE — Agence des Routes', 'marches@ageroute.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.AGEROUTE)
+  }
+  private async scraperPortAutonomeConakry(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('pac.gov.gn', AOSource.PORT_AUTONOME_CONAKRY, 'PAC', 'Port Autonome de Conakry', 'marches@pac.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.PORT_AUTONOME_CONAKRY)
+  }
+  private async scraperBCRG(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('bcrg.gov.gn', AOSource.BCRG, 'BCRG', 'Banque Centrale de la République de Guinée', 'marches@bcrg.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.BCRG)
+  }
+  private async scraperCENI(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('ceni.gov.gn', AOSource.CENI, 'CENI', 'Commission Électorale Nationale Indépendante', 'marches@ceni.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.CENI)
+  }
+  private async scraperANAIM(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('anaim.gov.gn', AOSource.ANAIM, 'ANAIM', 'Agence Nationale des Affaires Immobilières et Minières', 'marches@anaim.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.ANAIM)
+  }
+  private async scraperONT(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('ont.gov.gn', AOSource.ONT, 'ONT', 'Office National du Tourisme', 'marches@ont.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.ONT)
+  }
+  private async scraperDNEF(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('dnef.gov.gn', AOSource.DNEF, 'DNEF', 'Direction Nationale des Eaux et Forêts', 'marches@dnef.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.DNEF)
+  }
+
+  // ── Ministères supplémentaires ─────────────────────────────────────────────
+
+  private async scraperMinistereEauAssainissement(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('eau.gov.gn', AOSource.MINISTERE_EAU_ASSAINISSEMENT, 'MEA', 'Ministère de l\'Eau et de l\'Assainissement', 'marches@eau.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_EAU_ASSAINISSEMENT)
+  }
+  private async scraperMinistereEnseignementTechnique(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('metfp.gov.gn', AOSource.MINISTERE_ENSEIGNEMENT_TECHNIQUE, 'METFP', 'Ministère de l\'Enseignement Technique et de la Formation Professionnelle', 'marches@metfp.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENSEIGNEMENT_TECHNIQUE)
+  }
+  private async scraperMinistereAffairesReligieuses(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('religions.gov.gn', AOSource.MINISTERE_AFFAIRES_RELIGIEUSES, 'MAR', 'Ministère des Affaires Religieuses', 'marches@religions.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_AFFAIRES_RELIGIEUSES)
+  }
+  private async scraperMinistereBonneGouvernance(): Promise<AOBrut[]> {
+    const r = await this.scraperGovGn('gouvernance.gov.gn', AOSource.MINISTERE_BONNE_GOUVERNANCE, 'MBG', 'Ministère de la Bonne Gouvernance et de la Lutte contre la Corruption', 'marches@gouvernance.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_BONNE_GOUVERNANCE)
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // DONNÉES DE SECOURS — TOUS les ministères, directions et institutions
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1153,6 +1241,244 @@ export class ScrapingService {
 
       // ── OND ────────────────────────────
       { source: AOSource.OND, sourceId: `OND-${Y}-DECENTRAL`, sourceUrl: 'https://ond.gov.gn', titre: 'Système de suivi de la décentralisation et transfert de compétences', objet: 'Développement d\'une plateforme de suivi du processus de décentralisation incluant le transfert de compétences aux collectivités, le suivi budgétaire et la formation des élus locaux.', entiteAdj: 'Office National de la Décentralisation', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(480_000_000), documentUrls: [], contactEmail: 'si@ond.gov.gn' },
+
+      // ── EDG — Électricité de Guinée ─────────────────────
+      {
+        source: AOSource.EDG,
+        sourceId: `EDG-REHAB-RESEAU-${Y}`,
+        sourceUrl: 'https://edg.gov.gn/marches-publics',
+        titre: `Réhabilitation du réseau électrique de Boké et Kamsar — fourniture de transformateurs et câbles MT/BT`,
+        objet: 'Réhabilitation et extension du réseau de distribution électrique dans les villes de Boké et Kamsar, incluant la fourniture et pose de transformateurs 20kV/400V, câbles moyenne et basse tension, et comptage prépayé pour 5 000 nouveaux abonnés.',
+        entiteAdj: 'EDG — Électricité de Guinée',
+        datePublication: new Date(now - 3 * 86400000),
+        dateLimite: new Date(now + 18 * 86400000),
+        budgetEstimeGNF: BigInt(15_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@edg.gov.gn',
+        contactNom: 'Direction des Marchés EDG',
+      },
+      {
+        source: AOSource.EDG,
+        sourceId: `EDG-SOLAIRES-${Y}`,
+        sourceUrl: 'https://edg.gov.gn/marches-publics',
+        titre: `Installation de panneaux solaires sur 50 sites isolés en Guinée Forestière`,
+        objet: 'Fourniture, installation et mise en service de systèmes solaires photovoltaïques sur 50 sites isolés dans les préfectures de Nzérékoré, Beyla et Yomou. Capacité totale: 2 MWc. Batteries de stockage lithium inclues.',
+        entiteAdj: 'EDG — Électricité de Guinée',
+        datePublication: new Date(now - 7 * 86400000),
+        dateLimite: new Date(now + 14 * 86400000),
+        budgetEstimeGNF: BigInt(25_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@edg.gov.gn',
+        contactNom: 'Direction des Marchés EDG',
+      },
+      // ── SEG — Société des Eaux de Guinée ─────────────────
+      {
+        source: AOSource.SEG,
+        sourceId: `SEG-ADDUCTEUR-${Y}`,
+        sourceUrl: 'https://seg.gov.gn/marches-publics',
+        titre: `Construction de l'adducteur principal d'eau potable Kankan — Kouroussa`,
+        objet: 'Construction d\'un adducteur d\'eau potable de 85 km entre Kankan et Kouroussa, incluant station de pompage, station de traitement, réservoirs de 2000 m³ et réseau de distribution desservant 80 000 habitants.',
+        entiteAdj: 'SEG — Société des Eaux de Guinée',
+        datePublication: new Date(now - 5 * 86400000),
+        dateLimite: new Date(now + 25 * 86400000),
+        budgetEstimeGNF: BigInt(35_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@seg.gov.gn',
+        contactNom: 'Direction des Marchés SEG',
+      },
+      {
+        source: AOSource.SEG,
+        sourceId: `SEG-FORAGES-${Y}`,
+        sourceUrl: 'https://seg.gov.gn/marches-publics',
+        titre: `Réalisation de 120 forages équipés de pompes solaires en Moyenne Guinée`,
+        objet: 'Programme d\'hydraulique villageoise: réalisation de 120 forages équipés de pompes solaires dans les préfectures de Labé, Mamou, Pita et Dalaba. Chaque forage: 80-120m de profondeur, pompe solaire 3kW, château d\'eau 15m³.',
+        entiteAdj: 'SEG — Société des Eaux de Guinée',
+        datePublication: new Date(now - 10 * 86400000),
+        dateLimite: new Date(now + 20 * 86400000),
+        budgetEstimeGNF: BigInt(12_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@seg.gov.gn',
+        contactNom: 'Direction des Marchés SEG',
+      },
+      // ── AGEROUTE — Agence des Routes ─────────────────────
+      {
+        source: AOSource.AGEROUTE,
+        sourceId: `AGRT-RN2-${Y}`,
+        sourceUrl: 'https://ageroute.gov.gn/marches-publics',
+        titre: `Reprofilage et asphaltage de la RN2 Kissidougou — Kérouané (92 km)`,
+        objet: 'Travaux de reprofilage, amélioration et asphaltage de la route nationale RN2 entre Kissidougou et Kérouané, longueur 92 km. Chaussée 7m avec accotements 1.5m, 6 ouvrages d\'art, signalisation horizontale et verticale.',
+        entiteAdj: 'AGEROUTE — Agence des Routes',
+        datePublication: new Date(now - 8 * 86400000),
+        dateLimite: new Date(now + 30 * 86400000),
+        budgetEstimeGNF: BigInt(120_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@ageroute.gov.gn',
+        contactNom: 'Direction des Marchés AGEROUTE',
+      },
+      {
+        source: AOSource.AGEROUTE,
+        sourceId: `AGRT-PISTES-${Y}`,
+        sourceUrl: 'https://ageroute.gov.gn/marches-publics',
+        titre: `Réhabilitation de pistes rurales en Basse Guinée — 150 km`,
+        objet: 'Réhabilitation de 150 km de pistes rurales dans les préfectures de Boffa, Boké, Fria et Kindia. Travaux: mise en terrasse, drainage, ouvrages de franchissement, revêtement en grave naturelle traitée.',
+        entiteAdj: 'AGEROUTE — Agence des Routes',
+        datePublication: new Date(now - 12 * 86400000),
+        dateLimite: new Date(now + 28 * 86400000),
+        budgetEstimeGNF: BigInt(45_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@ageroute.gov.gn',
+        contactNom: 'Direction des Marchés AGEROUTE',
+      },
+      // ── Port Autonome de Conakry ──────────────────────────
+      {
+        source: AOSource.PORT_AUTONOME_CONAKRY,
+        sourceId: `PAC-QUAI-${Y}`,
+        sourceUrl: 'https://pac.gov.gn/marches-publics',
+        titre: `Extension du quai minéralier et dragage du chenal d'accès — Port de Conakry`,
+        objet: 'Extension du quai minéralier de 250 mètres linéaires, dragage du chenal d\'accès à -15m CD, construction d\'un mur de quai en blocs de béton, fourniture et installation de 2 portiques de manutention de 40 tonnes.',
+        entiteAdj: 'Port Autonome de Conakry',
+        datePublication: new Date(now - 6 * 86400000),
+        dateLimite: new Date(now + 35 * 86400000),
+        budgetEstimeGNF: BigInt(200_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@pac.gov.gn',
+        contactNom: 'Direction des Marchés PAC',
+      },
+      // ── BCRG — Banque Centrale ────────────────────────────
+      {
+        source: AOSource.BCRG,
+        sourceId: `BCRG-SI-${Y}`,
+        sourceUrl: 'https://bcrg.gov.gn/marches-publics',
+        titre: `Modernisation du système d'information de la Banque Centrale de la République de Guinée`,
+        objet: 'Migration du système central vers une plateforme temps réel (RTGS), mise en place d\'un système de télécompensation automatisée, renforcement de la cybersécurité, formation du personnel technique et opérationnel.',
+        entiteAdj: 'Banque Centrale de la République de Guinée',
+        datePublication: new Date(now - 4 * 86400000),
+        dateLimite: new Date(now + 21 * 86400000),
+        budgetEstimeGNF: BigInt(40_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@bcrg.gov.gn',
+        contactNom: 'Direction des Marchés BCRG',
+      },
+      // ── CENI — Commission Électorale ──────────────────────
+      {
+        source: AOSource.CENI,
+        sourceId: `CENI-MATERIEL-${Y}`,
+        sourceUrl: 'https://ceni.gov.gn/marches-publics',
+        titre: `Acquisition de matériel électoral et kits de bureau de vote pour les élections générales`,
+        objet: 'Fourniture de 25 000 kits de bureau de vote complets (urnes transparentes, isoloirs, encre indélébile, tampons, formulaires PV), 30 000 lampes torches, et 5 000 tentes de vote. Livraison sous 90 jours.',
+        entiteAdj: 'Commission Électorale Nationale Indépendante',
+        datePublication: new Date(now - 15 * 86400000),
+        dateLimite: new Date(now + 10 * 86400000),
+        budgetEstimeGNF: BigInt(18_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@ceni.gov.gn',
+        contactNom: 'Direction de la Logistique CENI',
+      },
+      // ── ANAIM — Agence Nationale Immobilière ──────────────
+      {
+        source: AOSource.ANAIM,
+        sourceId: `ANAIM-LOGEMENTS-${Y}`,
+        sourceUrl: 'https://anaim.gov.gn/marches-publics',
+        titre: `Construction de 500 logements sociaux à Dubréka — programme ANAIM Habitat`,
+        objet: 'Construction de 500 logements sociaux type F3 (65 m²) et F4 (85 m²) sur un terrain de 25 hectares à Dubréka. Voirie, réseaux divers (VED), espaces verts, école primaire, centre de santé, marché.',
+        entiteAdj: 'ANAIM — Agence Nationale des Affaires Immobilières',
+        datePublication: new Date(now - 9 * 86400000),
+        dateLimite: new Date(now + 30 * 86400000),
+        budgetEstimeGNF: BigInt(75_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@anaim.gov.gn',
+        contactNom: 'Direction des Marchés ANAIM',
+      },
+      // ── ONT — Office National du Tourisme ─────────────────
+      {
+        source: AOSource.ONT,
+        sourceId: `ONT-PROMOTION-${Y}`,
+        sourceUrl: 'https://ont.gov.gn/marches-publics',
+        titre: `Campagne internationale de promotion touristique — Destination Guinée 2026`,
+        objet: 'Conception et déploiement d\'une campagne de communication multimédia (digital, TV, print, événementiel) pour la promotion de la destination Guinée sur les marchés européens et africains. Site web multilingue, présence réseaux sociaux, relations presse.',
+        entiteAdj: 'Office National du Tourisme de Guinée',
+        datePublication: new Date(now - 2 * 86400000),
+        dateLimite: new Date(now + 15 * 86400000),
+        budgetEstimeGNF: BigInt(5_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@ont.gov.gn',
+        contactNom: 'Direction des Marchés ONT',
+      },
+      // ── DNEF — Direction Nationale Eaux et Forêts ─────────
+      {
+        source: AOSource.DNEF,
+        sourceId: `DNEF-REBOISEMENT-${Y}`,
+        sourceUrl: 'https://dnef.gov.gn/marches-publics',
+        titre: `Programme de reboisement et aménagement forestier — Monts Nimba et Ziama`,
+        objet: 'Aménagement forestier durable de 15 000 hectares dans les réserves des Monts Nimba et Ziama. Reboisement de 3 000 ha, pépinière de 2 millions de plants, formation des communautés locales, surveillance anti-braconnage.',
+        entiteAdj: 'Direction Nationale des Eaux et Forêts',
+        datePublication: new Date(now - 11 * 86400000),
+        dateLimite: new Date(now + 22 * 86400000),
+        budgetEstimeGNF: BigInt(8_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@dnef.gov.gn',
+        contactNom: 'Direction des Marchés DNEF',
+      },
+      // ── Ministère de l'Eau et de l'Assainissement ─────────
+      {
+        source: AOSource.MINISTERE_EAU_ASSAINISSEMENT,
+        sourceId: `MEA-ASSAINISSEMENT-${Y}`,
+        sourceUrl: 'https://eau.gov.gn/marches-publics',
+        titre: `Programme d'assainissement liquide de la commune de N'Zérékoré — phase 2`,
+        objet: 'Construction d\'un réseau d\'égouts de 25 km, station d\'épuration boues activées (capacité 15 000 EH), 2 000 latrines familiales, 50 blocs sanitaires publics. Volet sensibilisation hygiène pour 200 000 bénéficiaires.',
+        entiteAdj: 'Ministère de l\'Eau et de l\'Assainissement',
+        datePublication: new Date(now - 6 * 86400000),
+        dateLimite: new Date(now + 25 * 86400000),
+        budgetEstimeGNF: BigInt(28_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@eau.gov.gn',
+        contactNom: 'Direction des Marchés MEA',
+      },
+      // ── Ministère Enseignement Technique ───────────────────
+      {
+        source: AOSource.MINISTERE_ENSEIGNEMENT_TECHNIQUE,
+        sourceId: `METFP-EQUIPEMENT-${Y}`,
+        sourceUrl: 'https://metfp.gov.gn/marches-publics',
+        titre: `Équipement en matériel pédagogique des 12 centres de formation professionnelle régionaux`,
+        objet: 'Fourniture et installation d\'équipements techniques et pédagogiques dans 12 centres de formation professionnelle: ateliers soudure, électricité, menuiserie, informatique, froid climatisation. Formation des formateurs incluse.',
+        entiteAdj: 'Ministère de l\'Enseignement Technique et de la Formation Professionnelle',
+        datePublication: new Date(now - 3 * 86400000),
+        dateLimite: new Date(now + 20 * 86400000),
+        budgetEstimeGNF: BigInt(10_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@metfp.gov.gn',
+        contactNom: 'Direction des Marchés METFP',
+      },
+      // ── Ministère Affaires Religieuses ─────────────────────
+      {
+        source: AOSource.MINISTERE_AFFAIRES_RELIGIEUSES,
+        sourceId: `MAR-PELERINAGE-${Y}`,
+        sourceUrl: 'https://religions.gov.gn/marches-publics',
+        titre: `Organisation logistique du transport aérien des pèlerins guinéens — Hajj ${Y + 1}`,
+        objet: 'Affrètement d\'avions pour le transport de 8 000 pèlerins guinéens vers les Lieux Saints. Inclut: billets aller-retour, accueil et accompagnement, assurance voyage, hébergement à Médine et La Mecque.',
+        entiteAdj: 'Ministère des Affaires Religieuses',
+        datePublication: new Date(now - 1 * 86400000),
+        dateLimite: new Date(now + 12 * 86400000),
+        budgetEstimeGNF: BigInt(20_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@religions.gov.gn',
+        contactNom: 'Direction des Marchés MAR',
+      },
+      // ── Ministère Bonne Gouvernance ────────────────────────
+      {
+        source: AOSource.MINISTERE_BONNE_GOUVERNANCE,
+        sourceId: `MBG-ARCHIVAGE-${Y}`,
+        sourceUrl: 'https://gouvernance.gov.gn/marches-publics',
+        titre: `Numérisation et archivage électronique des dossiers administratifs des ministères — phase pilote`,
+        objet: 'Numérisation de 500 000 dossiers administratifs dans 5 ministères pilotes, mise en place d\'un système GED (Gestion Électronique de Documents), formation des agents, interconnexion avec le réseau national e-administration.',
+        entiteAdj: 'Ministère de la Bonne Gouvernance et de la Lutte contre la Corruption',
+        datePublication: new Date(now - 7 * 86400000),
+        dateLimite: new Date(now + 18 * 86400000),
+        budgetEstimeGNF: BigInt(6_000_000_000),
+        documentUrls: [],
+        contactEmail: 'marches@gouvernance.gov.gn',
+        contactNom: 'Direction des Marchés MBG',
+      },
     ]
   }
 

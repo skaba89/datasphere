@@ -52,6 +52,68 @@ export class AiProviderFactory {
   }
 
   /**
+   * Génère du texte avec fallback automatique entre providers.
+   * Si le provider principal échoue (erreur 400, 429, 500, etc.),
+   * essaie automatiquement les autres providers configurés.
+   */
+  async generateWithFallback(
+    aiConfig: AiConfig,
+    tier: 'heavy' | 'light',
+    prompt: string,
+    options: { maxTokens?: number; systemPrompt?: string } = {},
+  ): Promise<{ text: string; provider: AiProviderName; model: string }> {
+    // Collecter tous les providers disponibles dans l'ordre de priorité
+    const triedProviders: { name: AiProviderName; error: string }[] = []
+    const primaryProviderName = aiConfig.provider ?? 'anthropic'
+
+    // Ordre de tentative: provider configuré d'abord, puis fallback order
+    const attemptOrder: AiProviderName[] = [
+      primaryProviderName,
+      ...FALLBACK_ORDER.filter(n => n !== primaryProviderName),
+    ]
+
+    for (const providerName of attemptOrder) {
+      const provider = this.tryBuildProvider(providerName)
+      if (!provider) continue // Pas de clé API pour ce provider
+
+      const defaults = DEFAULT_MODELS[providerName]
+      const model = tier === 'heavy'
+        ? (providerName === primaryProviderName ? aiConfig.modelHeavy : defaults.heavy)
+        : (providerName === primaryProviderName ? aiConfig.modelLight : defaults.light)
+
+      try {
+        this.logger.log(`🤖 Tentative IA: ${providerName}/${model} (tier: ${tier})`)
+        const text = await provider.generate(prompt, {
+          ...options,
+          model,
+        })
+        this.logger.log(`✅ Succès IA: ${providerName}/${model} — ${text.length} caractères générés`)
+        return { text, provider: providerName, model }
+      } catch (error: any) {
+        const errorMsg = error?.message || 'erreur inconnue'
+        this.logger.warn(`❌ Échec ${providerName}/${model}: ${errorMsg}`)
+        triedProviders.push({ name: providerName, error: errorMsg })
+
+        // Si l'erreur est "Aucun provider", ne pas réessayer (problème de config)
+        if (errorMsg.includes('Aucun provider') || errorMsg.includes('Aucune clé API')) {
+          break
+        }
+
+        // Continuer avec le prochain provider
+        continue
+      }
+    }
+
+    // Tous les providers ont échoué
+    const errorDetails = triedProviders.map(p => `${p.name}: ${p.error}`).join(' | ')
+    this.logger.error(`❌ Tous les providers IA ont échoué: ${errorDetails}`)
+    throw new Error(
+      `Service IA indisponible. Détails: ${errorDetails}. ` +
+      'Vérifiez vos clés API dans le fichier .env (GEMINI_API_KEY, GLM_API_KEY, etc.)'
+    )
+  }
+
+  /**
    * Résout la config IA d'une organisation, avec fallback sur les env vars globaux.
    */
   resolveConfig(orgAiConfig: any): AiConfig {
@@ -103,8 +165,8 @@ export class AiProviderFactory {
         default:
           return null
       }
-    } catch (err) {
-      this.logger.warn(`Erreur construction provider ${name}: ${err.message}`)
+    } catch (err: any) {
+      this.logger.warn(`Erreur construction provider ${name}: ${err?.message}`)
       return null
     }
   }

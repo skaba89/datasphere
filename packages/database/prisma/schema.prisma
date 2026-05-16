@@ -225,7 +225,7 @@ model Organisation {
   updatedAt   DateTime @updatedAt
 
   nom              String
-  slug             String    @unique
+  slug             String?   @unique
   rccm             String?
   ifu              String?
   adresse          String?
@@ -452,8 +452,8 @@ model Entite {
   updatedAt DateTime @updatedAt
 
   nom         String
-  slug        String   @unique
-  type        String
+  slug        String?  @unique
+  type        String   @default("MINISTERE")
   siteWeb     String?
   adresse     String?
   pays        String  @default("GN")
@@ -614,7 +614,7 @@ model Solution {
   updatedAt DateTime @updatedAt
 
   nom             String
-  slug            String
+  slug            String?   @unique
   categorie       SolutionCategory
   description     String  @db.Text
   configSchema    Json    @default("{}")

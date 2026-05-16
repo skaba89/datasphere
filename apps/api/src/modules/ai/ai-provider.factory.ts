@@ -4,6 +4,9 @@ import { AnthropicProvider } from './providers/anthropic.provider'
 import { OpenAICompatibleProvider } from './providers/openai-compatible.provider'
 import { AiProvider, AiProviderName, AiConfig, DEFAULT_MODELS } from './providers/ai-provider.interface'
 
+/** Ordre de préférence pour le fallback automatique */
+const FALLBACK_ORDER: AiProviderName[] = ['gemini', 'glm', 'groq', 'openrouter', 'mistral', 'qwen', 'anthropic']
+
 @Injectable()
 export class AiProviderFactory {
   private readonly logger = new Logger(AiProviderFactory.name)
@@ -13,14 +16,38 @@ export class AiProviderFactory {
   /**
    * Retourne un provider configuré pour le modèle "heavy" (mémoire technique, dossiers)
    * ou "light" (résumés, scoring, analyses rapides).
+   *
+   * Si le provider demandé n'a pas de clé API configurée, on essaie les autres
+   * providers dans l'ordre de FALLBACK_ORDER jusqu'à en trouver un fonctionnel.
    */
   getProvider(aiConfig: AiConfig, tier: 'heavy' | 'light'): AiProvider & { model: string } {
     const providerName = aiConfig.provider ?? 'anthropic'
     const model = tier === 'heavy' ? aiConfig.modelHeavy : aiConfig.modelLight
-    const provider = this.buildProvider(providerName)
 
-    // Attach model to provider for use in generate() via options['model']
-    return Object.assign(provider, { model })
+    // Essayer le provider demandé d'abord
+    const provider = this.tryBuildProvider(providerName)
+    if (provider) {
+      return Object.assign(provider, { model })
+    }
+
+    // Fallback: essayer les autres providers
+    this.logger.warn(`Provider "${providerName}" non configuré (clé API manquante), recherche d'un fallback...`)
+    for (const fallbackName of FALLBACK_ORDER) {
+      if (fallbackName === providerName) continue
+      const fallbackProvider = this.tryBuildProvider(fallbackName)
+      if (fallbackProvider) {
+        const fallbackDefaults = DEFAULT_MODELS[fallbackName]
+        const fallbackModel = tier === 'heavy' ? fallbackDefaults.heavy : fallbackDefaults.light
+        this.logger.log(`✅ Fallback IA: utilisation de ${fallbackName} (${fallbackModel}) au lieu de ${providerName}`)
+        return Object.assign(fallbackProvider, { model: fallbackModel })
+      }
+    }
+
+    // Aucun provider disponible
+    this.logger.error('❌ Aucun provider IA configuré ! Veuillez ajouter au moins une clé API dans le fichier .env')
+    // Retourner un provider qui donnera une erreur claire
+    const providerAny = new OpenAICompatibleProvider('none', 'no-key', 'http://localhost:1')
+    return Object.assign(providerAny, { model })
   }
 
   /**
@@ -36,64 +63,61 @@ export class AiProviderFactory {
     }
   }
 
-  private buildProvider(name: AiProviderName): AiProvider {
-    switch (name) {
-      case 'anthropic':
-        return new AnthropicProvider(
-          this.config.getOrThrow('ANTHROPIC_API_KEY'),
-        )
+  /**
+   * Retourne la liste des providers réellement configurés (avec clé API)
+   */
+  getAvailableProviders(): { name: AiProviderName; hasKey: boolean }[] {
+    return FALLBACK_ORDER.map(name => ({
+      name,
+      hasKey: !!this.getApiKey(name),
+    }))
+  }
 
-      case 'openrouter':
-        return new OpenAICompatibleProvider(
-          'openrouter',
-          this.config.getOrThrow('OPENROUTER_API_KEY'),
-          'https://openrouter.ai/api/v1',
-          {
+  /**
+   * Tente de construire un provider. Retourne null si la clé API est manquante.
+   */
+  private tryBuildProvider(name: AiProviderName): AiProvider | null {
+    const apiKey = this.getApiKey(name)
+    if (!apiKey) return null
+
+    try {
+      switch (name) {
+        case 'anthropic':
+          return new AnthropicProvider(apiKey)
+        case 'openrouter':
+          return new OpenAICompatibleProvider('openrouter', apiKey, 'https://openrouter.ai/api/v1', {
             'HTTP-Referer': this.config.get('APP_URL', 'https://guineatender.gn'),
             'X-Title': 'GuineaTender AI',
-          },
-        )
-
-      case 'groq':
-        return new OpenAICompatibleProvider(
-          'groq',
-          this.config.getOrThrow('GROQ_API_KEY'),
-          'https://api.groq.com/openai/v1',
-        )
-
-      case 'glm':
-        return new OpenAICompatibleProvider(
-          'glm',
-          this.config.getOrThrow('GLM_API_KEY'),
-          'https://open.bigmodel.cn/api/paas/v4',
-        )
-
-      case 'qwen':
-        return new OpenAICompatibleProvider(
-          'qwen',
-          this.config.getOrThrow('QWEN_API_KEY'),
-          'https://dashscope.aliyuncs.com/compatible-mode/v1',
-        )
-
-      case 'gemini':
-        return new OpenAICompatibleProvider(
-          'gemini',
-          this.config.getOrThrow('GEMINI_API_KEY'),
-          'https://generativelanguage.googleapis.com/v1beta/openai',
-        )
-
-      case 'mistral':
-        return new OpenAICompatibleProvider(
-          'mistral',
-          this.config.getOrThrow('MISTRAL_API_KEY'),
-          'https://api.mistral.ai/v1',
-        )
-
-      default:
-        this.logger.warn(`Provider inconnu "${name}", fallback sur Anthropic`)
-        return new AnthropicProvider(
-          this.config.get('ANTHROPIC_API_KEY', ''),
-        )
+          })
+        case 'groq':
+          return new OpenAICompatibleProvider('groq', apiKey, 'https://api.groq.com/openai/v1')
+        case 'glm':
+          return new OpenAICompatibleProvider('glm', apiKey, 'https://open.bigmodel.cn/api/paas/v4')
+        case 'qwen':
+          return new OpenAICompatibleProvider('qwen', apiKey, 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+        case 'gemini':
+          return new OpenAICompatibleProvider('gemini', apiKey, 'https://generativelanguage.googleapis.com/v1beta/openai')
+        case 'mistral':
+          return new OpenAICompatibleProvider('mistral', apiKey, 'https://api.mistral.ai/v1')
+        default:
+          return null
+      }
+    } catch (err) {
+      this.logger.warn(`Erreur construction provider ${name}: ${err.message}`)
+      return null
     }
+  }
+
+  private getApiKey(name: AiProviderName): string | undefined {
+    const keyMap: Record<AiProviderName, string> = {
+      anthropic: 'ANTHROPIC_API_KEY',
+      openrouter: 'OPENROUTER_API_KEY',
+      groq: 'GROQ_API_KEY',
+      glm: 'GLM_API_KEY',
+      qwen: 'QWEN_API_KEY',
+      gemini: 'GEMINI_API_KEY',
+      mistral: 'MISTRAL_API_KEY',
+    }
+    return this.config.get(keyMap[name])
   }
 }

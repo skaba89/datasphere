@@ -3,6 +3,7 @@ import { PrismaService } from '../../common/prisma/prisma.service'
 import { AiService } from '../ai/ai.service'
 import { NotificationsService } from '../notifications/notifications.service'
 import { DossierStatus } from '@guineatender/database'
+import { QueryDossierDto } from './dto/query-dossier.dto'
 
 // ── Transitions légales de statut ────────────────────────────────────────────────
 // Chaque clé indique les statuts sources autorisés pour une transition donnée
@@ -30,13 +31,13 @@ export class DossiersService {
     private notifications: NotificationsService,
   ) {}
 
-  async findAll(organisationId: string, query: { aoId?: string; status?: string; page?: number; limit?: number }) {
-    const page = Number(query.page) || 1
-    const limit = Math.min(100, Math.max(1, Number(query.limit) || 20))
+  async findAll(organisationId: string, query: QueryDossierDto) {
+    const page = query.page ?? 1
+    const limit = query.limit ?? 20
     const where = {
       organisationId,
       ...(query.aoId && { aoId: query.aoId }),
-      ...(query.status && { status: query.status as DossierStatus }),
+      ...(query.status && { status: query.status }),
     }
 
     const [total, items] = await Promise.all([

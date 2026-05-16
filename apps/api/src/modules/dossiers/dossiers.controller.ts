@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Request } fr
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiBody } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { DossiersService } from './dossiers.service'
+import { QueryDossierDto } from './dto/query-dossier.dto'
 
 @ApiTags('Dossiers')
 @ApiBearerAuth()
@@ -12,7 +13,7 @@ export class DossiersController {
 
   @Get()
   @ApiOperation({ summary: 'Lister les dossiers de réponse' })
-  findAll(@Request() req: any, @Query() query: any) {
+  findAll(@Request() req: any, @Query() query: QueryDossierDto) {
     return this.service.findAll(req.user.organisationId, query)
   }
 

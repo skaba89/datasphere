@@ -1,7 +1,10 @@
 import { IsOptional, IsEnum, IsString, IsNumber, IsDateString, Min, Max } from 'class-validator'
-import { Type } from 'class-transformer'
+import { Type, Transform } from 'class-transformer'
 import { ApiProperty } from '@nestjs/swagger'
 import { AOStatus, AOSource, AOSector } from '@guineatender/database'
+
+// Transforme les chaînes vides en undefined pour les champs optionnels enum
+const EmptyToUndefined = () => Transform(({ value }) => (value === '' || value === undefined) ? undefined : value)
 
 export class QueryAODto {
   @ApiProperty({ required: false, default: 1 })
@@ -22,20 +25,24 @@ export class QueryAODto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   search?: string
 
   @ApiProperty({ enum: AOStatus, required: false })
   @IsOptional()
+  @EmptyToUndefined()
   @IsEnum(AOStatus)
   status?: AOStatus
 
   @ApiProperty({ enum: AOSource, required: false })
   @IsOptional()
+  @EmptyToUndefined()
   @IsEnum(AOSource)
   source?: AOSource
 
   @ApiProperty({ enum: AOSector, required: false })
   @IsOptional()
+  @EmptyToUndefined()
   @IsEnum(AOSector)
   secteur?: AOSector
 
@@ -47,6 +54,7 @@ export class QueryAODto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsDateString()
   dateLimit?: string
 

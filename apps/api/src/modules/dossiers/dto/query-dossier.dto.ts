@@ -1,7 +1,9 @@
 import { IsOptional, IsString, IsNumber, IsEnum, Min, Max } from 'class-validator'
-import { Type } from 'class-transformer'
+import { Type, Transform } from 'class-transformer'
 import { ApiProperty } from '@nestjs/swagger'
 import { DossierStatus } from '@guineatender/database'
+
+const EmptyToUndefined = () => Transform(({ value }) => (value === '' || value === undefined) ? undefined : value)
 
 export class QueryDossierDto {
   @ApiProperty({ required: false, default: 1 })
@@ -21,11 +23,13 @@ export class QueryDossierDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsString()
   aoId?: string
 
   @ApiProperty({ enum: DossierStatus, required: false })
   @IsOptional()
+  @EmptyToUndefined()
   @IsEnum(DossierStatus)
   status?: DossierStatus
 }

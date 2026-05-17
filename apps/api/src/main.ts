@@ -21,14 +21,19 @@ async function bootstrap() {
   const port = config.get<number>('PORT', 4000)
   const corsOrigins = config.get<string>('CORS_ORIGINS', 'http://localhost:3000,http://localhost:3001')
 
-  // Security
-  app.use(helmet())
-  app.use(cookieParser())
+  // CORS — doit être configuré AVANT helmet
   app.enableCors({
-    origin: corsOrigins.split(','),
+    origin: corsOrigins.split(',').map(s => s.trim()),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
+
+  // Security — helmet doit venir APRÈS CORS
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
+  app.use(cookieParser())
 
   // Global prefix
   app.setGlobalPrefix('api/v1')

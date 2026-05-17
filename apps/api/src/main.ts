@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { ValidationPipe, Logger } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
-import helmet from 'helmet'
+import * as cors from 'cors'
 import * as cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 
@@ -15,24 +15,23 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap')
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
+    cors: false, // On gère CORS manuellement via le middleware cors
   })
 
   const config = app.get(ConfigService)
   const port = config.get<number>('PORT', 4000)
   const corsOrigins = config.get<string>('CORS_ORIGINS', 'http://localhost:3000,http://localhost:3001')
 
-  // CORS — doit être configuré AVANT helmet
-  app.enableCors({
+  // CORS — middleware Express AVANT tout le reste
+  app.use(cors({
     origin: corsOrigins.split(',').map(s => s.trim()),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     preflightContinue: false,
     optionsSuccessStatus: 204,
-  })
+  }))
 
-  // Security — helmet doit venir APRÈS CORS
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
   app.use(cookieParser())
 
   // Global prefix

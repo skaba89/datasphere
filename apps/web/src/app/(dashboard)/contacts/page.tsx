@@ -356,14 +356,22 @@ export default function ContactsPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {contact.email?.[0] && (
-                    <span className="text-gray-400 hover:text-primary-600" onClick={(e) => e.preventDefault()}>
-                      <a href={`mailto:${contact.email[0]}`}><Mail className="w-4 h-4" /></a>
-                    </span>
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-primary-600"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `mailto:${contact.email[0]}`; }}
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
                   )}
                   {contact.telephone?.[0] && (
-                    <span className="text-gray-400 hover:text-green-600" onClick={(e) => e.preventDefault()}>
-                      <a href={`tel:${contact.telephone[0]}`}><Phone className="w-4 h-4" /></a>
-                    </span>
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-green-600"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `tel:${contact.telephone[0]}`; }}
+                    >
+                      <Phone className="w-4 h-4" />
+                    </button>
                   )}
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                     {contact._count?.interactions ?? 0} interact.

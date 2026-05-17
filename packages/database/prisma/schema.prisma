@@ -40,12 +40,16 @@ enum SubscriptionStatus {
 }
 
 enum AOSource {
-  // Sources guinéennes principales
+  // ── Sources guinéennes principales ────────────────────────────────────────
   TELEMO
   ARMP
   JAO_GUINEE
   ANDE
-  // Ministères guinéens
+  GOUVERNEMENT_GUINEE
+  PRIMATURE
+  DGCMP
+
+  // ── Ministères guinéens ───────────────────────────────────────────────────
   MINISTERE_BUDGET
   MINISTERE_NUMERIQUE
   MINISTERE_SANTE
@@ -72,7 +76,19 @@ enum AOSource {
   MINISTERE_COMMUNICATION
   MINISTERE_PLAN
   MINISTERE_ECONOMIE
-  // Institutions et agences guinéennes
+  // Ministères supplémentaires
+  MINISTERE_EAU_ASSAINISSEMENT
+  MINISTERE_ENSEIGNEMENT_TECHNIQUE
+  MINISTERE_AFFAIRES_RELIGIEUSES
+  MINISTERE_BONNE_GOUVERNANCE
+  MINISTERE_INFRASTRUCTURES
+  MINISTERE_TOURISME
+  MINISTERE_POSTES_TELECOMS
+  MINISTERE_INDUSTRIE_PME
+  MINISTERE_HABITAT
+  MINISTERE_COOPERATION
+
+  // ── Institutions et agences guinéennes ────────────────────────────────────
   DIRECTION_NATIONALE_IMPOTS
   DIRECTION_NATIONALE_DOUANES
   DIRECTION_NATIONALE_TRESOR
@@ -82,8 +98,13 @@ enum AOSource {
   COUR_COMPTES
   CNLS
   OND
-  // Autres institutions et agences guinéennes
   ARPT
+  ANAFIC
+  ITIE_GUINEE
+  UCEP_GUINEE
+  PPP_GUINEE
+
+  // ── Entreprises publiques & parapubliques ─────────────────────────────────
   EDG
   SEG
   AGEROUTE
@@ -93,12 +114,15 @@ enum AOSource {
   ANAIM
   ONT
   DNEF
-  // Ministères supplémentaires
-  MINISTERE_EAU_ASSAINISSEMENT
-  MINISTERE_ENSEIGNEMENT_TECHNIQUE
-  MINISTERE_AFFAIRES_RELIGIEUSES
-  MINISTERE_BONNE_GOUVERNANCE
-  // Sources internationales
+  SOGUIPAMI
+  UGP_PASSP
+
+  // ── Agrégateurs & presse spécialisée ──────────────────────────────────────
+  COMMUNIQUES224
+  DIGIJOB_GUINEE
+  SANGO_BIDS
+
+  // ── Sources internationales ───────────────────────────────────────────────
   BANQUE_MONDIALE
   BAD
   PNUD
@@ -106,7 +130,12 @@ enum AOSource {
   OMS
   FAO
   CEDEAO
-  // Sources régionales complémentaires
+  AFD
+  OMVS
+  OMVG
+  UE_GUINEE
+
+  // ── Sources régionales complémentaires ────────────────────────────────────
   DCMP_SENEGAL
   DMP_COTE_IVOIRE
   AUTRE

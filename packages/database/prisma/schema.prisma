@@ -614,7 +614,7 @@ model Solution {
   updatedAt DateTime @updatedAt
 
   nom             String
-  slug            String?   @unique
+  slug            String?   @unique(map: "solutions_slug_uniq")
   categorie       SolutionCategory
   description     String  @db.Text
   configSchema    Json    @default("{}")
@@ -634,7 +634,6 @@ model Solution {
 
   dossiers        Dossier[]
 
-  @@unique([slug])
   @@index([categorie])
   @@map("solutions")
 }

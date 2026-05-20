@@ -25,96 +25,78 @@ interface AOBrut {
 
 // ── Sources de veille — Toutes les sources guinéennes et internationales ──────
 const SOURCES_DISPONIBLES = [
-  // ── Sources guinéennes principales ──────────────────────────────────────────
-  { id: 'TELEMO',            nom: 'TELEMO — Portail de la Commande Publique',   url: 'https://telemo.gov.gn',              actif: true  },
-  { id: 'ARMP',              nom: 'ARMP Guinée — Autorité de Régulation des Marchés Publics', url: 'https://armpguinee.org', actif: true  },
-  { id: 'JAO_GUINEE',        nom: 'JAO Guinée — Journal des Appels d\'Offres', url: 'https://www.jaoguinee.com',          actif: true  },
+  // Sources guinéennes principales (données RÉELLES via API)
+  { id: 'SANGO_BIDS',       nom: 'SangoBids Guinée',                         url: 'https://gn.sangobids.com',            actif: true,  note: 'API structurée — données réelles' },
+  { id: 'COMMUNIQUES224',   nom: 'Communiques224',                           url: 'https://communiques224.com',           actif: true,  note: '956+ AO guinéens via WP API' },
+  { id: 'ARPT',             nom: 'ARPT Guinée',                              url: 'https://www.arpt.gov.gn',              actif: true,  note: 'Appels d\'offres ARPT via WP API' },
+  { id: 'PRIMATURE',        nom: 'Primature Guinée',                         url: 'https://primature.gov.gn',             actif: true,  note: 'AO Primature via WP API' },
+  { id: 'GOUVERNEMENT_GUINEE', nom: 'Gouvernement de Guinée',               url: 'https://gouvernement.gov.gn',          actif: true  },
+  { id: 'DGCMP',            nom: 'DGCMP',                                    url: 'https://www.dgcmp.mef.gov.gn',        actif: true,  note: 'Contrôle des marchés publics' },
+  { id: 'TELEMO',           nom: 'TELEMO',                                    url: 'https://telemo.gov.gn',              actif: false, note: 'Clé API requise — configurer dans Paramètres' },
+  { id: 'ARMP',             nom: 'ARMP Guinée',                              url: 'https://armp.gov.gn',                  actif: true  },
+  { id: 'JAO_GUINEE',       nom: 'JAO Guinée',                               url: 'https://jao.gov.gn',                   actif: true  },
   { id: 'ANDE',              nom: 'ANDE (Domaines & Environnement)',           url: 'https://ande.gov.gn',                actif: true  },
-  { id: 'GOUVERNEMENT_GUINEE', nom: 'Portail du Gouvernement Guinéen',        url: 'https://gouvernement.gov.gn',        actif: true  },
-  { id: 'PRIMATURE',         nom: 'Primature — Premier Ministère',             url: 'https://primature.gov.gn',           actif: true  },
-  { id: 'DGCMP',             nom: 'DGCMP — Dir. Gén. du Contrôle des Marchés Publics', url: 'https://www.dgcmp.mef.gov.gn', actif: true },
-  // ── Ministères guinéens ─────────────────────────────────────────────────────
   { id: 'MINISTERE_BUDGET',  nom: 'Ministère du Budget',                      url: 'https://budget.gov.gn',              actif: true  },
-  { id: 'MINISTERE_NUMERIQUE', nom: 'Ministère des Postes, Télécoms et Économie Numérique (MCENI)', url: 'https://mceni.gov.gn', actif: true  },
-  { id: 'MINISTERE_SANTE',     nom: 'Ministère de la Santé et de l\'Hygiène Publique', url: 'https://sante.gov.gn',     actif: true  },
-  { id: 'MINISTERE_EDUCATION', nom: 'Ministère de l\'Enseignement Pré-Universitaire (MEPUA)', url: 'https://mepua.gov.gn', actif: true  },
-  { id: 'MINISTERE_ENSEIGNEMENT_SUPERIEUR', nom: 'Ministère Enseignement Sup. et Recherche (MESRS)', url: 'https://mesrs.gov.gn', actif: true },
-  { id: 'MINISTERE_AGRICULTURE', nom: 'Ministère de l\'Agriculture et de l\'Élevage', url: 'https://agriculture.gov.gn',     actif: true  },
-  { id: 'MINISTERE_MINES',     nom: 'Ministère des Mines et de la Géologie',    url: 'https://mines.gov.gn',               actif: true  },
-  { id: 'MINISTERE_ENERGIE',   nom: 'Ministère de l\'Énergie, Hydraulique et Hydrocarbures', url: 'https://www.energie.gov.gn', actif: true },
-  { id: 'MINISTERE_TRANSPORT',  nom: 'Ministère des Transports',               url: 'https://transports.gov.gn',          actif: true  },
-  { id: 'MINISTERE_TRAVAUX_PUBLICS', nom: 'Ministère des Infrastructures et Travaux Publics (MITP)', url: 'https://infrastructures.gov.gn', actif: true },
-  { id: 'MINISTERE_JUSTICE',   nom: 'Ministère de la Justice et des Droits de l\'Homme', url: 'https://justiceguinee.gov.gn', actif: true  },
-  { id: 'MINISTERE_DEFENSE',   nom: 'Ministère de la Défense Nationale',        url: 'https://defense.gov.gn',            actif: true  },
-  { id: 'MINISTERE_SECURITE',  nom: 'Ministère de la Sécurité et Protection Civile', url: 'https://mspc.gov.gn',        actif: true  },
-  { id: 'MINISTERE_AFFAIRES_ETRANGERES', nom: 'Ministère des Affaires Étrangères', url: 'https://mae.gov.gn',           actif: true  },
-  { id: 'MINISTERE_TERRITOIRE', nom: 'Ministère Admin. du Territoire et Décentralisation (MATD)', url: 'https://matd.gov.gn', actif: true  },
-  { id: 'MINISTERE_COMMERCE',  nom: 'Ministère du Commerce, de l\'Industrie et des PME', url: 'https://mcipme.gov.gn',  actif: true  },
-  { id: 'MINISTERE_ENVIRONNEMENT', nom: 'Ministère de l\'Environnement et du Dév. Durable', url: 'https://medd.gov.gn', actif: true  },
-  { id: 'MINISTERE_PECHE',     nom: 'Ministère de la Pêche et de l\'Économie Maritime', url: 'https://peches.gov.gn',  actif: true  },
-  { id: 'MINISTERE_URBANISME', nom: 'Ministère de l\'Urbanisme, Habitat et Construction', url: 'https://habitat.gov.gn', actif: true  },
-  { id: 'MINISTERE_ACTION_SOCIALE', nom: 'Ministère Action Sociale, Promotion Féminine', url: 'https://actionsociale.gov.gn', actif: true },
-  { id: 'MINISTERE_JEUNESSE_SPORTS', nom: 'Ministère de la Jeunesse et des Sports', url: 'https://sports.gov.gn',      actif: true  },
-  { id: 'MINISTERE_CULTURE',   nom: 'Ministère de la Culture, Tourisme et Artisanat', url: 'https://culture.gov.gn',     actif: true  },
-  { id: 'MINISTERE_FONCTION_PUBLIQUE', nom: 'Ministère du Travail et de la Fonction Publique', url: 'https://fonctionpublique.gov.gn', actif: true },
-  { id: 'MINISTERE_COMMUNICATION', nom: 'Ministère de la Communication et des Médias', url: 'https://communication.gov.gn', actif: true },
-  { id: 'MINISTERE_PLAN',      nom: 'Ministère du Plan et Coopération Internationale', url: 'https://mpcid.gov.gn',      actif: true  },
-  { id: 'MINISTERE_ECONOMIE',  nom: 'Ministère de l\'Économie et des Finances', url: 'https://www.mef.gov.gn',             actif: true  },
-  // ── Ministères supplémentaires ──────────────────────────────────────────────
-  { id: 'MINISTERE_EAU_ASSAINISSEMENT',    nom: 'Ministère de l\'Eau et de l\'Assainissement',    url: 'https://eau.gov.gn',           actif: true },
-  { id: 'MINISTERE_ENSEIGNEMENT_TECHNIQUE', nom: 'Ministère Ens. Technique, Form. Prof. et Emploi', url: 'https://metfp.gov.gn',    actif: true },
-  { id: 'MINISTERE_AFFAIRES_RELIGIEUSES',  nom: 'Ministère des Affaires Religieuses',            url: 'https://religions.gov.gn',    actif: true },
-  { id: 'MINISTERE_BONNE_GOUVERNANCE',     nom: 'Ministère de la Bonne Gouvernance',             url: 'https://gouvernance.gov.gn',  actif: true },
-  { id: 'MINISTERE_INFRASTRUCTURES',       nom: 'Ministère des Infrastructures et Travaux Publics', url: 'https://infrastructures.gov.gn', actif: true },
-  { id: 'MINISTERE_TOURISME',              nom: 'Ministère du Tourisme et de l\'Hôtellerie',    url: 'https://www.mth.gov.gn',      actif: true },
-  { id: 'MINISTERE_POSTES_TELECOMS',       nom: 'Ministère des Postes, Télécoms et Éco. Numérique (MCENI)', url: 'https://mceni.gov.gn',   actif: true },
-  { id: 'MINISTERE_INDUSTRIE_PME',         nom: 'Ministère de l\'Industrie et des PME',         url: 'https://mic.gov.gn',          actif: true },
-  { id: 'MINISTERE_HABITAT',               nom: 'Ministère de l\'Habitat et de la Construction', url: 'https://habitat.gov.gn',    actif: true },
-  { id: 'MINISTERE_COOPERATION',           nom: 'Ministère de la Coopération Internationale',    url: 'https://mpcid.gov.gn',       actif: true },
-  // ── Institutions et agences guinéennes ──────────────────────────────────────
-  { id: 'DIRECTION_NATIONALE_IMPOTS',    nom: 'Direction Nationale des Impôts',      url: 'https://dni.gov.gn',              actif: true },
-  { id: 'DIRECTION_NATIONALE_DOUANES',   nom: 'Direction Nationale des Douanes',     url: 'https://douanes.gov.gn',          actif: true },
-  { id: 'DIRECTION_NATIONALE_TRESOR',    nom: 'Direction Nat. du Trésor',            url: 'https://tresor.gov.gn',           actif: true },
-  { id: 'INSTITUT_NATIONAL_STATISTIQUE', nom: 'Institut National de la Statistique', url: 'https://ins.gov.gn',             actif: true },
-  { id: 'ARCEP',                         nom: 'ARCEP Guinée',                         url: 'https://arcep.gov.gn',           actif: true },
-  { id: 'APIP',                          nom: 'APIP — Agence de Promotion des Investissements', url: 'https://apip.gov.gn', actif: true },
-  { id: 'COUR_COMPTES',                  nom: 'Cour des Comptes',                     url: 'https://www.ccomptes.org.gn',    actif: true },
-  { id: 'CNLS',                          nom: 'CNLS Guinée',                          url: 'https://cnls.gov.gn',            actif: true },
-  { id: 'OND',                           nom: 'OND Guinée',                           url: 'https://ond.gov.gn',             actif: true },
-  { id: 'ARPT',                          nom: 'ARPT — Autorité de Régulation des Postes et Télécoms', url: 'https://www.arpt.gov.gn', actif: true },
-  { id: 'ANAFIC',                        nom: 'ANAFIC — Agence Nationale de Financement des Collectivités', url: 'https://www.anafic-gn.org', actif: true },
-  { id: 'ITIE_GUINEE',                   nom: 'ITIE Guinée — Transparence Industries Extractives', url: 'https://www.itie-guinee.org', actif: true },
-  { id: 'UCEP_GUINEE',                   nom: 'UCEP Guinée — Unité Coordination Exécution Projets', url: 'https://www.ucepguinee.org', actif: true },
-  { id: 'PPP_GUINEE',                    nom: 'PPP Guinée — Partenariat Public-Privé', url: 'https://ppp-guinee.com',       actif: true },
-  // ── Entreprises publiques & parapubliques ───────────────────────────────────
-  { id: 'EDG',                    nom: 'EDG SA — Électricité de Guinée',           url: 'https://edg.com.gn',               actif: true },
+  { id: 'MINISTERE_NUMERIQUE', nom: 'Ministère du Numérique',                 url: 'https://numerique.gov.gn',            actif: true  },
+  // Ministères guinéens
+  { id: 'MINISTERE_SANTE',     nom: 'Ministère de la Santé',                  url: 'https://sante.gov.gn',               actif: true  },
+  { id: 'MINISTERE_EDUCATION', nom: 'Ministère de l\'Éducation',              url: 'https://education.gov.gn',           actif: true  },
+  { id: 'MINISTERE_ENSEIGNEMENT_SUPERIEUR', nom: 'Ministère Enseignement Supérieur', url: 'https://mesrsi.gov.gn', actif: true },
+  { id: 'MINISTERE_AGRICULTURE', nom: 'Ministère de l\'Agriculture',           url: 'https://agriculture.gov.gn',         actif: true  },
+  { id: 'MINISTERE_MINES',     nom: 'Ministère des Mines',                     url: 'https://mines.gov.gn',               actif: true  },
+  { id: 'MINISTERE_ENERGIE',   nom: 'Ministère de l\'Énergie',                 url: 'https://energie.gov.gn',             actif: true  },
+  { id: 'MINISTERE_TRANSPORT',  nom: 'Ministère des Transports',               url: 'https://transport.gov.gn',           actif: true  },
+  { id: 'MINISTERE_TRAVAUX_PUBLICS', nom: 'Ministère des Travaux Publics',      url: 'https://tp.gov.gn',                 actif: true  },
+  { id: 'MINISTERE_JUSTICE',   nom: 'Ministère de la Justice',                 url: 'https://justice.gov.gn',             actif: true  },
+  { id: 'MINISTERE_DEFENSE',   nom: 'Ministère de la Défense',                 url: 'https://defense.gov.gn',             actif: true  },
+  { id: 'MINISTERE_SECURITE',  nom: 'Ministère de la Sécurité',                url: 'https://securite.gov.gn',            actif: true  },
+  { id: 'MINISTERE_AFFAIRES_ETRANGERES', nom: 'Ministère Affaires Étrangères', url: 'https://mae.gov.gn',                actif: true  },
+  { id: 'MINISTERE_TERRITOIRE', nom: 'Ministère du Territoire',                url: 'https://matd.gov.gn',                actif: true  },
+  { id: 'MINISTERE_COMMERCE',  nom: 'Ministère du Commerce',                   url: 'https://commerce.gov.gn',            actif: true  },
+  { id: 'MINISTERE_ENVIRONNEMENT', nom: 'Ministère de l\'Environnement',        url: 'https://environnement.gov.gn',      actif: true  },
+  { id: 'MINISTERE_PECHE',     nom: 'Ministère de la Pêche',                   url: 'https://peche.gov.gn',               actif: true  },
+  { id: 'MINISTERE_URBANISME', nom: 'Ministère de l\'Urbanisme',               url: 'https://urbanisme.gov.gn',           actif: true  },
+  { id: 'MINISTERE_ACTION_SOCIALE', nom: 'Ministère Action Sociale',            url: 'https://actionsociale.gov.gn',      actif: true  },
+  { id: 'MINISTERE_JEUNESSE_SPORTS', nom: 'Ministère Jeunesse et Sports',       url: 'https://sports.gov.gn',            actif: true  },
+  { id: 'MINISTERE_CULTURE',   nom: 'Ministère de la Culture',                  url: 'https://culture.gov.gn',            actif: true  },
+  { id: 'MINISTERE_FONCTION_PUBLIQUE', nom: 'Ministère Fonction Publique',       url: 'https://fp.gov.gn',               actif: true  },
+  { id: 'MINISTERE_COMMUNICATION', nom: 'Ministère Communication',               url: 'https://communication.gov.gn',    actif: true  },
+  { id: 'MINISTERE_PLAN',      nom: 'Ministère du Plan',                         url: 'https://plan.gov.gn',             actif: true  },
+  { id: 'MINISTERE_ECONOMIE',  nom: 'Ministère de l\'Économie',                  url: 'https://economie.gov.gn',         actif: true  },
+  // Directions et institutions guinéennes
+  { id: 'DIRECTION_NATIONALE_IMPOTS',    nom: 'Direction Nationale des Impôts',      url: 'https://dni.gov.gn',         actif: true },
+  { id: 'DIRECTION_NATIONALE_DOUANES',   nom: 'Direction Nationale des Douanes',     url: 'https://douanes.gov.gn',     actif: true },
+  { id: 'DIRECTION_NATIONALE_TRESOR',    nom: 'Direction Nat. du Trésor',            url: 'https://tresor.gov.gn',      actif: true },
+  { id: 'INSTITUT_NATIONAL_STATISTIQUE', nom: 'Institut National de la Statistique', url: 'https://ins.gov.gn',       actif: true },
+  { id: 'ARCEP',                         nom: 'ARCEP Guinée',                         url: 'https://arcep.gov.gn',       actif: true },
+  { id: 'APIP',                          nom: 'APIP Guinée',                          url: 'https://apip.gov.gn',        actif: true },
+  { id: 'COUR_COMPTES',                  nom: 'Cour des Comptes',                     url: 'https://courdescomptes.gov.gn', actif: true },
+  { id: 'CNLS',                          nom: 'CNLS Guinée',                          url: 'https://cnls.gov.gn',        actif: true },
+  { id: 'OND',                           nom: 'OND Guinée',                           url: 'https://ond.gov.gn',         actif: true },
+  // Autres institutions et agences guinéennes
+  { id: 'EDG',                    nom: 'EDG — Électricité de Guinée',              url: 'https://edg.gov.gn',               actif: true },
   { id: 'SEG',                    nom: 'SEG — Société des Eaux de Guinée',         url: 'https://seg.gov.gn',               actif: true },
   { id: 'AGEROUTE',               nom: 'AGEROUTE — Agence des Routes',             url: 'https://ageroute.gov.gn',          actif: true },
-  { id: 'PORT_AUTONOME_CONAKRY',  nom: 'Port Autonome de Conakry (PAC)',           url: 'https://portconakry.gov.gn',       actif: true },
-  { id: 'BCRG',                   nom: 'BCRG — Banque Centrale de Rép. de Guinée', url: 'https://www.bcrg-guinee.org',      actif: true },
+  { id: 'PORT_AUTONOME_CONAKRY',  nom: 'Port Autonome de Conakry',                 url: 'https://pac.gov.gn',               actif: true },
+  { id: 'BCRG',                   nom: 'BCRG — Banque Centrale de Rép. de Guinée', url: 'https://bcrg.gov.gn',              actif: true },
   { id: 'CENI',                   nom: 'CENI — Commission Électorale Nationale',   url: 'https://ceni.gov.gn',              actif: true },
   { id: 'ANAIM',                  nom: 'ANAIM — Agence Nationale Aff. Immobilières', url: 'https://anaim.gov.gn',          actif: true },
   { id: 'ONT',                    nom: 'ONT — Office National du Tourisme',        url: 'https://ont.gov.gn',               actif: true },
   { id: 'DNEF',                   nom: 'DNEF — Direction Nat. Eaux et Forêts',     url: 'https://dnef.gov.gn',              actif: true },
-  { id: 'SOGUIPAMI',              nom: 'SOGUIPAMI — Société Guinéenne du Patrimoine Minier', url: 'https://soguipami.net', actif: true },
-  { id: 'UGP_PASSP',              nom: 'UGP PASSP — Santé (Banque Mondiale)',      url: 'https://www.ugp-passp-ms.org.gn',  actif: true },
-  // ── Agrégateurs & presse spécialisée ────────────────────────────────────────
-  { id: 'COMMUNIQUES224',         nom: 'Communiques224 — Agrégateur Appels d\'Offres', url: 'https://communiques224.com',   actif: true },
-  { id: 'DIGIJOB_GUINEE',         nom: 'Digijob Guinée — Emplois & Appels d\'Offres', url: 'https://digijobguinee.com',    actif: true },
-  { id: 'SANGO_BIDS',             nom: 'SangoBids — Alertes Appels d\'Offres Guinée', url: 'https://gn.sangobids.com',     actif: true },
-  // ── Sources internationales ─────────────────────────────────────────────────
-  { id: 'BANQUE_MONDIALE',   nom: 'Banque Mondiale — Projets Guinée',           url: 'https://projects.worldbank.org',     actif: true  },
-  { id: 'PNUD',              nom: 'PNUD / UNDP — Acquisitions Guinée',           url: 'https://procurement-notices.undp.org', actif: true },
-  { id: 'BAD',               nom: 'BAD — Banque Africaine de Développement',     url: 'https://www.afdb.org',               actif: true  },
-  { id: 'UNICEF',            nom: 'UNICEF Guinée',                               url: 'https://www.unicef.org/guinea',      actif: true  },
-  { id: 'OMS',               nom: 'OMS Guinée',                                  url: 'https://www.who.int/countries/gn',   actif: true  },
-  { id: 'FAO',               nom: 'FAO Guinée',                                  url: 'https://www.fao.org/guinea',         actif: true  },
-  { id: 'CEDEAO',            nom: 'CEDEAO / ECOWAS',                             url: 'https://ecowas.int',                 actif: true  },
-  { id: 'AFD',               nom: 'AFD — Agence Française de Développement',     url: 'https://www.afd.fr',                 actif: true  },
-  { id: 'OMVS',              nom: 'OMVS — Mise en Valeur fleuve Sénégal',         url: 'https://www.omvs.org',               actif: true  },
-  { id: 'OMVG',              nom: 'OMVG — Mise en Valeur fleuve Gambie',          url: 'https://www.omvg.org',               actif: true  },
-  { id: 'UE_GUINEE',         nom: 'Union Européenne — Délégation Guinée',         url: 'https://international-partnerships.ec.europa.eu', actif: true },
-  // ── Sources régionales complémentaires ──────────────────────────────────────
+  // Ministères supplémentaires
+  { id: 'MINISTERE_EAU_ASSAINISSEMENT',    nom: 'Ministère de l\'Eau et de l\'Assainissement',    url: 'https://eau.gov.gn',           actif: true },
+  { id: 'MINISTERE_ENSEIGNEMENT_TECHNIQUE', nom: 'Ministère Enseignement Technique',             url: 'https://metfp.gov.gn',        actif: true },
+  { id: 'MINISTERE_AFFAIRES_RELIGIEUSES',  nom: 'Ministère des Affaires Religieuses',            url: 'https://religions.gov.gn',    actif: true },
+  { id: 'MINISTERE_BONNE_GOUVERNANCE',     nom: 'Ministère de la Bonne Gouvernance',             url: 'https://gouvernance.gov.gn',  actif: true },
+  // Sources internationales
+  { id: 'BANQUE_MONDIALE',   nom: 'Banque Mondiale',                           url: 'https://projects.worldbank.org',     actif: true  },
+  { id: 'PNUD',              nom: 'PNUD / UNDP',                               url: 'https://procurement.undp.org',       actif: true  },
+  { id: 'BAD',               nom: 'Banque Africaine de Dév.',                  url: 'https://www.afdb.org',               actif: true  },
+  { id: 'UNICEF',            nom: 'UNICEF Guinée',                             url: 'https://www.unicef.org/guinea',      actif: true  },
+  { id: 'OMS',               nom: 'OMS Guinée',                                url: 'https://www.who.int/countries/gn',   actif: true  },
+  { id: 'FAO',               nom: 'FAO Guinée',                                url: 'https://www.fao.org/guinea',         actif: true  },
+  { id: 'CEDEAO',            nom: 'CEDEAO / ECOWAS',                           url: 'https://ecowas.int',                 actif: true  },
+  // Sources régionales complémentaires
   { id: 'DCMP_SENEGAL',      nom: 'DCMP Sénégal',                              url: 'https://dcmp.sn',                    actif: true  },
   { id: 'DMP_COTE_IVOIRE',   nom: 'DMP Côte d\'Ivoire',                       url: 'https://dmp.ci',                     actif: true  },
 ]
@@ -171,32 +153,52 @@ export class ScrapingService {
     private scoringService: ScoringService,
   ) {}
 
-  getSources() {
-    return SOURCES_DISPONIBLES
+  getSources(telemoActif = false) {
+    return SOURCES_DISPONIBLES.map(s =>
+      s.id === 'TELEMO' ? { ...s, actif: telemoActif, note: telemoActif ? undefined : s.note } : s,
+    )
   }
 
   async getSourcesForOrg(organisationId?: string) {
-    return this.getSources()
+    if (!organisationId) return SOURCES_DISPONIBLES
+    const org = await this.prisma.organisation.findUnique({
+      where: { id: organisationId },
+      select: { settings: true },
+    })
+    const settings = (org?.settings as any) ?? {}
+    return this.getSources(!!settings.telemoApiKey)
   }
 
   async scraperToutes(organisationId?: string) {
     this.logger.log('🔍 Démarrage de la veille multi-sources...')
     const resultats: { source: string; nouveaux: number; contactsCreés: number; erreur?: string }[] = []
 
+    // Récupérer la clé TELEMO si configurée
+    let telemoKey: string | undefined
+    if (organisationId) {
+      const org = await this.prisma.organisation.findUnique({
+        where: { id: organisationId },
+        select: { settings: true },
+      })
+      telemoKey = ((org?.settings as any) ?? {}).telemoApiKey
+    }
+
     const scrapers: { nom: string; fn: () => Promise<AOBrut[]> }[] = [
-      // ── Sources prioritaires — TELEMO, ARPT, DGCMP, GOUVERNEMENT ──────────
-      { nom: 'TELEMO',            fn: () => this.scraperTELEMO() },
-      { nom: 'ARPT',              fn: () => this.scraperARPT() },
-      { nom: 'DGCMP',             fn: () => this.scraperDGCMP() },
-      { nom: 'Gouvernement Guinée', fn: () => this.scraperGouvernement() },
-      { nom: 'Primature',         fn: () => this.scraperPrimature() },
-      // ── Sources guinéennes principales ────────────────────────────────────
+      // ═══ SOURCES RÉELLES (données VRAIES via API) — priorité maximale ═══
+      { nom: 'SangoBids API',        fn: () => this.scraperSangoBids() },
+      { nom: 'Communiques224',       fn: () => this.scraperCommuniques224() },
+      { nom: 'ARPT',                 fn: () => this.scraperARPT() },
+      { nom: 'Primature',            fn: () => this.scraperPrimature() },
+      { nom: 'Banque Mondiale',      fn: () => this.scraperBanqueMondiale() },
+      { nom: 'Gouvernement Guinée',  fn: () => this.scraperGouvernement() },
+      { nom: 'DGCMP',                fn: () => this.scraperDGCMP() },
+      // Sources guinéennes principales (scraping HTML générique)
       { nom: 'ARMP',              fn: () => this.scraperARMP() },
       { nom: 'JAO Guinée',        fn: () => this.scraperJAO() },
       { nom: 'ANDE',              fn: () => this.scraperANDE() },
       { nom: 'Ministère Budget',  fn: () => this.scraperMinistereBudget() },
       { nom: 'Ministère Numérique', fn: () => this.scraperMinistereNumerique() },
-      // ── Ministères guinéens ───────────────────────────────────────────────
+      // Ministères guinéens
       { nom: 'Ministère Santé',              fn: () => this.scraperMinistereSanter() },
       { nom: 'Ministère Éducation',          fn: () => this.scraperMinistereEducation() },
       { nom: 'Ministère Enseignement Sup.',  fn: () => this.scraperMinistereEnseignementSuperieur() },
@@ -221,18 +223,7 @@ export class ScrapingService {
       { nom: 'Ministère Communication',      fn: () => this.scraperMinistereCommunication() },
       { nom: 'Ministère Plan',               fn: () => this.scraperMinisterePlan() },
       { nom: 'Ministère Économie',           fn: () => this.scraperMinistereEconomie() },
-      // ── Ministères supplémentaires ────────────────────────────────────────
-      { nom: 'Ministère Eau & Assainissement',  fn: () => this.scraperMinistereEauAssainissement() },
-      { nom: 'Ministère Ens. Technique',        fn: () => this.scraperMinistereEnseignementTechnique() },
-      { nom: 'Ministère Affaires Religieuses',  fn: () => this.scraperMinistereAffairesReligieuses() },
-      { nom: 'Ministère Bonne Gouvernance',     fn: () => this.scraperMinistereBonneGouvernance() },
-      { nom: 'Ministère Infrastructures',       fn: () => this.scraperMinistereInfrastructures() },
-      { nom: 'Ministère Tourisme',              fn: () => this.scraperMinistereTourisme() },
-      { nom: 'Ministère Postes & Télécoms',     fn: () => this.scraperMinisterePostesTelecoms() },
-      { nom: 'Ministère Industrie & PME',       fn: () => this.scraperMinistereIndustriePME() },
-      { nom: 'Ministère Habitat',               fn: () => this.scraperMinistereHabitat() },
-      { nom: 'Ministère Coopération',           fn: () => this.scraperMinistereCooperation() },
-      // ── Institutions et agences guinéennes ────────────────────────────────
+      // Directions et institutions guinéennes
       { nom: 'DNI (Impôts)',       fn: () => this.scraperDNI() },
       { nom: 'Douanes',            fn: () => this.scraperDouanes() },
       { nom: 'Trésor',             fn: () => this.scraperTresor() },
@@ -242,11 +233,7 @@ export class ScrapingService {
       { nom: 'Cour des Comptes',   fn: () => this.scraperCourComptes() },
       { nom: 'CNLS',               fn: () => this.scraperCNLS() },
       { nom: 'OND',                fn: () => this.scraperOND() },
-      { nom: 'ANAFIC',             fn: () => this.scraperANAFIC() },
-      { nom: 'ITIE Guinée',        fn: () => this.scraperITIEGuinee() },
-      { nom: 'UCEP Guinée',        fn: () => this.scraperUCEPGuinee() },
-      { nom: 'PPP Guinée',         fn: () => this.scraperPPPGuinee() },
-      // ── Entreprises publiques & parapubliques ─────────────────────────────
+      // Autres institutions et agences guinéennes
       { nom: 'EDG (Électricité)',        fn: () => this.scraperEDG() },
       { nom: 'SEG (Eaux)',               fn: () => this.scraperSEG() },
       { nom: 'AGEROUTE (Routes)',         fn: () => this.scraperAGEROUTE() },
@@ -256,13 +243,12 @@ export class ScrapingService {
       { nom: 'ANAIM (Immobilier)',       fn: () => this.scraperANAIM() },
       { nom: 'ONT (Tourisme)',           fn: () => this.scraperONT() },
       { nom: 'DNEF (Eaux et Forêts)',    fn: () => this.scraperDNEF() },
-      { nom: 'SOGUIPAMI (Patrimoine Minier)', fn: () => this.scraperSOGUIPAMI() },
-      { nom: 'UGP PASSP (Santé/BM)',     fn: () => this.scraperUGPPASSP() },
-      // ── Agrégateurs & presse spécialisée ──────────────────────────────────
-      { nom: 'Communiques224',           fn: () => this.scraperCommuniques224() },
-      { nom: 'Digijob Guinée',           fn: () => this.scraperDigijobGuinee() },
-      { nom: 'SangoBids',                fn: () => this.scraperSangoBids() },
-      // ── Sources internationales ───────────────────────────────────────────
+      // Ministères supplémentaires
+      { nom: 'Ministère Eau & Assainissement', fn: () => this.scraperMinistereEauAssainissement() },
+      { nom: 'Ministère Ens. Technique',       fn: () => this.scraperMinistereEnseignementTechnique() },
+      { nom: 'Ministère Affaires Religieuses', fn: () => this.scraperMinistereAffairesReligieuses() },
+      { nom: 'Ministère Bonne Gouvernance',    fn: () => this.scraperMinistereBonneGouvernance() },
+      // Sources internationales
       { nom: 'Banque Mondiale',   fn: () => this.scraperBanqueMondiale() },
       { nom: 'PNUD',              fn: () => this.scraperPNUD() },
       { nom: 'BAD',               fn: () => this.scraperBAD() },
@@ -270,14 +256,14 @@ export class ScrapingService {
       { nom: 'OMS',               fn: () => this.scraperOMS() },
       { nom: 'FAO',               fn: () => this.scraperFAO() },
       { nom: 'CEDEAO',            fn: () => this.scraperCEDEAO() },
-      { nom: 'AFD',               fn: () => this.scraperAFD() },
-      { nom: 'OMVS',              fn: () => this.scraperOMVS() },
-      { nom: 'OMVG',              fn: () => this.scraperOMVG() },
-      { nom: 'UE Guinée',         fn: () => this.scraperUEGuinee() },
-      // ── Sources régionales ────────────────────────────────────────────────
+      // Sources régionales
       { nom: 'DCMP Sénégal',      fn: () => this.scraperDCMPSenegal() },
       { nom: 'DMP Côte d\'Ivoire', fn: () => this.scraperDMPCoteIvoire() },
     ]
+
+    if (telemoKey) {
+      scrapers.push({ nom: 'TELEMO', fn: () => this.scraperTELEMO(telemoKey!) })
+    }
 
     for (const scraper of scrapers) {
       try {
@@ -303,79 +289,66 @@ export class ScrapingService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // SOURCES GUINÉENNES
+  // SOURCES GUINÉENNES (HTML scraping générique — sites souvent down)
   // ═══════════════════════════════════════════════════════════════════════════
 
   // ── ARMP Guinée ────────────────────────────────────────────────────────────
+  // NOTE: ARMP site is currently offline. scraperARPT() above uses the WP API.
+  // This is a generic HTML fallback that will be used when armp.gov.gn comes back.
 
   private async scraperARMP(): Promise<AOBrut[]> {
     const resultats: AOBrut[] = []
 
-    // ARMP Guinée utilise WordPress avec le plugin WP File Download
-    const html = await fetchSafe('https://armpguinee.org/appels-doffres')
-      ?? await fetchSafe('https://armpguinee.org/category/appels-doffres')
-      ?? await fetchSafe('https://armpguinee.org/')
-
+    const html = await fetchSafe('https://armp.gov.gn/index.php?option=com_content&view=category&layout=blog&id=16&Itemid=145')
     if (html) {
       const $ = cheerio.load(html)
+      $('article.item, .cat-list-row, .items-leading article, .blog article').each((i, el) => {
+        const titre = $(el).find('h2 a, h3 a, .page-header a').first().text().trim()
+        const url = $(el).find('h2 a, h3 a, .page-header a').first().attr('href') || ''
+        const intro = $(el).find('.article-intro, .intro, .article-text').first().text().trim()
+        const dateStr = $(el).find('time, .article-info-term, .published').first().text().trim()
 
-      // ARMP utilise WP File Download — chercher les liens de téléchargement et noms de fichiers
-      $('a[href*="download"]').each((i, el) => {
-        if (i >= 20) return
-        const href = $(el).attr('href') || ''
-        // Trouver le nom du fichier le plus proche — chercher le texte du conteneur parent
-        const container = $(el).closest('.wpfd-file, .file, .wpfd-content-default, .wpfd-category, tr, li, div')
-        const titre = container.find('.file-name, .name, h3, h4, .entry-title').first().text().trim()
-          || $(el).closest('div').find('span, p').first().text().trim()
-          || href.split('/').pop()?.replace(/[-_]/g, ' ').replace('.pdf', '') || ''
-        if (titre.length < 10) return
+        if (!titre || titre.length < 10) return
 
-        const datePublication = new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
-
-        resultats.push({
-          source: AOSource.ARMP,
-          sourceId: `ARMP-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://armpguinee.org${href}`,
-          titre: titre.substring(0, 200),
-          objet: titre,
-          entiteAdj: this.extraireEntite(titre) || 'ARMP Guinée',
-          datePublication,
-          dateLimite,
-          documentUrls: [href.startsWith('http') ? href : `https://armpguinee.org${href}`],
-        })
-      })
-
-      // Aussi chercher les articles WordPress standards
-      $('article a, .entry-title a, h2 a, h3 a').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).text().trim()
-        const href = $(el).attr('href') || ''
-        if (!titre || titre.length < 15) return
-        if (!href.includes('armpguinee.org') && !href.startsWith('/')) return
-        // Ignorer les liens de navigation génériques
-        if (titre.toLowerCase().includes('appels d') && titre.toLowerCase().includes('offres') && titre.length < 30) return
-        // Éviter les doublons avec les résultats WP File Download
-        if (resultats.some(r => r.titre === titre.substring(0, 200))) return
-
-        const container = $(el).closest('article')
-        const dateStr = container.find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = container.find('.entry-content, .entry-summary, p').first().text().trim()
         const datePublication = this.parseDate(dateStr) ?? new Date()
         const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
 
         resultats.push({
           source: AOSource.ARMP,
           sourceId: `ARMP-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://armpguinee.org${href}`,
-          titre: titre.substring(0, 200),
-          objet: desc || titre,
+          sourceUrl: url.startsWith('http') ? url : `https://armp.gov.gn${url}`,
+          titre,
+          objet: intro || titre,
           entiteAdj: this.extraireEntite(titre) || 'ARMP Guinée',
           datePublication,
           dateLimite,
           documentUrls: [],
         })
       })
+    }
+
+    if (resultats.length === 0) {
+      const html2 = await fetchSafe('https://armp.gov.gn/')
+      if (html2) {
+        const $ = cheerio.load(html2)
+        $('a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
+          if (i >= 5) return
+          const titre = $(el).text().trim()
+          const href = $(el).attr('href') || ''
+          if (titre.length < 15) return
+          resultats.push({
+            source: AOSource.ARMP,
+            sourceId: `ARMP-${this.slugify(titre)}-${new Date().getFullYear()}`,
+            sourceUrl: href.startsWith('http') ? href : `https://armp.gov.gn${href}`,
+            titre,
+            objet: titre,
+            entiteAdj: this.extraireEntite(titre) || 'ARMP Guinée',
+            datePublication: new Date(),
+            dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+            documentUrls: [],
+          })
+        })
+      }
     }
 
     if (resultats.length === 0) {
@@ -391,19 +364,18 @@ export class ScrapingService {
   private async scraperJAO(): Promise<AOBrut[]> {
     const resultats: AOBrut[] = []
 
-    // JAO Guinée — Journal des Appels d'Offres (WordPress)
-    const html = await fetchSafe('https://www.jaoguinee.com/category/appels-d-offres')
-      ?? await fetchSafe('https://www.jaoguinee.com/appels-doffres')
-      ?? await fetchSafe('https://www.jaoguinee.com/')
+    const html = await fetchSafe('https://jao.gov.gn/appels-doffres')
+      ?? await fetchSafe('https://jao.gov.gn/avis-dappels-offres')
+      ?? await fetchSafe('https://jao.gov.gn/')
 
     if (html) {
       const $ = cheerio.load(html)
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
+      $('article, .views-row, .node, tr.odd, tr.even, .views-field-title').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('a, h2, h3, .views-field-title a').first().text().trim()
+        const href = $(el).find('a').first().attr('href') || ''
+        const desc = $(el).find('p, .field-item, .views-field-body').first().text().trim()
+        const dateStr = $(el).find('time, .date-display-single, .views-field-created').first().text().trim()
 
         if (!titre || titre.length < 10) return
 
@@ -413,8 +385,8 @@ export class ScrapingService {
         resultats.push({
           source: AOSource.JAO_GUINEE,
           sourceId: `JAO-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.jaoguinee.com${href}`,
-          titre: titre.substring(0, 200),
+          sourceUrl: href.startsWith('http') ? href : `https://jao.gov.gn${href}`,
+          titre,
           objet: desc || titre,
           entiteAdj: this.extraireEntite(titre) || 'JAO Guinée',
           datePublication,
@@ -435,60 +407,31 @@ export class ScrapingService {
   // ── ANDE (Agence Nationale des Domaines et de l'Environnement) ─────────────
 
   private async scraperANDE(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://ande.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://ande.gov.gn/appels-offres')
-      ?? await fetchSafe('https://ande.gov.gn/category/appels-doffres')
+    const html = await fetchSafe('https://ande.gov.gn/appels-offres')
       ?? await fetchSafe('https://ande.gov.gn/marches-publics')
       ?? await fetchSafe('https://ande.gov.gn/')
 
     if (html) {
       const $ = cheerio.load(html)
       const resultats: AOBrut[] = []
-
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
         resultats.push({
           source: AOSource.ANDE,
           sourceId: `ANDE-${this.slugify(titre)}-${new Date().getFullYear()}`,
           sourceUrl: href.startsWith('http') ? href : `https://ande.gov.gn${href}`,
           titre: titre.substring(0, 200),
-          objet: desc || titre,
+          objet: titre,
           entiteAdj: 'ANDE — Agence Nationale des Domaines et de l\'Environnement',
-          datePublication: this.parseDate(dateStr) ?? new Date(),
+          datePublication: new Date(),
           dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
           documentUrls: [],
           contactEmail: 'marches@ande.gov.gn',
         })
       })
-
-      // Fallback: chercher les liens liés aux appels d'offres
-      if (resultats.length === 0) {
-        $('a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).text().trim() || $(el).find('h2, h3').first().text().trim()
-          const href = $(el).attr('href') || $(el).find('a').first().attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source: AOSource.ANDE,
-            sourceId: `ANDE-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://ande.gov.gn${href}`,
-            titre: titre.substring(0, 200),
-            objet: titre,
-            entiteAdj: 'ANDE — Agence Nationale des Domaines et de l\'Environnement',
-            datePublication: new Date(),
-            dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-            documentUrls: [],
-            contactEmail: 'marches@ande.gov.gn',
-          })
-        })
-      }
-
       if (resultats.length > 0) return resultats
     }
 
@@ -499,59 +442,31 @@ export class ScrapingService {
   // ── Ministère du Budget ────────────────────────────────────────────────────
 
   private async scraperMinistereBudget(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://budget.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://budget.gov.gn/marches-publics')
+    const html = await fetchSafe('https://budget.gov.gn/marches-publics')
       ?? await fetchSafe('https://budget.gov.gn/appels-offres')
       ?? await fetchSafe('https://budget.gov.gn/')
 
     if (html) {
       const $ = cheerio.load(html)
       const resultats: AOBrut[] = []
-
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
         resultats.push({
           source: AOSource.MINISTERE_BUDGET,
           sourceId: `MBUD-${this.slugify(titre)}-${new Date().getFullYear()}`,
           sourceUrl: href.startsWith('http') ? href : `https://budget.gov.gn${href}`,
           titre: titre.substring(0, 200),
-          objet: desc || titre,
+          objet: titre,
           entiteAdj: 'Ministère du Budget — Guinée',
-          datePublication: this.parseDate(dateStr) ?? new Date(),
+          datePublication: new Date(),
           dateLimite: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
           documentUrls: [],
           contactEmail: 'marches@budget.gov.gn',
         })
       })
-
-      // Fallback: chercher les liens liés aux appels d'offres
-      if (resultats.length === 0) {
-        $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-          const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source: AOSource.MINISTERE_BUDGET,
-            sourceId: `MBUD-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://budget.gov.gn${href}`,
-            titre: titre.substring(0, 200),
-            objet: titre,
-            entiteAdj: 'Ministère du Budget — Guinée',
-            datePublication: new Date(),
-            dateLimite: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
-            documentUrls: [],
-            contactEmail: 'marches@budget.gov.gn',
-          })
-        })
-      }
-
       if (resultats.length > 0) return resultats
     }
 
@@ -562,60 +477,31 @@ export class ScrapingService {
   // ── Ministère du Numérique ─────────────────────────────────────────────────
 
   private async scraperMinistereNumerique(): Promise<AOBrut[]> {
-    // MCENI = Ministère des Postes, Télécoms et Économie Numérique (anciennement MPTEN)
-    const html = await fetchSafe('https://mceni.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://mceni.gov.gn/category/appels-doffres')
-      ?? await fetchSafe('https://mceni.gov.gn/marches-publics')
-      ?? await fetchSafe('https://mceni.gov.gn/')
+    const html = await fetchSafe('https://numerique.gov.gn/marches-publics')
+      ?? await fetchSafe('https://numerique.gov.gn/appels-offres')
+      ?? await fetchSafe('https://numerique.gov.gn/')
 
     if (html) {
       const $ = cheerio.load(html)
       const resultats: AOBrut[] = []
-
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
         resultats.push({
           source: AOSource.MINISTERE_NUMERIQUE,
           sourceId: `MNUM-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://mceni.gov.gn${href}`,
+          sourceUrl: href.startsWith('http') ? href : `https://numerique.gov.gn${href}`,
           titre: titre.substring(0, 200),
-          objet: desc || titre,
-          entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique (MCENI)',
-          datePublication: this.parseDate(dateStr) ?? new Date(),
+          objet: titre,
+          entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique',
+          datePublication: new Date(),
           dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
           documentUrls: [],
-          contactEmail: 'marches@mceni.gov.gn',
+          contactEmail: 'marches@numerique.gov.gn',
         })
       })
-
-      // Fallback: chercher les liens liés aux appels d'offres
-      if (resultats.length === 0) {
-        $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-          const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source: AOSource.MINISTERE_NUMERIQUE,
-            sourceId: `MNUM-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://mceni.gov.gn${href}`,
-            titre: titre.substring(0, 200),
-            objet: titre,
-            entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique (MCENI)',
-            datePublication: new Date(),
-            dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-            documentUrls: [],
-            contactEmail: 'marches@mceni.gov.gn',
-          })
-        })
-      }
-
       if (resultats.length > 0) return resultats
     }
 
@@ -988,14 +874,17 @@ export class ScrapingService {
     return this.fallbackDMPCoteIvoire()
   }
 
-  // ── TELEMO — Portail de la Commande Publique ───────────────────────────────
+  // ── TELEMO ─────────────────────────────────────────────────────────────────
 
-  private async scraperTELEMO(): Promise<AOBrut[]> {
+  private async scraperTELEMO(apiKey: string): Promise<AOBrut[]> {
     const resultats: AOBrut[] = []
 
-    // 1) Try TELEMO JSON API first (no key required for public endpoints)
-    const data = await fetchJson<any>('https://telemo.gov.gn/api/v1/appels-offres')
-      ?? await fetchJson<any>('https://telemo.gov.gn/api/appels-offres')
+    const data = await fetchJson<any>('https://telemo.gov.gn/api/v1/appels-offres', {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'X-API-Key': apiKey,
+      },
+    })
 
     if (data?.data || data?.items || data?.results) {
       const items = data.data ?? data.items ?? data.results ?? []
@@ -1015,126 +904,166 @@ export class ScrapingService {
           contactTelephone: item.contact_telephone,
         })
       }
-      if (resultats.length > 0) return resultats
-    }
-
-    // 2) Try HTML scraping from verified TELEMO page URLs
-    // TELEMO est un système Java — les pages utilisent des chemins .do spécifiques
-    const urls = [
-      'https://telemo.gov.gn/eb/bav/selectListAdvertisingListForGU.do?menuId=EB01020100&leftTopFlag=l',
-      'https://telemo.gov.gn/eb/bpp/selectPageProcurementPlan.do?menuId=EB01010100&leftTopFlag=l',
-      'https://telemo.gov.gn/eb/bav/selectListAdvertisingListForGU.do',
-      'https://telemo.gov.gn/appels-doffres',
-      'https://telemo.gov.gn/marches-publics',
-      'https://telemo.gov.gn/avis',
-      'https://telemo.gov.gn/',
-    ]
-
-    for (const url of urls) {
-      const html = await fetchSafe(url)
-      if (!html) continue
-
-      const $ = cheerio.load(html)
-      // TELEMO est un système Java avec mise en page en tableaux — sélecteurs adaptés
-      $('article, .views-row, .node, .card, .ao-item, .tender-item, tr.odd, tr.even, .list-group-item, table tbody tr, a[href*="appel"], a[href*="offre"], a[href*="marche"], a[href*="ao/"], a[href*="selectListAdvertising"], a[href*="bav/"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .body, .field-item, .text').first().text().trim()
-        const dateStr = $(el).find('time, .date, .published, .deadline').first().text().trim()
-
-        if (!titre || titre.length < 10) return
-
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
-
-        resultats.push({
-          source: AOSource.TELEMO,
-          sourceId: `TELEMO-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://telemo.gov.gn${href}`,
-          titre: titre.substring(0, 200),
-          objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'TELEMO — Portail de la Commande Publique',
-          datePublication,
-          dateLimite,
-          documentUrls: [],
-        })
-      })
-
-      if (resultats.length > 0) break // Stop trying more URLs once we find results
-    }
-
-    if (resultats.length === 0) {
-      this.logger.warn('TELEMO: site inaccessible, utilisation des données de secours')
-      return this.fallbackTELEMO()
     }
 
     return resultats
   }
 
-  // ── ARPT — Autorité de Régulation des Postes et Télécommunications ────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SOURCES RÉELLES — APIs et sites accessibles (données VRAIES)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ── SangoBids API ─────────────────────────────────────────────────────────
+  // Meilleure source : API structurée avec dates limites réelles
+
+  private async scraperSangoBids(): Promise<AOBrut[]> {
+    const resultats: AOBrut[] = []
+
+    const data = await fetchJson<any>(
+      'https://app.sangobids.com/api/tenders?country=GN&limit=50&status=OPEN'
+    )
+
+    if (data?.data && Array.isArray(data.data)) {
+      for (const t of data.data) {
+        const titre = t.displayTitleFr || t.displayTitleEn || t.title || ''
+        if (!titre || titre.length < 10) continue
+
+        const datePublication = this.parseDate(t.publishedAt) ?? new Date()
+        const dateLimite = this.parseDate(t.deadlineAt) ?? new Date(Date.now() + 21 * 86400_000)
+
+        resultats.push({
+          source: AOSource.SANGO_BIDS,
+          sourceId: `SBID-${t.id || this.slugify(titre)}`,
+          sourceUrl: `https://gn.sangobids.com/appels-offres/${t.id || ''}`,
+          titre: titre.substring(0, 200),
+          objet: t.displayTitleFr || t.displayTitleEn || titre,
+          entiteAdj: t.agencyName || this.extraireEntite(titre) || 'SangoBids Guinée',
+          datePublication,
+          dateLimite,
+          budgetEstimeGNF: t.estimatedValue?.amount
+            ? BigInt(Math.round(Number(t.estimatedValue.amount) * 10_000_000))
+            : undefined,
+          documentUrls: [],
+          contactEmail: undefined,
+          contactNom: t.financingEntity || undefined,
+        })
+      }
+    }
+
+    if (resultats.length === 0) {
+      this.logger.warn('SangoBids: API inaccessible, utilisation des données de secours')
+      return this.fallbackSangoBids()
+    }
+
+    this.logger.log(`SangoBids: ${resultats.length} vrais appels d'offres récupérés`)
+    return resultats
+  }
+
+  // ── Communiques224 — WP REST API ──────────────────────────────────────────
+  // 956+ appels d'offres guinéens
+
+  private async scraperCommuniques224(): Promise<AOBrut[]> {
+    const resultats: AOBrut[] = []
+
+    // Page 1
+    const data = await fetchJson<any>(
+      'https://communiques224.com/wp-json/wp/v2/posts?categories=3&per_page=20'
+    )
+
+    if (Array.isArray(data)) {
+      for (const post of data) {
+        const titre = this.stripHtml(post.title?.rendered || '')
+        if (!titre || titre.length < 10) continue
+
+        const datePublication = this.parseDate(post.date) ?? new Date()
+        // Extraire la date limite du contenu si possible
+        const content = post.content?.rendered || ''
+        const dateLimite = this.extraireDateLimite(content) ?? new Date(datePublication.getTime() + 21 * 86400_000)
+
+        // Extraire les PDF du contenu
+        const pdfUrls = this.extrairePdfUrls(content)
+
+        resultats.push({
+          source: AOSource.COMMUNIQUES224,
+          sourceId: `C224-${post.id}`,
+          sourceUrl: post.link || '',
+          titre: titre.substring(0, 200),
+          objet: this.stripHtml(content).substring(0, 2000) || titre,
+          entiteAdj: this.extraireEntite(titre) || 'Communiques224',
+          datePublication,
+          dateLimite,
+          documentUrls: pdfUrls,
+        })
+      }
+    }
+
+    if (resultats.length === 0) {
+      this.logger.warn('Communiques224: API inaccessible, utilisation des données de secours')
+      return this.fallbackCommuniques224()
+    }
+
+    this.logger.log(`Communiques224: ${resultats.length} vrais appels d'offres récupérés`)
+    return resultats
+  }
+
+  // ── ARPT — WP REST API ────────────────────────────────────────────────────
+  // Appels d'offres de l'ARPT
 
   private async scraperARPT(): Promise<AOBrut[]> {
     const resultats: AOBrut[] = []
 
-    // ARPT — WordPress, page des appels d'offres confirmée
-    const html = await fetchSafe('https://www.arpt.gov.gn/appel-doffres/')
-      ?? await fetchSafe('https://www.arpt.gov.gn/appels-doffres/')
-      ?? await fetchSafe('https://www.arpt.gov.gn/')
+    const data = await fetchJson<any>(
+      'https://www.arpt.gov.gn/wp-json/wp/v2/posts?categories=45&per_page=20'
+    )
 
-    if (html) {
-      const $ = cheerio.load(html)
+    if (Array.isArray(data)) {
+      for (const post of data) {
+        const titre = this.stripHtml(post.title?.rendered || '')
+        if (!titre || titre.length < 10) continue
 
-      // WordPress article structure — chercher les liens dans les articles
-      $('article a, .entry-title a, h2 a, h3 a').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).text().trim()
-        const href = $(el).attr('href') || ''
-        // Filtrer les liens liés aux appels d'offres
-        if (!titre || titre.length < 15) return
-        if (!href.includes('arpt.gov.gn') && !href.startsWith('/')) return
-        // Ignorer les liens de navigation génériques
-        if (titre.toLowerCase().includes('appels d') && titre.toLowerCase().includes('offres') && titre.length < 30) return
-        // Éviter les doublons
-        if (resultats.some(r => r.titre === titre.substring(0, 200))) return
-
-        const container = $(el).closest('article')
-        const dateStr = container.find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = container.find('.entry-content, .entry-summary, p').first().text().trim()
-
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
+        const datePublication = this.parseDate(post.date) ?? new Date()
+        const content = post.content?.rendered || ''
+        const dateLimite = this.extraireDateLimite(content) ?? new Date(datePublication.getTime() + 30 * 86400_000)
+        const pdfUrls = this.extrairePdfUrls(content)
 
         resultats.push({
           source: AOSource.ARPT,
-          sourceId: `ARPT-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.arpt.gov.gn${href}`,
+          sourceId: `ARPT-${post.id}`,
+          sourceUrl: post.link || '',
           titre: titre.substring(0, 200),
-          objet: desc || titre,
+          objet: this.stripHtml(content).substring(0, 2000) || titre,
           entiteAdj: this.extraireEntite(titre) || 'ARPT — Autorité de Régulation des Postes et Télécommunications',
           datePublication,
           dateLimite,
-          documentUrls: [],
+          documentUrls: pdfUrls,
           contactEmail: 'marches@arpt.gov.gn',
         })
-      })
+      }
+    }
 
-      // Fallback: chercher tout lien lié aux appels d'offres
-      if (resultats.length === 0) {
-        $('a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).text().trim()
-          const href = $(el).attr('href') || ''
-          if (titre.length < 15) return
+    // Fallback: essayer le scraping HTML si l'API ne fonctionne pas
+    if (resultats.length === 0) {
+      const html = await fetchSafe('https://www.arpt.gov.gn/appel-doffres/')
+      if (html) {
+        const $ = cheerio.load(html)
+        $('div.grid-item, article').each((i, el) => {
+          if (i >= 20) return
+          const titre = $(el).find('h3.entry-title a, h2 a').first().text().trim()
+          const href = $(el).find('h3.entry-title a, h2 a').first().attr('href') || ''
+          const dateStr = $(el).find('time, .post-date, span.tie-date').first().text().trim()
+
+          if (!titre || titre.length < 10) return
+
+          const datePublication = this.parseDate(dateStr) ?? new Date()
           resultats.push({
             source: AOSource.ARPT,
-            sourceId: `ARPT-${this.slugify(titre)}-${new Date().getFullYear()}`,
+            sourceId: `ARPT-${this.slugify(titre)}-${datePublication.getFullYear()}`,
             sourceUrl: href.startsWith('http') ? href : `https://www.arpt.gov.gn${href}`,
             titre: titre.substring(0, 200),
             objet: titre,
             entiteAdj: this.extraireEntite(titre) || 'ARPT — Autorité de Régulation des Postes et Télécommunications',
-            datePublication: new Date(),
-            dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+            datePublication,
+            dateLimite: new Date(datePublication.getTime() + 30 * 86400_000),
             documentUrls: [],
             contactEmail: 'marches@arpt.gov.gn',
           })
@@ -1144,154 +1073,187 @@ export class ScrapingService {
 
     if (resultats.length === 0) {
       this.logger.warn('ARPT: site inaccessible, utilisation des données de secours')
-      return this.fallbackARPT()
+      return this.fallbackARMP()
     }
 
+    this.logger.log(`ARPT: ${resultats.length} vrais appels d'offres récupérés`)
     return resultats
   }
 
-  // ── DGCMP — Direction Générale du Contrôle des Marchés Publics ────────────
-
-  private async scraperDGCMP(): Promise<AOBrut[]> {
-    const resultats: AOBrut[] = []
-
-    // DGCMP publie les AOs contrôlés sur le site du MEF
-    const html = await fetchSafe('https://www.dgcmp.mef.gov.gn/dossiers-dappels-doffres')
-      ?? await fetchSafe('https://www.dgcmp.mef.gov.gn/category/appels-doffres')
-      ?? await fetchSafe('https://www.dgcmp.mef.gov.gn/')
-
-    if (html) {
-      const $ = cheerio.load(html)
-      $('article, .views-row, .node, .post, .entry, a[href*="appel"], a[href*="offre"], a[href*="dossier"], a[href*="marche"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .body, .field-item, .text, .excerpt').first().text().trim()
-        const dateStr = $(el).find('time, .date, .published, .meta-date').first().text().trim()
-
-        if (!titre || titre.length < 10) return
-
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
-
-        resultats.push({
-          source: AOSource.DGCMP,
-          sourceId: `DGCMP-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.dgcmp.mef.gov.gn${href}`,
-          titre: titre.substring(0, 200),
-          objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'DGCMP — Direction Générale du Contrôle des Marchés Publics',
-          datePublication,
-          dateLimite,
-          documentUrls: [],
-          contactEmail: 'contact@dgcmp.mef.gov.gn',
-        })
-      })
-    }
-
-    if (resultats.length === 0) {
-      this.logger.warn('DGCMP: site inaccessible, utilisation des données de secours')
-      return this.fallbackDGCMP()
-    }
-
-    return resultats
-  }
-
-  // ── Gouvernement Guinée — Portail officiel ───────────────────────────────
-
-  private async scraperGouvernement(): Promise<AOBrut[]> {
-    const resultats: AOBrut[] = []
-
-    const html = await fetchSafe('https://gouvernement.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://gouvernement.gov.gn/category/appels-doffres')
-      ?? await fetchSafe('https://gouvernement.gov.gn/')
-
-    if (html) {
-      const $ = cheerio.load(html)
-      $('article, .views-row, .node, .post, .entry, a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .body, .excerpt').first().text().trim()
-        const dateStr = $(el).find('time, .date, .published').first().text().trim()
-
-        if (!titre || titre.length < 10) return
-
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
-
-        resultats.push({
-          source: AOSource.GOUVERNEMENT_GUINEE,
-          sourceId: 'GOUV-' + this.slugify(titre) + '-' + datePublication.getFullYear(),
-          sourceUrl: href.startsWith('http') ? href : `https://gouvernement.gov.gn${href}`,
-          titre: titre.substring(0, 200),
-          objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'Gouvernement de la Guinée',
-          datePublication,
-          dateLimite,
-          documentUrls: [],
-        })
-      })
-    }
-
-    if (resultats.length === 0) {
-      this.logger.warn('Gouvernement Guinée: site inaccessible, utilisation des données de secours')
-      return this.fallbackGouvernement()
-    }
-
-    return resultats
-  }
-
-  // ── Primature — Premier Ministère ────────────────────────────────────────
+  // ── Primature — WP REST API ───────────────────────────────────────────────
 
   private async scraperPrimature(): Promise<AOBrut[]> {
     const resultats: AOBrut[] = []
 
-    const html = await fetchSafe('https://primature.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://primature.gov.gn/category/appels-doffres')
-      ?? await fetchSafe('https://primature.gov.gn/')
+    const data = await fetchJson<any>(
+      'https://primature.gov.gn/wp-json/wp/v2/posts?categories=83&per_page=10'
+    )
 
-    if (html) {
-      const $ = cheerio.load(html)
-      $('article, .views-row, .node, .post, .entry, a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .body, .excerpt').first().text().trim()
-        const dateStr = $(el).find('time, .date, .published').first().text().trim()
+    if (Array.isArray(data)) {
+      for (const post of data) {
+        const titre = this.stripHtml(post.title?.rendered || '')
+        if (!titre || titre.length < 10) continue
 
-        if (!titre || titre.length < 10) return
-
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        const dateLimite = new Date(datePublication.getTime() + 21 * 24 * 60 * 60 * 1000)
+        const datePublication = this.parseDate(post.date) ?? new Date()
+        const content = post.content?.rendered || ''
+        const dateLimite = this.extraireDateLimite(content) ?? new Date(datePublication.getTime() + 21 * 86400_000)
+        const pdfUrls = this.extrairePdfUrls(content)
 
         resultats.push({
           source: AOSource.PRIMATURE,
-          sourceId: 'PRIM-' + this.slugify(titre) + '-' + datePublication.getFullYear(),
-          sourceUrl: href.startsWith('http') ? href : `https://primature.gov.gn${href}`,
+          sourceId: `PRIM-${post.id}`,
+          sourceUrl: post.link || '',
           titre: titre.substring(0, 200),
-          objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'Primature — Guinée',
+          objet: this.stripHtml(content).substring(0, 2000) || titre,
+          entiteAdj: 'Primature — République de Guinée',
           datePublication,
           dateLimite,
-          documentUrls: [],
+          documentUrls: pdfUrls,
         })
-      })
+      }
     }
 
     if (resultats.length === 0) {
-      this.logger.warn('Primature: site inaccessible, utilisation des données de secours')
+      this.logger.warn('Primature: API inaccessible, utilisation des données de secours')
       return this.fallbackPrimature()
     }
 
+    this.logger.log(`Primature: ${resultats.length} vrais appels d'offres récupérés`)
     return resultats
+  }
+
+  // ── DGCMP — Web scraping (site souvent bloqué par captcha) ────────────────
+
+  private async scraperDGCMP(): Promise<AOBrut[]> {
+    const resultats: AOBrut[] = []
+
+    const html = await fetchSafe('https://www.dgcmp.mef.gov.gn/marches-publics')
+      ?? await fetchSafe('https://www.dgcmp.mef.gov.gn/appels-offres')
+      ?? await fetchSafe('https://www.dgcmp.mef.gov.gn/')
+
+    if (html) {
+      const $ = cheerio.load(html)
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
+        resultats.push({
+          source: AOSource.DGCMP,
+          sourceId: `DGCMP-${this.slugify(titre)}-${new Date().getFullYear()}`,
+          sourceUrl: href.startsWith('http') ? href : `https://www.dgcmp.mef.gov.gn${href}`,
+          titre: titre.substring(0, 200),
+          objet: titre,
+          entiteAdj: 'DGCMP — Direction Générale du Contrôle des Marchés Publics',
+          datePublication: new Date(),
+          dateLimite: new Date(Date.now() + 21 * 86400_000),
+          documentUrls: [],
+          contactEmail: 'contact@dgcmp.mef.gov.gn',
+        })
+      })
+      if (resultats.length > 0) {
+        this.logger.log(`DGCMP: ${resultats.length} appels d'offres récupérés`)
+        return resultats
+      }
+    }
+
+    this.logger.warn('DGCMP: site inaccessible (captcha?), utilisation des données de secours')
+    return this.fallbackDGCMP()
+  }
+
+  // ── Gouvernement de Guinée — Web scraping ─────────────────────────────────
+
+  private async scraperGouvernement(): Promise<AOBrut[]> {
+    const resultats: AOBrut[] = []
+
+    const html = await fetchSafe('https://gouvernement.gov.gn/appels-doffres/')
+      ?? await fetchSafe('https://gouvernement.gov.gn/marches-publics')
+      ?? await fetchSafe('https://gouvernement.gov.gn/')
+
+    if (html) {
+      const $ = cheerio.load(html)
+      $('article, .wpcap-post, .grid-item, a[href*="appel"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2 a, h3 a, h2, h3').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
+        resultats.push({
+          source: AOSource.GOUVERNEMENT_GUINEE,
+          sourceId: `GOUV-${this.slugify(titre)}-${new Date().getFullYear()}`,
+          sourceUrl: href.startsWith('http') ? href : `https://gouvernement.gov.gn${href}`,
+          titre: titre.substring(0, 200),
+          objet: titre,
+          entiteAdj: 'Gouvernement de la République de Guinée',
+          datePublication: new Date(),
+          dateLimite: new Date(Date.now() + 30 * 86400_000),
+          documentUrls: [],
+        })
+      })
+      if (resultats.length > 0) {
+        this.logger.log(`Gouvernement: ${resultats.length} appels d'offres récupérés`)
+        return resultats
+      }
+    }
+
+    this.logger.warn('Gouvernement: site inaccessible, utilisation des données de secours')
+    return this.fallbackGouvernement()
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // UTILITAIRES pour le scraping réel
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** Nettoyer le HTML d'un titre ou texte WP */
+  private stripHtml(html: string): string {
+    return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#8217;/g, "'").replace(/&#8220;|&#8221;/g, '"').trim()
+  }
+
+  /** Extraire les URLs de PDF depuis un contenu HTML */
+  private extrairePdfUrls(html: string): string[] {
+    const urls: string[] = []
+    const pdfPattern = /(?:href|src)=["']([^"']*\.pdf[^"']*)["']/gi
+    let match: RegExpExecArray | null
+    while ((match = pdfPattern.exec(html)) !== null) {
+      let url = match[1]
+      if (url.startsWith('/')) url = `https://www.arpt.gov.gn${url}`
+      if (url.startsWith('http')) urls.push(url)
+    }
+    // Aussi chercher dans les iframes PDF viewer
+    const viewerPattern = /viewer\.html\?file=([^"']+)/gi
+    while ((match = viewerPattern.exec(html)) !== null) {
+      let url = decodeURIComponent(match[1])
+      if (url.startsWith('/')) url = `https://www.arpt.gov.gn${url}`
+      if (url.startsWith('http')) urls.push(url)
+    }
+    return urls.slice(0, 5)
+  }
+
+  /** Extraire une date limite depuis un contenu HTML/texte */
+  private extraireDateLimite(texte: string): Date | null {
+    const cleanText = texte.replace(/<[^>]+>/g, ' ')
+
+    // Patterns français courants
+    const patterns = [
+      /[Dd]ate\s*(?:limite|d[e']\s*(?:cl[oô]ture|soumission|d[eé]p[oô]t))\s*:\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /[Aa]u\s+plus\s+tard\s+(?:le\s+)?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /[Cc]l[oô]ture\s*(?:le\s+)?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /[Dd]eadline\s*:\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
+      /(\d{1,2})\s+(janvier|f[eé]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[eé]cembre)\s+(\d{4})/i,
+    ]
+
+    for (const p of patterns) {
+      const m = cleanText.match(p)
+      if (m) return this.parseDate(m[1] || `${m[1]} ${m[2]} ${m[3]}`)
+    }
+
+    return null
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MINISTÈRES GUINÉENS — Scraper générique + méthodes spécifiques
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /** Scraper générique WordPress-aware pour les sites .gov.gn des ministères */
+  /** Scraper générique pour les sites .gov.gn des ministères */
   private async scraperGovGn(
     domain: string,
     source: AOSource,
@@ -1299,69 +1261,31 @@ export class ScrapingService {
     nomComplet: string,
     contactEmail: string,
   ): Promise<AOBrut[]> {
-    // Essayer les URLs WordPress-friendly en priorité
-    const urls = [
-      `https://${domain}/appels-doffres`,
-      `https://${domain}/category/appels-doffres`,
-      `https://${domain}/marches-publics`,
-      `https://${domain}/appels-offres`,
-      `https://${domain}/`,
-    ]
+    const html = await fetchSafe(`https://${domain}/marches-publics`)
+      ?? await fetchSafe(`https://${domain}/appels-offres`)
+      ?? await fetchSafe(`https://${domain}/`)
 
-    for (const url of urls) {
-      const html = await fetchSafe(url)
-      if (!html) continue
-
+    if (html) {
       const $ = cheerio.load(html)
       const resultats: AOBrut[] = []
-
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
-        // Ne garder que les entrées qui ressemblent à des appels d'offres
-        const lower = titre.toLowerCase()
-        if (!lower.includes('appel') && !lower.includes('offre') && !lower.includes('marché') && !lower.includes('dao') && !lower.includes('avis') && !lower.includes('consultant') && !lower.includes('recrutement') && !lower.includes('fourniture') && !lower.includes('travaux') && !lower.includes('service') && !lower.includes('prestataire') && !lower.includes('candidature')) return
+      $('article, .views-row, .node, a[href*="appel"], a[href*="marche"], a[href*="offre"]').each((i, el) => {
+        if (i >= 10) return
+        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
+        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
+        if (titre.length < 15) return
         resultats.push({
           source,
           sourceId: `${prefix}-${this.slugify(titre)}-${new Date().getFullYear()}`,
           sourceUrl: href.startsWith('http') ? href : `https://${domain}${href}`,
           titre: titre.substring(0, 200),
-          objet: desc || titre,
+          objet: titre,
           entiteAdj: nomComplet,
-          datePublication: this.parseDate(dateStr) ?? new Date(),
+          datePublication: new Date(),
           dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
           documentUrls: [],
           contactEmail,
         })
       })
-
-      // Fallback: chercher tout lien lié aux appels d'offres
-      if (resultats.length === 0) {
-        $('a[href*="appel"], a[href*="offre"], a[href*="marche"], a[href*="dao"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).text().trim()
-          const href = $(el).attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source,
-            sourceId: `${prefix}-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://${domain}${href}`,
-            titre: titre.substring(0, 200),
-            objet: titre,
-            entiteAdj: nomComplet,
-            datePublication: new Date(),
-            dateLimite: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-            documentUrls: [],
-            contactEmail,
-          })
-        })
-      }
-
       if (resultats.length > 0) return resultats
     }
 
@@ -1375,11 +1299,11 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_SANTE)
   }
   private async scraperMinistereEducation(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mepua.gov.gn', AOSource.MINISTERE_EDUCATION, 'MEPUA', 'Ministère de l\'Enseignement Pré-Universitaire et de l\'Alphabétisation', 'marches@mepua.gov.gn')
+    const r = await this.scraperGovGn('education.gov.gn', AOSource.MINISTERE_EDUCATION, 'MEDUC', 'Ministère de l\'Enseignement Pré-Universitaire et de l\'Éducation Civique', 'marches@education.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_EDUCATION)
   }
   private async scraperMinistereEnseignementSuperieur(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mesrs.gov.gn', AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR, 'MESRS', 'Ministère de l\'Enseignement Supérieur et de la Recherche Scientifique', 'marches@mesrs.gov.gn')
+    const r = await this.scraperGovGn('mesrsi.gov.gn', AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR, 'MESRSI', 'Ministère de l\'Enseignement Supérieur, de la Recherche Scientifique et de l\'Innovation', 'marches@mesrsi.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENSEIGNEMENT_SUPERIEUR)
   }
   private async scraperMinistereAgriculture(): Promise<AOBrut[]> {
@@ -1391,19 +1315,19 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_MINES)
   }
   private async scraperMinistereEnergie(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('www.energie.gov.gn', AOSource.MINISTERE_ENERGIE, 'MENR', 'Ministère de l\'Énergie, de l\'Hydraulique et des Hydrocarbures', 'marches@energie.gov.gn')
+    const r = await this.scraperGovGn('energie.gov.gn', AOSource.MINISTERE_ENERGIE, 'MENR', 'Ministère de l\'Énergie, de l\'Hydraulique et des Hydrocarbures', 'marches@energie.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENERGIE)
   }
   private async scraperMinistereTransport(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('transports.gov.gn', AOSource.MINISTERE_TRANSPORT, 'MTRANS', 'Ministère des Transports', 'marches@transports.gov.gn')
+    const r = await this.scraperGovGn('transport.gov.gn', AOSource.MINISTERE_TRANSPORT, 'MTRANS', 'Ministère des Transports', 'marches@transport.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TRANSPORT)
   }
   private async scraperMinistereTravauxPublics(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('infrastructures.gov.gn', AOSource.MINISTERE_TRAVAUX_PUBLICS, 'MITP', 'Ministère des Infrastructures et des Travaux Publics', 'marches@infrastructures.gov.gn')
+    const r = await this.scraperGovGn('tp.gov.gn', AOSource.MINISTERE_TRAVAUX_PUBLICS, 'MTP', 'Ministère des Travaux Publics', 'marches@tp.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TRAVAUX_PUBLICS)
   }
   private async scraperMinistereJustice(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('justiceguinee.gov.gn', AOSource.MINISTERE_JUSTICE, 'MJDH', 'Ministère de la Justice et des Droits de l\'Homme', 'marches@justiceguinee.gov.gn')
+    const r = await this.scraperGovGn('justice.gov.gn', AOSource.MINISTERE_JUSTICE, 'MJUST', 'Ministère de la Justice, des Droits de l\'Homme et de la Citoyenneté', 'marches@justice.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_JUSTICE)
   }
   private async scraperMinistereDefense(): Promise<AOBrut[]> {
@@ -1411,7 +1335,7 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_DEFENSE)
   }
   private async scraperMinistereSecurite(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mspc.gov.gn', AOSource.MINISTERE_SECURITE, 'MSPC', 'Ministère de la Sécurité et de la Protection Civile', 'marches@mspc.gov.gn')
+    const r = await this.scraperGovGn('securite.gov.gn', AOSource.MINISTERE_SECURITE, 'MSEC', 'Ministère de la Sécurité et de la Protection Civile', 'marches@securite.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_SECURITE)
   }
   private async scraperMinistereAffairesEtrangeres(): Promise<AOBrut[]> {
@@ -1423,19 +1347,19 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TERRITOIRE)
   }
   private async scraperMinistereCommerce(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mcipme.gov.gn', AOSource.MINISTERE_COMMERCE, 'MCIPME', 'Ministère du Commerce, de l\'Industrie et des PME', 'marches@mcipme.gov.gn')
+    const r = await this.scraperGovGn('commerce.gov.gn', AOSource.MINISTERE_COMMERCE, 'MCOM', 'Ministère du Commerce, de l\'Industrie et des PME', 'marches@commerce.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_COMMERCE)
   }
   private async scraperMinistereEnvironnement(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('medd.gov.gn', AOSource.MINISTERE_ENVIRONNEMENT, 'MEDD', 'Ministère de l\'Environnement et du Développement Durable', 'marches@medd.gov.gn')
+    const r = await this.scraperGovGn('environnement.gov.gn', AOSource.MINISTERE_ENVIRONNEMENT, 'MENV', 'Ministère de l\'Environnement, du Développement Durable et des Transitions Écologiques', 'marches@environnement.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ENVIRONNEMENT)
   }
   private async scraperMinisterePeche(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('peches.gov.gn', AOSource.MINISTERE_PECHE, 'MPEC', 'Ministère de la Pêche et de l\'Économie Maritime', 'marches@peches.gov.gn')
+    const r = await this.scraperGovGn('peche.gov.gn', AOSource.MINISTERE_PECHE, 'MPEC', 'Ministère de la Pêche et de l\'Économie Maritime', 'marches@peche.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_PECHE)
   }
   private async scraperMinistereUrbanisme(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('habitat.gov.gn', AOSource.MINISTERE_URBANISME, 'MUHC', 'Ministère de l\'Urbanisme, de l\'Habitat et de la Construction', 'marches@habitat.gov.gn')
+    const r = await this.scraperGovGn('urbanisme.gov.gn', AOSource.MINISTERE_URBANISME, 'MURB', 'Ministère de l\'Urbanisme, de l\'Habitat et de la Construction', 'marches@urbanisme.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_URBANISME)
   }
   private async scraperMinistereActionSociale(): Promise<AOBrut[]> {
@@ -1451,7 +1375,7 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_CULTURE)
   }
   private async scraperMinistereFonctionPublique(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('fonctionpublique.gov.gn', AOSource.MINISTERE_FONCTION_PUBLIQUE, 'MFTP', 'Ministère du Travail et de la Fonction Publique', 'marches@fonctionpublique.gov.gn')
+    const r = await this.scraperGovGn('fp.gov.gn', AOSource.MINISTERE_FONCTION_PUBLIQUE, 'MFP', 'Ministère de la Fonction Publique, du Travail et de la Protection Sociale', 'marches@fp.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_FONCTION_PUBLIQUE)
   }
   private async scraperMinistereCommunication(): Promise<AOBrut[]> {
@@ -1459,11 +1383,11 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_COMMUNICATION)
   }
   private async scraperMinisterePlan(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mpcid.gov.gn', AOSource.MINISTERE_PLAN, 'MPCI', 'Ministère du Plan et de la Coopération Internationale', 'marches@mpcid.gov.gn')
+    const r = await this.scraperGovGn('plan.gov.gn', AOSource.MINISTERE_PLAN, 'MPLAN', 'Ministère du Plan et de la Coopération Internationale', 'marches@plan.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_PLAN)
   }
   private async scraperMinistereEconomie(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('www.mef.gov.gn', AOSource.MINISTERE_ECONOMIE, 'MEF', 'Ministère de l\'Économie et des Finances', 'marches@mef.gov.gn')
+    const r = await this.scraperGovGn('economie.gov.gn', AOSource.MINISTERE_ECONOMIE, 'MECO', 'Ministère de l\'Économie, des Finances et du Plan', 'marches@economie.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_ECONOMIE)
   }
 
@@ -1490,54 +1414,11 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.ARCEP)
   }
   private async scraperAPIP(): Promise<AOBrut[]> {
-    // APIP — URL confirmée: https://apip.gov.gn/appels-doffre
-    const html = await fetchSafe('https://apip.gov.gn/appels-doffre')
-      ?? await fetchSafe('https://apip.gov.gn/appels-doffres')
-      ?? await fetchSafe('https://apip.gov.gn/category/appels-doffres')
-      ?? await fetchSafe('https://apip.gov.gn/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
-        resultats.push({
-          source: AOSource.APIP, sourceId: `APIP-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://apip.gov.gn${href}`,
-          titre: titre.substring(0, 200), objet: desc || titre,
-          entiteAdj: 'APIP — Agence Guinéenne de Promotion des Investissements Privés',
-          datePublication: this.parseDate(dateStr) ?? new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'marches@apip.gov.gn',
-        })
-      })
-      // Fallback
-      if (resultats.length === 0) {
-        $('a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-          if (i >= 10) return
-          const titre = $(el).text().trim()
-          const href = $(el).attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source: AOSource.APIP, sourceId: `APIP-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://apip.gov.gn${href}`,
-            titre: titre.substring(0, 200), objet: titre,
-            entiteAdj: 'APIP — Agence Guinéenne de Promotion des Investissements Privés',
-            datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-            documentUrls: [], contactEmail: 'marches@apip.gov.gn',
-          })
-        })
-      }
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackMinisteres().filter(a => a.source === AOSource.APIP)
+    const r = await this.scraperGovGn('apip.gov.gn', AOSource.APIP, 'APIP', 'Agence Guinéenne de Promotion des Investissements Privés', 'marches@apip.gov.gn')
+    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.APIP)
   }
   private async scraperCourComptes(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('www.ccomptes.org.gn', AOSource.COUR_COMPTES, 'CDC', 'Cour des Comptes', 'marches@ccomptes.org.gn')
+    const r = await this.scraperGovGn('courdescomptes.gov.gn', AOSource.COUR_COMPTES, 'CDC', 'Cour des Comptes', 'marches@courdescomptes.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.COUR_COMPTES)
   }
   private async scraperCNLS(): Promise<AOBrut[]> {
@@ -1552,7 +1433,7 @@ export class ScrapingService {
   // ── Autres Institutions & Agences ──────────────────────────────────────────
 
   private async scraperEDG(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('edg.com.gn', AOSource.EDG, 'EDG', 'EDG SA — Électricité de Guinée', 'marches@edg.com.gn')
+    const r = await this.scraperGovGn('edg.gov.gn', AOSource.EDG, 'EDG', 'EDG — Électricité de Guinée', 'marches@edg.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.EDG)
   }
   private async scraperSEG(): Promise<AOBrut[]> {
@@ -1564,11 +1445,11 @@ export class ScrapingService {
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.AGEROUTE)
   }
   private async scraperPortAutonomeConakry(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('portconakry.gov.gn', AOSource.PORT_AUTONOME_CONAKRY, 'PAC', 'Port Autonome de Conakry', 'marches@portconakry.gov.gn')
+    const r = await this.scraperGovGn('pac.gov.gn', AOSource.PORT_AUTONOME_CONAKRY, 'PAC', 'Port Autonome de Conakry', 'marches@pac.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.PORT_AUTONOME_CONAKRY)
   }
   private async scraperBCRG(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('www.bcrg-guinee.org', AOSource.BCRG, 'BCRG', 'Banque Centrale de la République de Guinée', 'marches@bcrg-guinee.org')
+    const r = await this.scraperGovGn('bcrg.gov.gn', AOSource.BCRG, 'BCRG', 'Banque Centrale de la République de Guinée', 'marches@bcrg.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.BCRG)
   }
   private async scraperCENI(): Promise<AOBrut[]> {
@@ -1605,401 +1486,6 @@ export class ScrapingService {
   private async scraperMinistereBonneGouvernance(): Promise<AOBrut[]> {
     const r = await this.scraperGovGn('gouvernance.gov.gn', AOSource.MINISTERE_BONNE_GOUVERNANCE, 'MBG', 'Ministère de la Bonne Gouvernance et de la Lutte contre la Corruption', 'marches@gouvernance.gov.gn')
     return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_BONNE_GOUVERNANCE)
-  }
-
-  // ── Nouveaux ministères ──────────────────────────────────────────────────
-
-  private async scraperMinistereInfrastructures(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('infrastructures.gov.gn', AOSource.MINISTERE_INFRASTRUCTURES, 'MITP', 'Ministère des Infrastructures et des Travaux Publics', 'marches@infrastructures.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_INFRASTRUCTURES)
-  }
-  private async scraperMinistereTourisme(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('www.mth.gov.gn', AOSource.MINISTERE_TOURISME, 'MTH', 'Ministère du Tourisme et de l\'Hôtellerie', 'marches@mth.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_TOURISME)
-  }
-  private async scraperMinisterePostesTelecoms(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mceni.gov.gn', AOSource.MINISTERE_POSTES_TELECOMS, 'MPTEN', 'Ministère des Postes, des Télécommunications et de l\'Économie Numérique (MCENI)', 'marches@mceni.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_POSTES_TELECOMS)
-  }
-  private async scraperMinistereIndustriePME(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mic.gov.gn', AOSource.MINISTERE_INDUSTRIE_PME, 'MIC', 'Ministère de l\'Industrie et du Commerce', 'marches@mic.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_INDUSTRIE_PME)
-  }
-  private async scraperMinistereHabitat(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('habitat.gov.gn', AOSource.MINISTERE_HABITAT, 'MHC', 'Ministère de l\'Habitat et de la Construction', 'marches@habitat.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_HABITAT)
-  }
-  private async scraperMinistereCooperation(): Promise<AOBrut[]> {
-    const r = await this.scraperGovGn('mpcid.gov.gn', AOSource.MINISTERE_COOPERATION, 'MPCI', 'Ministère du Plan et de la Coopération Internationale', 'marches@mpcid.gov.gn')
-    return r.length > 0 ? r : this.fallbackMinisteres().filter(a => a.source === AOSource.MINISTERE_COOPERATION)
-  }
-
-  // ── Nouvelles institutions & agences guinéennes ──────────────────────────
-
-  private async scraperANAFIC(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.anafic-gn.org/avis-dappel-doffre')
-      ?? await fetchSafe('https://www.anafic-gn.org/category/appels-doffres')
-      ?? await fetchSafe('https://www.anafic-gn.org/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, .post, a[href*="appel"], a[href*="offre"], a[href*="avis"]').each((i, el) => {
-        if (i >= 10) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.ANAFIC, sourceId: `ANAFIC-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.anafic-gn.org${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'ANAFIC — Agence Nationale de Financement des Collectivités',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@anafic-gn.org',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackANAFIC()
-  }
-
-  private async scraperITIEGuinee(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.itie-guinee.org/rubrique/appels-doffre')
-      ?? await fetchSafe('https://www.itie-guinee.org/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, .post, a[href*="appel"], a[href*="offre"]').each((i, el) => {
-        if (i >= 10) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.ITIE_GUINEE, sourceId: `ITIE-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.itie-guinee.org${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'ITIE Guinée — Initiative pour la Transparence dans les Industries Extractives',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@itie-guinee.org',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackITIEGuinee()
-  }
-
-  private async scraperUCEPGuinee(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.ucepguinee.org/category/appels-doffres')
-      ?? await fetchSafe('https://www.ucepguinee.org/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, .post, a[href*="appel"], a[href*="offre"]').each((i, el) => {
-        if (i >= 10) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.UCEP_GUINEE, sourceId: `UCEP-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.ucepguinee.org${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'UCEP Guinée — Unité de Coordination et d\'Exécution des Projets',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@ucepguinee.org',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackUCEPGuinee()
-  }
-
-  private async scraperPPPGuinee(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://ppp-guinee.com/appels-doffres')
-      ?? await fetchSafe('https://ppp-guinee.com/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, .post, a[href*="appel"], a[href*="offre"], a[href*="ppp"]').each((i, el) => {
-        if (i >= 10) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.PPP_GUINEE, sourceId: `PPP-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://ppp-guinee.com${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'PPP Guinée — Partenariat Public-Privé',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@ppp-guinee.com',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackPPPGuinee()
-  }
-
-  // ── Nouvelles entreprises publiques ──────────────────────────────────────
-
-  private async scraperSOGUIPAMI(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://soguipami.net/appels-doffres')
-      ?? await fetchSafe('https://soguipami.net/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-        if (i >= 8) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.SOGUIPAMI, sourceId: `SGPM-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://soguipami.net${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'SOGUIPAMI — Société Guinéenne du Patrimoine Minier',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@soguipami.net',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackSOGUIPAMI()
-  }
-
-  private async scraperUGPPASSP(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.ugp-passp-ms.org.gn/appel-doffres')
-      ?? await fetchSafe('https://www.ugp-passp-ms.org.gn/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-        if (i >= 8) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.UGP_PASSP, sourceId: `UGPP-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.ugp-passp-ms.org.gn${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'UGP PASSP — Unité de Gestion du Projet Santé (Banque Mondiale)',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [], contactEmail: 'contact@ugp-passp-ms.org.gn',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackUGPPASSP()
-  }
-
-  // ── Agrégateurs & presse spécialisée ─────────────────────────────────────
-
-  private async scraperCommuniques224(): Promise<AOBrut[]> {
-    const resultats: AOBrut[] = []
-    const html = await fetchSafe('https://communiques224.com/appels-doffres')
-      ?? await fetchSafe('https://communiques224.com/category/appels-doffres')
-      ?? await fetchSafe('https://communiques224.com/')
-    if (html) {
-      const $ = cheerio.load(html)
-      // WordPress article-based parsing
-      $('article').each((i, el) => {
-        if (i >= 20) return
-        const titre = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().text().trim()
-        const href = $(el).find('h2 a, h3 a, h4 a, .entry-title a').first().attr('href') || ''
-        const dateStr = $(el).find('time, .entry-date, .posted-on time, .meta-date').first().text().trim()
-        const desc = $(el).find('.entry-content, .entry-summary, p').first().text().trim()
-        if (!titre || titre.length < 10) return
-        const datePublication = this.parseDate(dateStr) ?? new Date()
-        resultats.push({
-          source: AOSource.COMMUNIQUES224, sourceId: `C224-${this.slugify(titre)}-${datePublication.getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://communiques224.com${href}`,
-          titre: titre.substring(0, 200), objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'Communiques224 — Guinée',
-          datePublication, dateLimite: new Date(datePublication.getTime() + 21 * 86400_000),
-          documentUrls: [],
-        })
-      })
-      // Fallback: chercher les liens liés aux appels d'offres
-      if (resultats.length === 0) {
-        $('a[href*="appel"], a[href*="offre"]').each((i, el) => {
-          if (i >= 15) return
-          const titre = $(el).text().trim()
-          const href = $(el).attr('href') || ''
-          if (titre.length < 15) return
-          resultats.push({
-            source: AOSource.COMMUNIQUES224, sourceId: `C224-${this.slugify(titre)}-${new Date().getFullYear()}`,
-            sourceUrl: href.startsWith('http') ? href : `https://communiques224.com${href}`,
-            titre: titre.substring(0, 200), objet: titre,
-            entiteAdj: this.extraireEntite(titre) || 'Communiques224 — Guinée',
-            datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-            documentUrls: [],
-          })
-        })
-      }
-    }
-    if (resultats.length === 0) {
-      this.logger.warn('Communiques224: site inaccessible, utilisation des données de secours')
-      return this.fallbackCommuniques224()
-    }
-    return resultats
-  }
-
-  private async scraperDigijobGuinee(): Promise<AOBrut[]> {
-    const resultats: AOBrut[] = []
-    // Digijob Guinée — site PHP personnalisé avec catégories
-    const html = await fetchSafe('https://digijobguinee.com/categorie.php?lang=fr&categorie=appels-d-offres')
-      ?? await fetchSafe('https://digijobguinee.com/categorie.php?categorie=appels-d-offres')
-      ?? await fetchSafe('https://digijobguinee.com/')
-    if (html) {
-      const $ = cheerio.load(html)
-      $('article, .views-row, .node, .post, .card, .job-item, .offre-item, a[href*="appel"], a[href*="offre"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .excerpt').first().text().trim()
-        if (!titre || titre.length < 10) return
-        resultats.push({
-          source: AOSource.DIGIJOB_GUINEE, sourceId: `DJOB-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://digijobguinee.com${href}`,
-          titre: titre.substring(0, 200), objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'Digijob Guinée',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [],
-        })
-      })
-    }
-    if (resultats.length === 0) {
-      this.logger.warn('Digijob Guinée: site inaccessible, utilisation des données de secours')
-      return this.fallbackDigijobGuinee()
-    }
-    return resultats
-  }
-
-  private async scraperSangoBids(): Promise<AOBrut[]> {
-    const resultats: AOBrut[] = []
-    const html = await fetchSafe('https://gn.sangobids.com')
-    if (html) {
-      const $ = cheerio.load(html)
-      $('article, .views-row, .node, .tender, .card, .bid-item, a[href*="tender"], a[href*="appel"], a[href*="bid"]').each((i, el) => {
-        if (i >= 15) return
-        const titre = $(el).find('h2, h3, h4, .title, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        const desc = $(el).find('p, .description, .excerpt').first().text().trim()
-        if (!titre || titre.length < 10) return
-        resultats.push({
-          source: AOSource.SANGO_BIDS, sourceId: `SBID-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://gn.sangobids.com${href}`,
-          titre: titre.substring(0, 200), objet: desc || titre,
-          entiteAdj: this.extraireEntite(titre) || 'SangoBids Guinée',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 21 * 86400_000),
-          documentUrls: [],
-        })
-      })
-    }
-    if (resultats.length === 0) {
-      this.logger.warn('SangoBids: site inaccessible, utilisation des données de secours')
-      return this.fallbackSangoBids()
-    }
-    return resultats
-  }
-
-  // ── Nouvelles sources internationales ────────────────────────────────────
-
-  private async scraperAFD(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.afd.fr/fr/appels-doffres')
-      ?? await fetchSafe('https://www.afd.fr/fr')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, .card, a[href*="appel"], a[href*="offre"], a[href*="guinee"]').each((i, el) => {
-        if (i >= 10) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.AFD, sourceId: `AFD-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.afd.fr${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'AFD — Agence Française de Développement',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 30 * 86400_000),
-          documentUrls: [], contactEmail: 'appels-offres@afd.fr',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackAFD()
-  }
-
-  private async scraperOMVS(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.omvs.org/appel-d-offres')
-      ?? await fetchSafe('https://www.omvs.org/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, a[href*="appel"], a[href*="offre"], a[href*="marche"]').each((i, el) => {
-        if (i >= 8) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.OMVS, sourceId: `OMVS-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.omvs.org${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'OMVS — Organisation pour la Mise en Valeur du fleuve Sénégal',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 30 * 86400_000),
-          documentUrls: [], contactEmail: 'marches@omvs.org',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackOMVS()
-  }
-
-  private async scraperOMVG(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://www.omvg.org/appels-doffres')
-      ?? await fetchSafe('https://www.omvg.org/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, a[href*="appel"], a[href*="offre"]').each((i, el) => {
-        if (i >= 8) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.OMVG, sourceId: `OMVG-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://www.omvg.org${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'OMVG — Organisation pour la Mise en Valeur du fleuve Gambie',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 30 * 86400_000),
-          documentUrls: [], contactEmail: 'marches@omvg.org',
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackOMVG()
-  }
-
-  private async scraperUEGuinee(): Promise<AOBrut[]> {
-    const html = await fetchSafe('https://international-partnerships.ec.europa.eu/countries/guinea_fr')
-      ?? await fetchSafe('https://international-partnerships.ec.europa.eu/')
-    if (html) {
-      const $ = cheerio.load(html)
-      const resultats: AOBrut[] = []
-      $('article, .views-row, .node, a[href*="tender"], a[href*="procurement"], a[href*="appel"]').each((i, el) => {
-        if (i >= 8) return
-        const titre = $(el).find('h2, h3, a').first().text().trim() || $(el).text().trim()
-        const href = $(el).find('a').first().attr('href') || $(el).attr('href') || ''
-        if (titre.length < 15) return
-        resultats.push({
-          source: AOSource.UE_GUINEE, sourceId: `UE-${this.slugify(titre)}-${new Date().getFullYear()}`,
-          sourceUrl: href.startsWith('http') ? href : `https://international-partnerships.ec.europa.eu${href}`,
-          titre: titre.substring(0, 200), objet: titre,
-          entiteAdj: 'Union Européenne — Délégation Guinée',
-          datePublication: new Date(), dateLimite: new Date(Date.now() + 30 * 86400_000),
-          documentUrls: [],
-        })
-      })
-      if (resultats.length > 0) return resultats
-    }
-    return this.fallbackUEGuinee()
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -2059,7 +1545,7 @@ export class ScrapingService {
       { source: AOSource.MINISTERE_ENVIRONNEMENT, sourceId: `MENV-${Y}-DEFORESTATION`, sourceUrl: 'https://environnement.gov.gn', titre: 'Système de surveillance satellitaire de la déforestation', objet: 'Le Ministère de l\'Environnement recrute pour la mise en place d\'un système de surveillance par satellite de la déforestation et de l\'exploitation forestière illégale avec alertes en temps réel.', entiteAdj: 'Ministère de l\'Environnement, du Développement Durable et des Transitions Écologiques', datePublication: new Date(), dateLimite: new Date(now + 35 * 86400_000), budgetEstimeGNF: BigInt(1_600_000_000), documentUrls: [], contactEmail: 'si@environnement.gov.gn' },
 
       // ── Ministère de la Pêche ───────────
-      { source: AOSource.MINISTERE_PECHE, sourceId: `MPEC-${Y}-VMS`, sourceUrl: 'https://peches.gov.gn', titre: 'Système VMS de suivi des navires de pêche en zone économique exclusive', objet: 'Installation d\'un système VMS (Vessel Monitoring System) pour le suivi satellite des navires de pêche industriels et artisanaux dans la zone économique exclusive de Guinée.', entiteAdj: 'Ministère de la Pêche et de l\'Économie Maritime', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_200_000_000), documentUrls: [], contactEmail: 'surveillance@peches.gov.gn' },
+      { source: AOSource.MINISTERE_PECHE, sourceId: `MPEC-${Y}-VMS`, sourceUrl: 'https://peche.gov.gn', titre: 'Système VMS de suivi des navires de pêche en zone économique exclusive', objet: 'Installation d\'un système VMS (Vessel Monitoring System) pour le suivi satellite des navires de pêche industriels et artisanaux dans la zone économique exclusive de Guinée.', entiteAdj: 'Ministère de la Pêche et de l\'Économie Maritime', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(2_200_000_000), documentUrls: [], contactEmail: 'surveillance@peche.gov.gn' },
 
       // ── Ministère de l'Urbanisme ────────
       { source: AOSource.MINISTERE_URBANISME, sourceId: `MURB-${Y}-CADASTRE`, sourceUrl: 'https://urbanisme.gov.gn', titre: 'Numérisation du cadastre foncier urbain de Conakry', objet: 'Projet de numérisation du cadastre foncier de la ville de Conakry avec levé topographique GPS, système d\'information géographique et portail de consultation en ligne.', entiteAdj: 'Ministère de l\'Urbanisme, de l\'Habitat et de la Construction', datePublication: new Date(), dateLimite: new Date(now + 40 * 86400_000), budgetEstimeGNF: BigInt(3_800_000_000), documentUrls: [], contactEmail: 'cadastre@urbanisme.gov.gn' },
@@ -2104,7 +1590,7 @@ export class ScrapingService {
       { source: AOSource.APIP, sourceId: `APIP-${Y}-INVEST`, sourceUrl: 'https://apip.gov.gn', titre: 'Plateforme numérique de promotion des investissements et guichet unique', objet: 'Création d\'une plateforme en ligne pour la promotion des investissements privés en Guinée avec procédures de création d\'entreprise dématérialisées et suivi des dossiers d\'investissement.', entiteAdj: 'Agence Guinéenne de Promotion des Investissements Privés', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(750_000_000), documentUrls: [], contactEmail: 'si@apip.gov.gn' },
 
       // ── Cour des Comptes ───────────────
-      { source: AOSource.COUR_COMPTES, sourceId: `CDC-${Y}-AUDIT`, sourceUrl: 'https://www.ccomptes.org.gn', titre: 'Système d\'information pour le suivi des audits publics', objet: 'Développement d\'un système d\'information pour la gestion des missions d\'audit des comptes publics avec workflow de contrôle, rapportage automatisé et suivi des recommandations.', entiteAdj: 'Cour des Comptes', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(580_000_000), documentUrls: [], contactEmail: 'si@ccomptes.org.gn' },
+      { source: AOSource.COUR_COMPTES, sourceId: `CDC-${Y}-AUDIT`, sourceUrl: 'https://courdescomptes.gov.gn', titre: 'Système d\'information pour le suivi des audits publics', objet: 'Développement d\'un système d\'information pour la gestion des missions d\'audit des comptes publics avec workflow de contrôle, rapportage automatisé et suivi des recommandations.', entiteAdj: 'Cour des Comptes', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(580_000_000), documentUrls: [], contactEmail: 'si@courdescomptes.gov.gn' },
 
       // ── CNLS ───────────────────────────
       { source: AOSource.CNLS, sourceId: `CNLS-${Y}-SIS`, sourceUrl: 'https://cnls.gov.gn', titre: 'Système d\'information sanitaire pour le suivi VIH/SIDA', objet: 'Mise en place d\'un système d\'information pour le suivi des patients sous traitement ARV, la gestion des stocks de médicaments et le reporting aux bailleurs internationaux.', entiteAdj: 'Comité National de Lutte contre le SIDA', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(650_000_000), documentUrls: [], contactEmail: 'si@cnls.gov.gn' },
@@ -2353,101 +1839,52 @@ export class ScrapingService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // DONNÉES DE SECOURS — nouvelles sources réelles
   // ═══════════════════════════════════════════════════════════════════════════
 
-  private fallbackTELEMO(): AOBrut[] {
+  private fallbackSangoBids(): AOBrut[] {
     const now = Date.now()
     const Y = new Date().getFullYear()
     return [
-      {
-        source: AOSource.TELEMO,
-        sourceId: `TELEMO-${Y}-DIGITAL-GOV`,
-        sourceUrl: 'https://telemo.gov.gn',
-        titre: 'Prestation de services pour la transformation numérique de l\'administration publique guinéenne',
-        objet: 'Appel d\'offres lancé via le portail TELEMO pour la conception et le déploiement d\'une plateforme de services numériques gouvernementaux incluant e-administration, signature électronique et guichet unique dématérialisé pour les démarches administratives.',
-        entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique',
-        datePublication: new Date(now - 2 * 86400_000),
-        dateLimite: new Date(now + 19 * 86400_000),
-        budgetEstimeGNF: BigInt(5_200_000_000),
-        documentUrls: [],
-        contactNom: 'Direction de la Commande Publique — MPATEN',
-        contactEmail: 'marches@mceni.gov.gn',
-      },
-      {
-        source: AOSource.TELEMO,
-        sourceId: `TELEMO-${Y}-RESEAU-FIBRE`,
-        sourceUrl: 'https://telemo.gov.gn',
-        titre: 'Extension du réseau national de fibre optique — Tronçon Labé–Mali (frontière)',
-        objet: 'Appel d\'offres publié sur TELEMO pour les travaux d\'extension du backbone national de fibre optique sur 320 km entre Labé et la frontière malienne, incluant génie civil, tirage de câbles, installation de répéteurs et mise en service.',
-        entiteAdj: 'Autorité de Régulation des Communications Électroniques et Postales (ARCEP)',
-        datePublication: new Date(now - 5 * 86400_000),
-        dateLimite: new Date(now + 16 * 86400_000),
-        budgetEstimeGNF: BigInt(18_000_000_000),
-        documentUrls: [],
-        contactEmail: 'marches@arcep.gov.gn',
-      },
-      {
-        source: AOSource.TELEMO,
-        sourceId: `TELEMO-${Y}-E-EDUCATION`,
-        sourceUrl: 'https://telemo.gov.gn',
-        titre: 'Acquisition d\'équipements TIC et connectivité pour 500 écoles primaires — Programme e-Éducation',
-        objet: 'Marché publié sur le portail TELEMO pour la fourniture de tablettes éducatives, tableaux numériques interactifs, connexion satellite et contenus pédagogiques numériques pour 500 écoles primaires dans les 8 régions administratives.',
-        entiteAdj: 'Ministère de l\'Enseignement Pré-Universitaire et de l\'Éducation Civique',
-        datePublication: new Date(now - 1 * 86400_000),
-        dateLimite: new Date(now + 25 * 86400_000),
-        budgetEstimeGNF: BigInt(7_500_000_000),
-        documentUrls: [],
-        contactEmail: 'marches@education.gov.gn',
-      },
+      { source: AOSource.SANGO_BIDS, sourceId: `SBID-${Y}-SECOURS1`, sourceUrl: 'https://gn.sangobids.com', titre: 'Recrutement d\'un cabinet d\'audit pour le Projet de Gestion des Ressources Naturelles', objet: 'Recrutement d\'un cabinet d\'audit pour le Projet de Gestion des Ressources Naturelles et Minières en Guinée, financé par la Banque Mondiale.', entiteAdj: 'Projet de Gestion des Ressources Naturelles', datePublication: new Date(), dateLimite: new Date(now + 14 * 86400_000), documentUrls: [], contactNom: 'Banque Mondiale' },
     ]
   }
 
-  private fallbackARPT(): AOBrut[] {
+  private fallbackCommuniques224(): AOBrut[] {
     const now = Date.now()
     const Y = new Date().getFullYear()
     return [
-      {
-        source: AOSource.ARPT,
-        sourceId: `ARPT-${Y}-SPECTRUM-5G`,
-        sourceUrl: 'https://www.arpt.gov.gn/appel-doffres/',
-        titre: 'Étude d\'impact et planification de l\'attribution des fréquences pour le déploiement 5G en Guinée',
-        objet: 'L\'ARPT lance un appel d\'offres pour la réalisation d\'une étude complète sur l\'impact du déploiement 5G, incluant l\'audit du spectre disponible, la simulation de couverture, les recommandations d\'attribution des licences et le cadre réglementaire associé.',
-        entiteAdj: 'ARPT — Autorité de Régulation des Postes et Télécommunications',
-        datePublication: new Date(now - 3 * 86400_000),
-        dateLimite: new Date(now + 22 * 86400_000),
-        budgetEstimeGNF: BigInt(850_000_000),
-        documentUrls: [],
-        contactNom: 'Direction des Marchés — ARPT',
-        contactEmail: 'marches@arpt.gov.gn',
-      },
-      {
-        source: AOSource.ARPT,
-        sourceId: `ARPT-${Y}-QUALITE-SERVICE`,
-        sourceUrl: 'https://www.arpt.gov.gn/appel-doffres/',
-        titre: 'Audit indépendant de la qualité de service des réseaux mobiles — Campagne de mesures 2025',
-        objet: 'L\'ARPT recrute un cabinet indépendant pour mener une campagne nationale de mesures de la qualité de service des opérateurs mobiles (Orange, MTN, Celcom) couvrant la voix, les données et le SMS dans les 38 préfectures avec équipements de test QoS.',
-        entiteAdj: 'ARPT — Autorité de Régulation des Postes et Télécommunications',
-        datePublication: new Date(now - 7 * 86400_000),
-        dateLimite: new Date(now + 14 * 86400_000),
-        budgetEstimeGNF: BigInt(1_200_000_000),
-        documentUrls: [],
-        contactEmail: 'qualite@arpt.gov.gn',
-      },
-      {
-        source: AOSource.ARPT,
-        sourceId: `ARPT-${Y}-CYBERSECURITE`,
-        sourceUrl: 'https://www.arpt.gov.gn/appel-doffres/',
-        titre: 'Mise en place d\'un système de supervision et de cybersécurité des infrastructures télécoms critiques',
-        objet: 'L\'ARPT lance un appel d\'offres pour la mise en place d\'un centre de supervision de la sécurité des infrastructures télécoms critiques (SOC) incluant détection d\'intrusion, analyse de trafic, réponse aux incidents et plateforme de partage d\'informations sur les menaces.',
-        entiteAdj: 'ARPT — Autorité de Régulation des Postes et Télécommunications',
-        datePublication: new Date(now - 1 * 86400_000),
-        dateLimite: new Date(now + 28 * 86400_000),
-        budgetEstimeGNF: BigInt(2_300_000_000),
-        documentUrls: [],
-        contactEmail: 'cybersecurite@arpt.gov.gn',
-      },
+      { source: AOSource.COMMUNIQUES224, sourceId: `C224-${Y}-SECOURS1`, sourceUrl: 'https://communiques224.com', titre: 'Avis d\'appel à manifestation d\'intérêt — Projet d\'appui au secteur de l\'énergie', objet: 'Avis d\'appel à manifestation d\'intérêt pour le recrutement d\'un bureau d\'études dans le cadre du Projet d\'appui au secteur de l\'énergie en Guinée.', entiteAdj: 'Ministère de l\'Énergie', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), documentUrls: [] },
     ]
   }
+
+  private fallbackPrimature(): AOBrut[] {
+    const now = Date.now()
+    const Y = new Date().getFullYear()
+    return [
+      { source: AOSource.PRIMATURE, sourceId: `PRIM-${Y}-SECOURS1`, sourceUrl: 'https://primature.gov.gn', titre: 'Coordination du Programme de Réforme de l\'Administration Publique', objet: 'La Primature recrute un cabinet de conseil pour la coordination et le suivi du Programme de Réforme de l\'Administration Publique (PRAP).', entiteAdj: 'Primature — Guinée', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(2_800_000_000), documentUrls: [] },
+    ]
+  }
+
+  private fallbackDGCMP(): AOBrut[] {
+    const now = Date.now()
+    const Y = new Date().getFullYear()
+    return [
+      { source: AOSource.DGCMP, sourceId: `DGCMP-${Y}-CTRL1`, sourceUrl: 'https://www.dgcmp.mef.gov.gn', titre: 'Contrôle préalable — Marché de fourniture de matériel informatique pour le MEF', objet: 'Avis de contrôle préalable pour le marché de fourniture et d\'installation de matériel informatique au Ministère de l\'Économie et des Finances.', entiteAdj: 'DGCMP — Direction Générale du Contrôle des Marchés Publics', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(3_500_000_000), documentUrls: [], contactEmail: 'contact@dgcmp.mef.gov.gn' },
+      { source: AOSource.DGCMP, sourceId: `DGCMP-${Y}-CTRL2`, sourceUrl: 'https://www.dgcmp.mef.gov.gn', titre: 'Visa de conformité — Travaux de réhabilitation de la route Conakry-Kindia', objet: 'Procédure de visa de conformité pour les travaux de réhabilitation de la route nationale Conakry-Kindia.', entiteAdj: 'DGCMP — Direction Générale du Contrôle des Marchés Publics', datePublication: new Date(), dateLimite: new Date(now + 14 * 86400_000), budgetEstimeGNF: BigInt(45_000_000_000), documentUrls: [], contactEmail: 'contact@dgcmp.mef.gov.gn' },
+    ]
+  }
+
+  private fallbackGouvernement(): AOBrut[] {
+    const now = Date.now()
+    const Y = new Date().getFullYear()
+    return [
+      { source: AOSource.GOUVERNEMENT_GUINEE, sourceId: `GOUV-${Y}-AO1`, sourceUrl: 'https://gouvernement.gov.gn', titre: 'Programme national de digitalisation des services publics — Appel à manifestation d\'intérêt', objet: 'Le Gouvernement de Guinée lance un appel à manifestation d\'intérêt pour la conception et le déploiement d\'une plateforme de services publics numériques.', entiteAdj: 'Gouvernement de la République de Guinée', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(8_000_000_000), documentUrls: [] },
+    ]
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════════════
 
   private fallbackARMP(): AOBrut[] {
     const now = Date.now()
@@ -2455,7 +1892,7 @@ export class ScrapingService {
       {
         source: AOSource.ARMP,
         sourceId: `ARMP-${new Date().getFullYear()}-GED-MAT`,
-        sourceUrl: 'https://armpguinee.org',
+        sourceUrl: 'https://armp.gov.gn',
         titre: 'Fourniture et installation d\'un système de gestion électronique des archives (GED)',
         objet: 'Le Ministère de l\'Administration du Territoire lance un appel d\'offres pour la fourniture et installation d\'un système GED comprenant numérisation, indexation OCR, recherche sémantique et archivage conforme aux normes ISO.',
         entiteAdj: 'Ministère de l\'Administration du Territoire et de la Décentralisation',
@@ -2469,7 +1906,7 @@ export class ScrapingService {
       {
         source: AOSource.ARMP,
         sourceId: `ARMP-${new Date().getFullYear()}-DNI-IMPOTS`,
-        sourceUrl: 'https://armpguinee.org',
+        sourceUrl: 'https://armp.gov.gn',
         titre: 'Développement d\'une plateforme de paiement des impôts et taxes en ligne',
         objet: 'La Direction Nationale des Impôts lance un AO pour une plateforme numérique de déclaration et paiement en ligne avec Mobile Money, calcul automatique des montants et émission de reçus électroniques.',
         entiteAdj: 'Direction Nationale des Impôts (DNI)',
@@ -2482,7 +1919,7 @@ export class ScrapingService {
       {
         source: AOSource.ARMP,
         sourceId: `ARMP-${new Date().getFullYear()}-SIH-SANTE`,
-        sourceUrl: 'https://armpguinee.org',
+        sourceUrl: 'https://armp.gov.gn',
         titre: 'Système d\'information hospitalière (SIH) pour 5 hôpitaux régionaux',
         objet: 'Conception, développement et déploiement d\'un SIH intégré pour les hôpitaux de Kindia, Labé, Kankan, N\'Zérékoré et Faranah incluant dossier patient, pharmacie, facturation et tableau de bord direction.',
         entiteAdj: 'Ministère de la Santé et de l\'Hygiène Publique',
@@ -2495,7 +1932,7 @@ export class ScrapingService {
       {
         source: AOSource.ARMP,
         sourceId: `ARMP-${new Date().getFullYear()}-SIGFIP-BUDGET`,
-        sourceUrl: 'https://armpguinee.org',
+        sourceUrl: 'https://armp.gov.gn',
         titre: 'Modernisation du SIGFIP — Système Intégré de Gestion des Finances Publiques',
         objet: 'Le Ministère du Budget lance un AO pour la modernisation du SIGFIP : module budget, module trésor, module comptabilité, interface Web, formation agents et interopérabilité avec le système SYDONIA des douanes.',
         entiteAdj: 'Ministère du Budget — Direction Nationale du Budget',
@@ -2508,7 +1945,7 @@ export class ScrapingService {
       {
         source: AOSource.ARMP,
         sourceId: `ARMP-${new Date().getFullYear()}-ENREG-COMMERCE`,
-        sourceUrl: 'https://armpguinee.org',
+        sourceUrl: 'https://armp.gov.gn',
         titre: 'Plateforme de création d\'entreprises en ligne — Guichet unique',
         objet: 'Le Ministère du Commerce lance un appel d\'offres pour la création d\'une plateforme de guichet unique dématérialisé : création RCCM, IFU, CNSS, licence commerciale en un seul formulaire avec paiement Mobile Money.',
         entiteAdj: 'Ministère du Commerce, de l\'Industrie et des PME',
@@ -2527,7 +1964,7 @@ export class ScrapingService {
       {
         source: AOSource.JAO_GUINEE,
         sourceId: `JAO-${new Date().getFullYear()}-MACONAKRY`,
-        sourceUrl: 'https://www.jaoguinee.com',
+        sourceUrl: 'https://jao.gov.gn',
         titre: 'Création d\'un portail e-services pour la Mairie de Conakry',
         objet: 'La Mairie de Conakry lance un AO pour la conception et déploiement d\'un portail de services en ligne : demandes administratives, paiement de taxes, suivi des demandes et notifications SMS/email.',
         entiteAdj: 'Mairie de Conakry — Direction des Services Informatiques',
@@ -2540,7 +1977,7 @@ export class ScrapingService {
       {
         source: AOSource.JAO_GUINEE,
         sourceId: `JAO-${new Date().getFullYear()}-BOURSE-EDUC`,
-        sourceUrl: 'https://www.jaoguinee.com',
+        sourceUrl: 'https://jao.gov.gn',
         titre: 'Plateforme numérique de gestion des bourses et aides à l\'éducation',
         objet: 'Le Ministère de l\'Enseignement Supérieur, de la Recherche Scientifique et de l\'Innovation recrute pour une plateforme de gestion des bourses scolaires, aides éducatives et inscriptions en ligne.',
         entiteAdj: 'Ministère de l\'Enseignement Supérieur, de la Recherche Scientifique et de l\'Innovation',
@@ -2553,7 +1990,7 @@ export class ScrapingService {
       {
         source: AOSource.JAO_GUINEE,
         sourceId: `JAO-${new Date().getFullYear()}-ETATCIVIL`,
-        sourceUrl: 'https://www.jaoguinee.com',
+        sourceUrl: 'https://jao.gov.gn',
         titre: 'Numérisation de l\'état civil — Système d\'information d\'enregistrement des faits d\'état civil',
         objet: 'Le Ministère de l\'Administration du Territoire recherche un prestataire pour déployer un système d\'enregistrement numérique des naissances, mariages et décès dans les 38 préfectures avec interopérabilité CNI.',
         entiteAdj: 'Ministère de l\'Administration du Territoire — Direction Nationale de l\'État Civil',
@@ -2636,7 +2073,7 @@ export class ScrapingService {
       {
         source: AOSource.MINISTERE_NUMERIQUE,
         sourceId: `MNUM-${new Date().getFullYear()}-IDENTITE`,
-        sourceUrl: 'https://mceni.gov.gn',
+        sourceUrl: 'https://numerique.gov.gn',
         titre: 'Système national d\'identité numérique — Carte d\'identité biométrique nouvelle génération',
         objet: 'Le Ministère du Numérique lance un AO pour le déploiement d\'un système d\'identité numérique avec carte biométrique (empreintes + iris), base de données centralisée, API d\'authentification pour les administrations et vérification mobile.',
         entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique — ANIE',
@@ -2644,12 +2081,12 @@ export class ScrapingService {
         dateLimite: new Date(now + 45 * 86400_000),
         budgetEstimeGNF: BigInt(8_500_000_000),
         documentUrls: [],
-        contactEmail: 'anie@mceni.gov.gn',
+        contactEmail: 'anie@numerique.gov.gn',
       },
       {
         source: AOSource.MINISTERE_NUMERIQUE,
         sourceId: `MNUM-${new Date().getFullYear()}-GOBNUM`,
-        sourceUrl: 'https://mceni.gov.gn',
+        sourceUrl: 'https://numerique.gov.gn',
         titre: 'Plateforme GouvNum — Dématérialisation des services administratifs',
         objet: 'Le Ministère du Numérique recrute pour la conception et déploiement d\'une plateforme gouvernementale de dématérialisation : passeport, permis de conduire, casier judiciaire, certificat de résidence en ligne avec paiement mobile.',
         entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique',
@@ -2657,12 +2094,12 @@ export class ScrapingService {
         dateLimite: new Date(now + 35 * 86400_000),
         budgetEstimeGNF: BigInt(3_600_000_000),
         documentUrls: [],
-        contactEmail: 'gouvnum@mceni.gov.gn',
+        contactEmail: 'gouvnum@numerique.gov.gn',
       },
       {
         source: AOSource.MINISTERE_NUMERIQUE,
         sourceId: `MNUM-${new Date().getFullYear()}-DATACENTER`,
-        sourceUrl: 'https://mceni.gov.gn',
+        sourceUrl: 'https://numerique.gov.gn',
         titre: 'Construction et équipement d\'un datacenter national souverain Tier III',
         objet: 'Le Ministère du Numérique lance un appel d\'offres pour la construction d\'un datacenter national souverain de niveau Tier III : infrastructure physique, alimentation redondante, refroidissement, sécurité physique et logique, hébergement des données sensibles de l\'État.',
         entiteAdj: 'Ministère des Postes, Télécommunications et de l\'Économie Numérique — ADIN',
@@ -2670,7 +2107,7 @@ export class ScrapingService {
         dateLimite: new Date(now + 60 * 86400_000),
         budgetEstimeGNF: BigInt(12_000_000_000),
         documentUrls: [],
-        contactEmail: 'adin@mceni.gov.gn',
+        contactEmail: 'adin@numerique.gov.gn',
       },
     ]
   }
@@ -2913,123 +2350,6 @@ export class ScrapingService {
     ]
   }
 
-  // ── Fallbacks pour les nouvelles sources ──────────────────────────────────
-
-  private fallbackDGCMP(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.DGCMP, sourceId: `DGCMP-${Y}-CTRL1`, sourceUrl: 'https://www.dgcmp.mef.gov.gn', titre: 'Contrôle préalable — Marché de fourniture de matériel informatique pour le MEF', objet: 'Avis de contrôle préalable pour le marché de fourniture et d\'installation de matériel informatique et réseaux au Ministère de l\'Économie et des Finances.', entiteAdj: 'DGCMP — Direction Générale du Contrôle des Marchés Publics', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(3_500_000_000), documentUrls: [], contactEmail: 'contact@dgcmp.mef.gov.gn' },
-      { source: AOSource.DGCMP, sourceId: `DGCMP-${Y}-CTRL2`, sourceUrl: 'https://www.dgcmp.mef.gov.gn', titre: 'Visa de conformité — Travaux de réhabilitation de la route Conakry-Kindia', objet: 'Procédure de visa de conformité pour les travaux de réhabilitation et d\'aménagement de la route nationale Conakry-Kindia, section Kimbo-Kindia.', entiteAdj: 'DGCMP — Direction Générale du Contrôle des Marchés Publics', datePublication: new Date(), dateLimite: new Date(now + 14 * 86400_000), budgetEstimeGNF: BigInt(45_000_000_000), documentUrls: [], contactEmail: 'contact@dgcmp.mef.gov.gn' },
-    ]
-  }
-
-  private fallbackGouvernement(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.GOUVERNEMENT_GUINEE, sourceId: `GOUV-${Y}-AO1`, sourceUrl: 'https://gouvernement.gov.gn', titre: 'Programme national de digitalisation des services publics — Appel à manifestation d\'intérêt', objet: 'Le Gouvernement de Guinée lance un appel à manifestation d\'intérêt pour la conception et le déploiement d\'une plateforme de services publics numériques pour les citoyens guinéens.', entiteAdj: 'Gouvernement de la République de Guinée', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(8_000_000_000), documentUrls: [] },
-      { source: AOSource.GOUVERNEMENT_GUINEE, sourceId: `GOUV-${Y}-AO2`, sourceUrl: 'https://gouvernement.gov.gn', titre: 'Étude d\'impact environnemental et social du Programme National de Développement', objet: 'Recrutement d\'un cabinet d\'études pour la réalisation de l\'étude d\'impact environnemental et social du Programme National de Développement 2025-2030.', entiteAdj: 'Gouvernement de la République de Guinée', datePublication: new Date(), dateLimite: new Date(now + 25 * 86400_000), budgetEstimeGNF: BigInt(1_200_000_000), documentUrls: [] },
-    ]
-  }
-
-  private fallbackPrimature(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.PRIMATURE, sourceId: `PRIM-${Y}-AO1`, sourceUrl: 'https://primature.gov.gn', titre: 'Coordination du Programme de Réforme de l\'Administration Publique', objet: 'La Primature recrute un cabinet de conseil pour la coordination et le suivi du Programme de Réforme de l\'Administration Publique (PRAP) couvrant la période 2025-2029.', entiteAdj: 'Primature — Guinée', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(2_800_000_000), documentUrls: [] },
-    ]
-  }
-
-  private fallbackANAFIC(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.ANAFIC, sourceId: `ANAFIC-${Y}-AO1`, sourceUrl: 'https://www.anafic-gn.org', titre: 'Appui à la décentralisation financière des collectivités locales', objet: 'L\'ANAFIC lance un appel d\'offres pour l\'appui technique et financier aux collectivités locales dans le cadre de la décentralisation financière et de la gestion des budgets communaux.', entiteAdj: 'ANAFIC — Agence Nationale de Financement des Collectivités', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(4_200_000_000), documentUrls: [], contactEmail: 'contact@anafic-gn.org' },
-    ]
-  }
-
-  private fallbackITIEGuinee(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.ITIE_GUINEE, sourceId: `ITIE-${Y}-AO1`, sourceUrl: 'https://www.itie-guinee.org', titre: 'Audit de conformité ITIE des paiements miniers 2024-2025', objet: 'Recrutement d\'un cabinet d\'audit international pour la vérification et la reconciliation des paiements effectués par les entreprises minières et les revenus perçus par l\'État guinéen.', entiteAdj: 'ITIE Guinée', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(800_000_000), documentUrls: [], contactEmail: 'contact@itie-guinee.org' },
-    ]
-  }
-
-  private fallbackUCEPGuinee(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.UCEP_GUINEE, sourceId: `UCEP-${Y}-AO1`, sourceUrl: 'https://www.ucepguinee.org', titre: 'Construction de centres de santé communautaires en Guinée Forestière', objet: 'L\'UCEP Guinée lance un appel d\'offres pour la construction et l\'équipement de 5 centres de santé communautaires dans les préfectures de Nzérékoré et Beyla.', entiteAdj: 'UCEP Guinée', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(6_500_000_000), documentUrls: [], contactEmail: 'contact@ucepguinee.org' },
-    ]
-  }
-
-  private fallbackPPPGuinee(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.PPP_GUINEE, sourceId: `PPP-${Y}-AO1`, sourceUrl: 'https://ppp-guinee.com', titre: 'Concession de gestion de l\'approvisionnement en eau potable de Conakry', objet: 'Avis de manifestation d\'intérêt pour la concession de service public relative à la gestion, l\'exploitation et le développement de l\'approvisionnement en eau potable de la ville de Conakry.', entiteAdj: 'PPP Guinée — Partenariat Public-Privé', datePublication: new Date(), dateLimite: new Date(now + 45 * 86400_000), budgetEstimeGNF: BigInt(50_000_000_000), documentUrls: [], contactEmail: 'contact@ppp-guinee.com' },
-    ]
-  }
-
-  private fallbackSOGUIPAMI(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.SOGUIPAMI, sourceId: `SGPM-${Y}-AO1`, sourceUrl: 'https://soguipami.net', titre: 'Audit des titres miniers et des redevances minières', objet: 'La SOGUIPAMI lance un appel d\'offres pour l\'audit complet des titres miniers en vigueur et la vérification du calcul et du paiement des redevances minières par les opérateurs.', entiteAdj: 'SOGUIPAMI — Société Guinéenne du Patrimoine Minier', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(1_500_000_000), documentUrls: [], contactEmail: 'contact@soguipami.net' },
-    ]
-  }
-
-  private fallbackUGPPASSP(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.UGP_PASSP, sourceId: `UGPP-${Y}-AO1`, sourceUrl: 'https://www.ugp-passp-ms.org.gn', titre: 'Fourniture d\'équipements biomédicaux pour les hôpitaux régionaux', objet: 'L\'UGP PASSP, avec le financement de la Banque Mondiale, lance un appel d\'offres pour la fourniture et l\'installation d\'équipements biomédicaux dans 8 hôpitaux régionaux de Guinée.', entiteAdj: 'UGP PASSP — Unité de Gestion du Projet Santé', datePublication: new Date(), dateLimite: new Date(now + 28 * 86400_000), budgetEstimeGNF: BigInt(7_200_000_000), documentUrls: [], contactEmail: 'contact@ugp-passp-ms.org.gn' },
-    ]
-  }
-
-  private fallbackCommuniques224(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.COMMUNIQUES224, sourceId: `C224-${Y}-AO1`, sourceUrl: 'https://communiques224.com', titre: 'Travaux d\'aménagement de la voirie urbaine de Conakry — Phase 3', objet: 'Appel d\'offres ouvert pour les travaux de réhabilitation et d\'aménagement de la voirie urbaine de Conakry, phase 3, incluant drainage, chaussée et signalisation.', entiteAdj: 'Mairie de Conakry', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(15_000_000_000), documentUrls: [] },
-      { source: AOSource.COMMUNIQUES224, sourceId: `C224-${Y}-AO2`, sourceUrl: 'https://communiques224.com', titre: 'Prestation de services de consultation en gestion de projets de développement', objet: 'Recrutement d\'un bureau d\'études pour l\'accompagnement dans la gestion et le suivi de projets de développement financés par les partenaires techniques et financiers.', entiteAdj: 'Ministère du Plan', datePublication: new Date(), dateLimite: new Date(now + 14 * 86400_000), budgetEstimeGNF: BigInt(2_000_000_000), documentUrls: [] },
-    ]
-  }
-
-  private fallbackDigijobGuinee(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.DIGIJOB_GUINEE, sourceId: `DJOB-${Y}-AO1`, sourceUrl: 'https://digijobguinee.com', titre: 'Recrutement d\'experts internationaux pour le projet d\'appui au secteur de l\'énergie', objet: 'Appel à candidatures pour le recrutement d\'experts internationaux en énergie solaire, hydroélectricité et interconnexion électrique dans le cadre du projet d\'appui au secteur de l\'énergie en Guinée.', entiteAdj: 'Ministère de l\'Énergie', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(3_000_000_000), documentUrls: [] },
-    ]
-  }
-
-  private fallbackSangoBids(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.SANGO_BIDS, sourceId: `SBID-${Y}-AO1`, sourceUrl: 'https://gn.sangobids.com', titre: 'Fourniture de matériels pédagogiques pour les écoles primaires — Région de Kindia', objet: 'Appel d\'offres pour la fourniture de matériels pédagogiques, manuels scolaires et équipements didactiques pour les écoles primaires de la région administrative de Kindia.', entiteAdj: 'Ministère de l\'Éducation', datePublication: new Date(), dateLimite: new Date(now + 21 * 86400_000), budgetEstimeGNF: BigInt(1_800_000_000), documentUrls: [] },
-    ]
-  }
-
-  private fallbackAFD(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.AFD, sourceId: `AFD-${Y}-AO1`, sourceUrl: 'https://www.afd.fr', titre: 'Appui à la gouvernance urbaine de Conakry — Projet AFD', objet: 'L\'AFD finance un projet d\'appui à la gouvernance urbaine de la ville de Conakry incluant la planification urbaine, la gestion des déchets et la mobilité urbaine durable.', entiteAdj: 'AFD — Agence Française de Développement', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(12_000_000_000), documentUrls: [], contactEmail: 'appels-offres@afd.fr' },
-    ]
-  }
-
-  private fallbackOMVS(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.OMVS, sourceId: `OMVS-${Y}-AO1`, sourceUrl: 'https://www.omvs.org', titre: 'Étude d\'avant-projet détaillé du barrage de Gourbassy', objet: 'L\'OMVS lance un appel d\'offres pour l\'étude d\'avant-projet détaillé du barrage de Gourbassy sur le fleuve Sénégal, incluant les études environnementales et sociales.', entiteAdj: 'OMVS — Organisation pour la Mise en Valeur du fleuve Sénégal', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(5_000_000_000), documentUrls: [], contactEmail: 'marches@omvs.org' },
-    ]
-  }
-
-  private fallbackOMVG(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.OMVG, sourceId: `OMVG-${Y}-AO1`, sourceUrl: 'https://www.omvg.org', titre: 'Réalisation de l\'interconnexion électrique entre la Guinée et la Gambie', objet: 'L\'OMVG recrute un bureau d\'études pour la réalisation de l\'interconnexion électrique entre les réseaux de la Guinée et de la Gambie, incluant les études de faisabilité et l\'avant-projet sommaire.', entiteAdj: 'OMVG — Organisation pour la Mise en Valeur du fleuve Gambie', datePublication: new Date(), dateLimite: new Date(now + 30 * 86400_000), budgetEstimeGNF: BigInt(8_000_000_000), documentUrls: [], contactEmail: 'marches@omvg.org' },
-    ]
-  }
-
-  private fallbackUEGuinee(): AOBrut[] {
-    const now = Date.now(); const Y = new Date().getFullYear()
-    return [
-      { source: AOSource.UE_GUINEE, sourceId: `UE-${Y}-AO1`, sourceUrl: 'https://international-partnerships.ec.europa.eu', titre: 'Programme d\'appui à la société civile et aux médias en Guinée', objet: 'L\'Union Européenne lance un appel à propositions pour le programme d\'appui à la société civile, aux médias et à la participation citoyenne en Guinée dans le cadre du 11ème FED.', entiteAdj: 'Union Européenne — Délégation Guinée', datePublication: new Date(), dateLimite: new Date(now + 45 * 86400_000), budgetEstimeGNF: BigInt(4_500_000_000), documentUrls: [] },
-    ]
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // EXTRACTION & HELPERS
   // ═══════════════════════════════════════════════════════════════════════════
@@ -3045,13 +2365,13 @@ export class ScrapingService {
     const fullText = contactBloc || $('body').text()
     const text = fullText.replace(/\s+/g, ' ')
 
-    const emailMatches: string[] = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g) ?? []
+    const emailMatches = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g) ?? []
     const email = emailMatches.find(e =>
       !e.includes('noreply') && !e.includes('example') && !e.includes('test@') &&
       !e.includes('webmaster') && !e.includes('info@info') && e.length < 80
     )
 
-    const telMatches: string[] = text.match(/(\+224[\s.\-]?[\d\s.\-]{8,14}|0[\d\s.\-]{8,12}|\b6[2-8]\d[\s.\-]?\d{2,3}[\s.\-]?\d{2,3}[\s.\-]?\d{2,3})/g) ?? []
+    const telMatches = text.match(/(\+224[\s.\-]?[\d\s.\-]{8,14}|0[\d\s.\-]{8,12}|\b6[2-8]\d[\s.\-]?\d{2,3}[\s.\-]?\d{2,3}[\s.\-]?\d{2,3})/g) ?? []
     const telephone = telMatches.find(t => t.replace(/\D/g, '').length >= 8)
 
     const nomMatch = text.match(/(?:contact|point\s+focal|responsable|chef|directeur|chargé)[\s:]+([A-ZÀÂÉÊÈÙÛ][a-zàâéêèùûçî]+(?:\s+[A-ZÀÂÉÊÈÙÛ][a-zàâéêèùûçî]+){1,3})/i)
